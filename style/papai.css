@@ -1,0 +1,127 @@
+/* style/papai.css */
+.papai-main {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.admin-section {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 2rem;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section-title {
+    font-size: 0.8rem;
+    color: #4ade80; /* Green-400 */
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.section-title::after {
+    content: "ADMIN";
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 9px;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.label {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input, .select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 14px;
+    color: white;
+    font-size: 0.85rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+.input:focus, .select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-admin {
+    padding: 16px;
+    font-size: 0.95rem;
+    border-radius: 1.25rem;
+}
+
+.players-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.player-bubble {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.player-online {
+    background: rgba(74, 222, 128, 0.1);
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.2);
+}
+
+.papai-chat-container {
+    height: 350px;
+}
+
+.meeting-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.btn-activate {
+    background: #16a34a;
+    box-shadow: 0 10px 20px rgba(22, 163, 74, 0.2);
+}
+
+.btn-deactivate {
+    background: #dc2626;
+    box-shadow: 0 10px 20px rgba(220, 38, 38, 0.2);
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}

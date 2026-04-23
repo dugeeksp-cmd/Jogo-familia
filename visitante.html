@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Convidado - Quem Sou Eu?</title>
+    <link rel="stylesheet" href="style/main.css">
+    <link rel="stylesheet" href="style/player.css">
+    <link rel="stylesheet" href="style/chat.css">
+</head>
+<body data-player="visitante">
+    <div class="app-container fade-in">
+        <main class="player-main">
+            <header class="player-header">
+                <div>
+                    <h2 id="guest-name-display">Visitante</h2>
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span id="player-score-header">0 pts</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="invite-btn" class="status-badge" style="cursor: pointer;">🔗 Convidar</button>
+                    <a href="index.html" class="status-badge">Sair</a>
+                </div>
+            </header>
+
+            <div id="login-guest" class="card" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 12px;">Entrar como Convidado</h3>
+                <input type="text" id="guest-name-input" class="input" placeholder="Seu nome..." style="margin-bottom: 16px;">
+                <button id="btn-join-guest" class="btn btn-activate" style="width: 100%;">Entrar na Sala</button>
+                <p id="room-full-msg" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-top: 12px; text-align: center;">A sala está cheia!</p>
+            </div>
+
+            <div id="guest-content" class="hidden" style="display: flex; flex-direction: column; gap: 32px;">
+                <!-- Área do Meet -->
+                <div id="meet-container" class="meet-button-container hidden">
+                    <a href="#" id="meet-link" target="_blank" class="btn btn-meet">
+                        <span>📹</span>
+                        <span>Entrar na Reunião</span>
+                    </a>
+                </div>
+
+                <!-- Cronômetro -->
+                <section class="timer-area">
+                    <div class="timer-display">
+                        <span id="timer-number">60</span>
+                    </div>
+                    <div class="turn-status-container">
+                        <span class="turn-label">Vez do Jogador</span>
+                        <div class="turn-status" id="turn-status">Aguardando início...</div>
+                    </div>
+                </section>
+
+                <!-- Chats -->
+                <section class="chats-section">
+                    <div class="chat-tabs">
+                        <button class="chat-tab active" data-chat="group">Grupo Família</button>
+                        <button class="chat-tab" data-chat="public">Chat Público</button>
+                    </div>
+
+                    <div class="chat-window">
+                        <div id="messages-list" class="messages-list"></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" class="chat-input" placeholder="Escreva aqui...">
+                            <button id="send-msg" class="btn-send">➤</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { setupChat } from './script/chat.js';
+        import { initRoom, listenToRoom, updatePlayerStatus, listenToPlayers } from './script/firebase-service.js';
+        import { playSound } from './script/audio.js';
+
+        let PLAYER_ID = '';
+        let PLAYER_NAME = '';
+        let roomState = null;
+
+        const loginGuest = document.getElementById('login-guest');
+        const guestContent = document.getElementById('guest-content');
+        const guestNameInput = document.getElementById('guest-name-input');
+        const btnJoinGuest = document.getElementById('btn-join-guest');
+        const guestNameDisplay = document.getElementById('guest-name-display');
+        const timerNumber = document.getElementById('timer-number');
+        const turnStatus = document.getElementById('turn-status');
+        const meetContainer = document.getElementById('meet-container');
+        const meetLink = document.getElementById('meet-link');
+        const playerScoreHeader = document.getElementById('player-score-header');
+        const roomFullMsg = document.getElementById('room-full-msg');
+        const inviteBtn = document.getElementById('invite-btn');
+
+        btnJoinGuest.addEventListener('click', async () => {
+            PLAYER_NAME = guestNameInput.value.trim();
+            if (!PLAYER_NAME) return;
+
+            await initRoom();
+            
+            // Check room limit
+            const players = await new Promise(resolve => {
+                const unsub = listenToPlayers(p => { unsub(); resolve(p); });
+            });
+
+            if (players.length >= (roomState?.maxPlayers || 8)) {
+                roomFullMsg.classList.remove('hidden');
+                return;
+            }
+
+            PLAYER_ID = 'guest_' + Math.random().toString(36).substr(2, 9);
+            loginGuest.classList.add('hidden');
+            guestContent.classList.remove('hidden');
+            guestNameDisplay.textContent = PLAYER_NAME;
+
+            await updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME, role: 'guest', score: 0 });
+
+            // Setup Chat
+            setupChat({
+                playerId: PLAYER_ID,
+                playerName: PLAYER_NAME,
+                initialChatId: 'group',
+                tabs: document.querySelectorAll('.chat-tab'),
+                messagesList: document.getElementById('messages-list'),
+                input: document.getElementById('chat-input'),
+                sendBtn: document.getElementById('send-msg')
+            });
+        });
+
+        listenToRoom(room => {
+            roomState = room;
+            updateUI();
+        });
+
+        listenToPlayers(players => {
+            const me = players.find(p => p.id === PLAYER_ID);
+            if (me) playerScoreHeader.textContent = `${me.score || 0} pts`;
+        });
+
+        function updateUI() {
+            if (!roomState) return;
+            if (roomState.meeting?.enabled && roomState.meeting?.link) {
+                meetLink.href = roomState.meeting.link;
+                meetContainer.classList.remove('hidden');
+            } else {
+                meetContainer.classList.add('hidden');
+            }
+
+            if (roomState.timer?.isRunning && roomState.timer?.endsAtMs) {
+                const remaining = Math.max(0, Math.ceil((roomState.timer.endsAtMs - Date.now()) / 1000));
+                timerNumber.textContent = remaining;
+                if (remaining === 0) playSound('timerEnd');
+            } else {
+                timerNumber.textContent = roomState.timer?.durationSeconds || 60;
+            }
+
+            const turnName = roomState.currentTurnPlayerId ? roomState.currentTurnPlayerId.charAt(0).toUpperCase() + roomState.currentTurnPlayerId.slice(1) : 'Aguardando';
+            turnStatus.textContent = roomState.currentTurnPlayerId === PLAYER_ID ? 'Sua vez de perguntar!' : `Vez de: ${turnName}`;
+        }
+
+        inviteBtn.addEventListener('click', () => {
+            const url = window.location.origin;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Link de convite copiado!');
+            });
+        });
+
+        setInterval(() => { if (roomState?.timer?.isRunning) updateUI(); }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+/* style/index.css */
+.banner {
+    width: 100%;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.banner-img-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #0a0f1d;
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+}
+
+.banner-img {
+    width: 100%;
+    height: 100%;
+    background-image: url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&q=80&w=600');
+    background-size: cover;
+    background-position: center;
+    transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.banner:hover .banner-img {
+    transform: scale(1.1);
+}
+
+.banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, #0a0f1d 100%);
+}
+
+.index-content {
+    padding: 0 24px 48px;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-title {
+    font-size: 2.8rem;
+    line-height: 1;
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: white;
+}
+
+.game-title span {
+    display: block;
+    color: #4ade80; /* Green-400 */
+    font-size: 2rem;
+}
+
+.game-intro {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 40px;
+    max-width: 300px;
+    margin-inline: auto;
+}
+
+.player-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: auto;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 24px;
+    border-radius: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-miguel {
+    background: linear-gradient(to right, #22c55e, #10b981);
+    color: white;
+    box-shadow: 0 10px 20px rgba(5, 150, 105, 0.2);
+}
+
+.btn-sophia {
+    background: linear-gradient(to right, #a855f7, #6366f1);
+    color: white;
+    box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+}
+
+.btn-papai {
+    background: #2a303c;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}

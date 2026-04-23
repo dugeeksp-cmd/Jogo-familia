@@ -1,0 +1,15 @@
+/* script/audio.js */
+const sounds = {
+    timerEnd: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3',
+    message: 'https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3',
+    cardReveal: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'
+};
+
+export const playSound = (soundName) => {
+    try {
+        const audio = new Audio(sounds[soundName]);
+        audio.play().catch(e => console.warn("Audio play blocked", e));
+    } catch (err) {
+        console.error("Audio error", err);
+    }
+};

@@ -1,0 +1,142 @@
+/* script/player.js */
+import { 
+    initRoom, 
+    listenToRoom, 
+    listenToPrivateHand, 
+    updatePlayerStatus,
+    listenToPlayers
+} from './firebase-service.js';
+import { playSound } from './audio.js';
+import { setupChat } from './chat.js';
+
+const PLAYER_ID = document.body.dataset.player;
+const PLAYER_NAME = PLAYER_ID.charAt(0).toUpperCase() + PLAYER_ID.slice(1);
+const PRIVATE_CHAT_ID = PLAYER_ID === 'miguel' ? 'papai-miguel' : 'papai-sophia';
+
+let roomState = null;
+
+// DOM Elements
+const meetContainer = document.getElementById('meet-container');
+const meetLink = document.getElementById('meet-link');
+const toggleCardBtn = document.getElementById('toggle-card');
+const gameCard = document.getElementById('game-card');
+const cardCat = document.getElementById('card-cat');
+const cardText = document.getElementById('card-text');
+const cardDiff = document.getElementById('card-diff');
+const timerNumber = document.getElementById('timer-number');
+const turnStatus = document.getElementById('turn-status');
+const chatTabs = document.querySelectorAll('.chat-tab');
+const messagesList = document.getElementById('messages-list');
+const chatInput = document.getElementById('chat-input');
+const sendMsgBtn = document.getElementById('send-msg');
+const playerScoreHeader = document.getElementById('player-score-header');
+const inviteBtn = document.getElementById('invite-btn');
+
+async function init() {
+    await initRoom();
+    
+    updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME });
+
+    listenToRoom((room) => {
+        roomState = room;
+        updateUI();
+    });
+
+    listenToPlayers((players) => {
+        const me = players.find(p => p.id === PLAYER_ID);
+        if (me && playerScoreHeader) {
+            playerScoreHeader.textContent = `${me.score || 0} pts`;
+        }
+    });
+
+    listenToPrivateHand(PLAYER_ID, (hand) => {
+        if (hand && hand.card) {
+            cardCat.textContent = hand.card.category.toUpperCase();
+            cardText.textContent = hand.card.text;
+            cardDiff.textContent = hand.card.difficulty.toUpperCase();
+        }
+    });
+
+    // Initialize Chat
+    chatTabs.forEach(tab => {
+        if (tab.dataset.chat === 'private') tab.dataset.chatMapping = PRIVATE_CHAT_ID;
+        else if (tab.dataset.chat === 'public') tab.dataset.chatMapping = 'public';
+        else tab.dataset.chatMapping = 'group';
+    });
+
+    setupChat({
+        playerId: PLAYER_ID,
+        playerName: PLAYER_NAME,
+        initialChatId: 'group',
+        tabs: chatTabs,
+        messagesList: messagesList,
+        input: chatInput,
+        sendBtn: sendMsgBtn
+    });
+
+    // Invite Button
+    if (inviteBtn) {
+        inviteBtn.addEventListener('click', () => {
+            const url = window.location.origin;
+            navigator.clipboard.writeText(url).then(() => alert('Link de convite copiado!'));
+        });
+    }
+}
+
+function updateUI() {
+    if (!roomState) return;
+
+    // Public Chat Visibility for Guests
+    const publicTab = Array.from(chatTabs).find(t => t.dataset.chat === 'public');
+    if (publicTab) {
+        publicTab.style.display = roomState.publicChatHiddenForGuests ? 'none' : 'block';
+    }
+
+    // Meeting
+    if (roomState.meeting?.enabled && roomState.meeting?.link) {
+        meetLink.href = roomState.meeting.link;
+        meetContainer.classList.remove('hidden');
+    } else {
+        meetContainer.classList.add('hidden');
+    }
+
+    // Timer
+    if (roomState.timer?.isRunning && roomState.timer?.endsAtMs) {
+        const remaining = Math.max(0, Math.ceil((roomState.timer.endsAtMs - Date.now()) / 1000));
+        timerNumber.textContent = remaining;
+        
+        if (remaining === 0) {
+            playSound('timerEnd');
+        }
+    } else {
+        timerNumber.textContent = roomState.timer?.durationSeconds || 60;
+    }
+
+    // Turn
+    if (roomState.currentTurnPlayerId === PLAYER_ID) {
+        turnStatus.innerHTML = '<span class="turn-active">Sua vez de adivinhar!</span>';
+    } else {
+        const turnName = roomState.currentTurnPlayerId ? roomState.currentTurnPlayerId.charAt(0).toUpperCase() + roomState.currentTurnPlayerId.slice(1) : 'Aguardando';
+        turnStatus.textContent = `Vez de: ${turnName}`;
+    }
+}
+
+// Card Toggle
+toggleCardBtn.addEventListener('click', () => {
+    gameCard.classList.toggle('card-blur');
+    if (!gameCard.classList.contains('card-blur')) {
+        playSound('cardReveal');
+        toggleCardBtn.textContent = 'Esconder Carta';
+    } else {
+        toggleCardBtn.textContent = 'Ver Carta';
+    }
+});
+
+// Timer auto-refresh every second for smooth countdown
+setInterval(() => {
+    if (roomState && roomState.timer?.isRunning) {
+        updateUI();
+    }
+}, 1000);
+
+init();

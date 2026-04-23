@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sophia - Quem Sou Eu?</title>
+    <link rel="stylesheet" href="style/main.css">
+    <link rel="stylesheet" href="style/player.css">
+    <link rel="stylesheet" href="style/chat.css">
+</head>
+<body data-player="sophia">
+    <div class="app-container fade-in">
+        <main class="player-main">
+            <header class="player-header">
+                <div>
+                    <h2>Sophia</h2>
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span id="player-score-header">0 pts</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="invite-btn" class="status-badge" style="cursor: pointer;">🔗 Convidar</button>
+                    <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem;">Sair</a>
+                </div>
+            </header>
+
+            <!-- Área do Meet (Sincronizada) -->
+            <div id="meet-container" class="meet-button-container hidden">
+                <a href="#" id="meet-link" target="_blank" class="btn btn-meet">
+                    <span>📹</span>
+                    <span>Entrar na Reunião</span>
+                </a>
+            </div>
+
+            <!-- Área da Carta -->
+            <section class="card-area">
+                <div class="card-container">
+                    <div id="game-card" class="game-card card-blur">
+                        <div class="card-content">
+                            <span class="card-category" id="card-cat">ANIMAIS</span>
+                            <h3 class="card-title" id="card-text">???</h3>
+                            <span class="card-difficulty" id="card-diff">FÁCIL</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button id="toggle-card" class="btn" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                        Ver Carta
+                    </button>
+                </div>
+            </section>
+
+            <!-- Cronômetro -->
+            <section class="timer-area">
+                <div class="timer-display">
+                    <span id="timer-number">60</span>
+                </div>
+                <div class="turn-status-container">
+                    <span class="turn-label">Vez do Jogador</span>
+                    <div class="turn-status" id="turn-status">Aguardando início...</div>
+                </div>
+            </section>
+
+            <!-- Chats -->
+            <section class="chats-section">
+                <div class="chat-tabs">
+                    <button class="chat-tab active" data-chat="group">Grupo Família</button>
+                    <button class="chat-tab" data-chat="public">Público</button>
+                    <button class="chat-tab" data-chat="private">Papai Private</button>
+                </div>
+
+                <div class="chat-window">
+                    <div id="messages-list" class="messages-list">
+                        <!-- Mensagens aqui -->
+                        <div class="empty-chat">
+                            <span>💬</span>
+                            <p>Sem mensagens ainda. Dê um oi!</p>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Escreva aqui...">
+                        <button id="send-msg" class="btn-send">➤</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="script/player.js"></script>
+</body>
+</html>

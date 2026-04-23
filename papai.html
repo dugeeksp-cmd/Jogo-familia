@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Papai Admin - Quem Sou Eu?</title>
+    <link rel="stylesheet" href="style/main.css">
+    <link rel="stylesheet" href="style/papai.css">
+    <link rel="stylesheet" href="style/chat.css">
+</head>
+<body data-player="papai">
+    <div class="app-container fade-in">
+        <main class="papai-main">
+            <header class="player-header">
+                <h2>O Painel do Papai</h2>
+                <a href="index.html" class="status-badge">Sair</a>
+            </header>
+
+            <!-- Controle da Sala -->
+            <section class="admin-section">
+                <div class="section-title">Controle do Jogo</div>
+                <div class="form-group">
+                    <label class="label">Limite de Jogadores</label>
+                    <div class="filter-row">
+                        <input type="number" id="max-players-input" class="input" value="8">
+                        <button id="btn-save-limit" class="btn btn-admin btn-activate">Salvar Limite</button>
+                    </div>
+                </div>
+                <div class="control-grid">
+                    <button id="btn-start-game" class="btn btn-admin btn-activate">Iniciar Jogo</button>
+                    <button id="btn-next-turn" class="btn btn-admin">Próximo Turno</button>
+                    <button id="btn-start-timer" class="btn btn-admin">Iniciar Tempo</button>
+                    <button id="btn-reset-round" class="btn btn-admin">Resetar Rodada</button>
+                </div>
+                <div class="players-status" id="players-list">
+                    <!-- Players status here -->
+                </div>
+            </section>
+
+            <!-- Placar e Histórico -->
+            <section class="admin-section">
+                <div class="section-title">Placar e Histórico</div>
+                <div class="form-group">
+                    <label class="label">Registrar Pontos</label>
+                    <div class="filter-row" id="score-player-row">
+                        <select id="score-player-select" class="select">
+                            <option value="miguel">Miguel</option>
+                            <option value="sophia">Sophia</option>
+                        </select>
+                        <input type="number" id="score-points-input" class="input" placeholder="Pontos" value="10">
+                    </div>
+                    <button id="btn-add-score" class="btn btn-admin btn-activate" style="width: 100%; margin-top: 10px;">Adicionar Pontos</button>
+                </div>
+                <div id="score-history-list" class="score-history-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Histórico aqui -->
+                </div>
+            </section>
+
+            <section class="admin-section">
+                <div class="section-title">Ações Especiais</div>
+                <button id="btn-hide-public-chat" class="btn btn-admin btn-deactivate" style="width: 100%;">Esconder Chat Público p/ Visitantes</button>
+            </section>
+
+            <!-- Moderação de Cartas -->
+            <section class="admin-section">
+                <div class="section-title">Moderação de Cartas</div>
+                <div class="card-filters">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label class="label">Dificuldade</label>
+                            <select id="filter-difficulty" class="select">
+                                <option value="all">Todas</option>
+                                <option value="easy">Fácil</option>
+                                <option value="medium">Média</option>
+                                <option value="hard">Difícil</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Categoria</label>
+                            <select id="filter-category" class="select">
+                                <option value="all">Todas</option>
+                                <option value="animais">Animais</option>
+                                <option value="objetos">Objetos</option>
+                                <option value="profissões">Profissões</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="btn-generate-cards" class="btn btn-admin" style="width: 100%; background: var(--player-secondary, #f59e0b);">Gerar Novas Cartas</button>
+                </div>
+            </section>
+
+            <!-- Reunião -->
+            <section class="admin-section">
+                <div class="section-title">Reunião (Meet)</div>
+                <div class="meeting-controls">
+                    <div class="form-group">
+                        <label class="label">Link da Reunião</label>
+                        <input type="text" id="meet-link-input" class="input" placeholder="https://meet.google.com/...">
+                    </div>
+                    <div class="control-grid">
+                        <button id="btn-save-meet" class="btn btn-admin">Salvar Link</button>
+                        <button id="btn-toggle-meet" class="btn btn-admin">Ativar</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chats (Abas por Jogador) -->
+            <section class="chats-section">
+                <div class="chat-tabs" id="papai-chat-tabs">
+                    <button class="chat-tab active" data-chat="group">Geral</button>
+                    <button class="chat-tab" data-chat="public">Público</button>
+                    <button class="chat-tab" data-chat="private-miguel">Miguel</button>
+                    <button class="chat-tab" data-chat="private-sophia">Sophia</button>
+                </div>
+
+                <div class="chat-window papai-chat-container">
+                    <div id="messages-list" class="messages-list">
+                        <!-- Mensagens -->
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Responder...">
+                        <button id="send-msg" class="btn-send">➤</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="script/papai.js"></script>
+</body>
+</html>

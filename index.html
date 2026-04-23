@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quem Sou Eu? Online</title>
+    <link rel="stylesheet" href="style/main.css">
+    <link rel="stylesheet" href="style/index.css">
+</head>
+<body>
+    <div class="app-container fade-in">
+        <header class="banner">
+            <div class="banner-img-container">
+                <div class="banner-img"></div>
+                <div class="banner-overlay">
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span>Servidor Ativo</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="index-content">
+            <h1 class="game-title">Quem Sou Eu? <span>Online</span></h1>
+            <p class="game-intro">O jogo de cartas da família. Escolha seu perfil para começar a diversão.</p>
+
+            <div class="player-selection">
+                <a href="miguel.html" class="btn selection-btn btn-miguel">
+                    <span class="btn-icon">👦</span>
+                    <span>Miguel</span>
+                </a>
+                <a href="sophia.html" class="btn selection-btn btn-sophia">
+                    <span class="btn-icon">👧</span>
+                    <span>Sophia</span>
+                </a>
+                <a href="visitante.html" class="btn selection-btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <span class="btn-icon">🤝</span>
+                    <span>Convidado</span>
+                </a>
+                <button id="papai-btn" class="btn selection-btn btn-papai">
+                    <span class="btn-icon">👨</span>
+                    <span>Papai</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Senha -->
+    <div id="password-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px;">
+        <div class="card" style="width: 100%; max-width: 350px; text-align: center;">
+            <h3 style="margin-bottom: 20px;">Acesso Restrito</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Digite a senha para acessar o painel do Papai.</p>
+            <input type="password" id="admin-password" class="input" placeholder="••••••" style="width: 100%; text-align: center; font-size: 1.5rem; letter-spacing: 0.5em; margin-bottom: 24px;">
+            <div style="display: flex; gap: 10px;">
+                <button id="cancel-password" class="btn" style="flex: 1; opacity: 0.6; background: transparent;">Voltar</button>
+                <button id="confirm-password" class="btn btn-papai" style="flex: 2;">Acessar</button>
+            </div>
+            <p id="password-error" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-top: 15px;">Senha incorreta. Tente novamente.</p>
+        </div>
+    </div>
+
+    <script src="script/index.js"></script>
+</body>
+</html>

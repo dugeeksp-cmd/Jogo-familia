@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "Room": {
+      "title": "Sala de Jogo",
+      "description": "Estado global da sala de jogo.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "description": "Código da sala (ex: AB12CD)" },
+        "status": { "type": "string", "enum": ["waiting", "playing", "paused", "finished"] },
+        "createdBy": { "type": "string" },
+        "parentPlayerId": { "type": "string", "description": "ID do jogador que é o pai (admin)" },
+        "currentTurnPlayerId": { "type": "string", "description": "ID do jogador da vez" },
+        "gameStarted": { "type": "boolean" },
+        "roundNumber": { "type": "number" },
+        "timer": {
+          "type": "object",
+          "properties": {
+            "durationSeconds": { "type": "number" },
+            "startedAtMs": { "type": "number", "format": "timestamp" },
+            "endsAtMs": { "type": "number", "format": "timestamp" },
+            "isRunning": { "type": "boolean" }
+          }
+        },
+        "filters": {
+          "type": "object",
+          "properties": {
+            "difficulty": { "type": "string", "enum": ["easy", "medium", "hard", "all"] },
+            "category": { "type": "string", "enum": ["all", "animals", "objects", "professions"] },
+            "blockedCards": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "meeting": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "link": { "type": "string" },
+            "updatedAt": { "type": "number", "format": "timestamp" }
+          }
+        },
+        "maxPlayers": { "type": "number", "default": 8 },
+        "publicChatHiddenForGuests": { "type": "boolean", "description": "Controla se visitantes veem o histórico do chat público" },
+        "createdAt": { "type": "number", "format": "timestamp" }
+      },
+      "required": ["code", "status", "parentPlayerId", "createdAt"]
+    },
+    "Player": {
+      "title": "Jogador",
+      "description": "Dados de um jogador na sala.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["child", "parent", "guest"] },
+        "joinedAtMs": { "type": "number", "format": "timestamp" },
+        "online": { "type": "boolean" },
+        "score": { "type": "number" }
+      },
+      "required": ["id", "name", "role", "joinedAtMs"]
+    },
+    "ScoreEntry": {
+      "title": "Entrada de Pontuação",
+      "description": "Registro de pontos ganhos em uma rodada.",
+      "type": "object",
+      "properties": {
+        "playerId": { "type": "string" },
+        "playerName": { "type": "string" },
+        "round": { "type": "number" },
+        "points": { "type": "number" },
+        "timestamp": { "type": "number", "format": "timestamp" }
+      },
+      "required": ["playerId", "playerName", "round", "points", "timestamp"]
+    },
+    "PrivateHand": {
+      "title": "Mão Privada",
+      "description": "Carta atual do jogador, visível apenas para ele.",
+      "type": "object",
+      "properties": {
+        "playerId": { "type": "string" },
+        "card": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "category": { "type": "string" },
+            "difficulty": { "type": "string" },
+            "safe": { "type": "boolean" }
+          }
+        },
+        "updatedAt": { "type": "number", "format": "timestamp" }
+      }
+    },
+    "Message": {
+      "title": "Mensagem",
+      "description": "Mensagem de chat (grupo ou privada).",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string", "description": "ID do chat ('group', 'papai-miguel', 'papai-sophia')" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "number", "format": "timestamp" }
+      },
+      "required": ["chatId", "senderId", "senderName", "text", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/rooms/{roomCode}": {
+      "schema": "Room",
+      "description": "Documento da sala principal."
+    },
+    "/rooms/{roomCode}/players/{playerId}": {
+      "schema": "Player",
+      "description": "Lista de jogadores na sala."
+    },
+    "/rooms/{roomCode}/privateHands/{playerId}": {
+      "schema": "PrivateHand",
+      "description": "Cartas privadas dos jogadores."
+    },
+    "/rooms/{roomCode}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Histórico de mensagens da sala."
+    },
+    "/rooms/{roomCode}/scoreHistory/{historyId}": {
+      "schema": "ScoreEntry",
+      "description": "Histórico de pontuação detalhado por rodada."
+    }
+  }
+}
