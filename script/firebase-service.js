@@ -70,20 +70,26 @@ testConnection();
 
 // Inicializar sala se não existir
 export const initRoom = async () => {
-    const roomRef = doc(db, "rooms", ROOM_ID);
-    const roomSnap = await getDoc(roomRef);
-    if (!roomSnap.exists()) {
-        await setDoc(roomRef, {
-            code: ROOM_ID,
-            status: "waiting",
-            parentPlayerId: "papai",
-            gameStarted: false,
-            roundNumber: 1,
-            timer: { durationSeconds: 60, isRunning: false, startedAtMs: null, endsAtMs: null },
-            filters: { difficulty: "all", category: "all", blockedCards: [] },
-            meeting: { enabled: false, link: "", updated_at: Date.now() },
-            createdAt: serverTimestamp()
-        });
+    try {
+        const roomRef = doc(db, "rooms", ROOM_ID);
+        const roomSnap = await getDoc(roomRef);
+        if (!roomSnap.exists()) {
+            await setDoc(roomRef, {
+                code: ROOM_ID,
+                status: "waiting",
+                parentPlayerId: "papai",
+                gameStarted: false,
+                roundNumber: 1,
+                timer: { durationSeconds: 60, isRunning: false, startedAtMs: null, endsAtMs: null },
+                filters: { difficulty: "all", category: "all", blockedCards: [] },
+                meeting: { enabled: false, link: "", updated_at: Date.now() },
+                createdAt: serverTimestamp()
+            });
+            console.log("Sala inicializada com sucesso.");
+        }
+    } catch (e) {
+        console.error("Erro ao inicializar sala:", e);
+        handleFirestoreError(e, 'write', `rooms/${ROOM_ID}`);
     }
 };
 
@@ -128,23 +134,31 @@ export const listenToGuesses = (callback) => {
 };
 
 export const respondToGuess = async (guessId, isCorrect) => {
-    const guessRef = doc(db, "rooms", ROOM_ID, "guesses", guessId);
-    await updateDoc(guessRef, {
-        status: isCorrect ? "correct" : "wrong",
-        respondedAt: serverTimestamp()
-    });
+    try {
+        const guessRef = doc(db, "rooms", ROOM_ID, "guesses", guessId);
+        await updateDoc(guessRef, {
+            status: isCorrect ? "correct" : "wrong",
+            respondedAt: serverTimestamp()
+        });
+    } catch (e) {
+        handleFirestoreError(e, 'update', `rooms/${ROOM_ID}/guesses/${guessId}`);
+    }
 };
 
 // Messaging
 export const sendMessage = async (chatId, senderId, senderName, text) => {
-    const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
-    await addDoc(messagesRef, {
-        chatId,
-        senderId,
-        senderName,
-        text,
-        createdAt: serverTimestamp()
-    });
+    try {
+        const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
+        await addDoc(messagesRef, {
+            chatId,
+            senderId,
+            senderName,
+            text,
+            createdAt: serverTimestamp()
+        });
+    } catch (e) {
+        handleFirestoreError(e, 'create', `rooms/${ROOM_ID}/messages`);
+    }
 };
 
 export const listenToMessages = (chatId, callback) => {
@@ -163,12 +177,16 @@ export const listenToMessages = (chatId, callback) => {
 
 // Private Hands
 export const updatePrivateHand = async (playerId, card) => {
-    const handRef = doc(db, "rooms", ROOM_ID, "privateHands", playerId);
-    await setDoc(handRef, {
-        playerId,
-        card,
-        updatedAt: serverTimestamp()
-    });
+    try {
+        const handRef = doc(db, "rooms", ROOM_ID, "privateHands", playerId);
+        await setDoc(handRef, {
+            playerId,
+            card,
+            updatedAt: serverTimestamp()
+        });
+    } catch (e) {
+        handleFirestoreError(e, 'write', `rooms/${ROOM_ID}/privateHands/${playerId}`);
+    }
 };
 
 export const listenToPrivateHand = (playerId, callback) => {
@@ -186,17 +204,25 @@ export const listenToAllHands = (callback) => {
 
 // Players
 export const updatePlayerStatus = async (playerId, data) => {
-    const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
-    await setDoc(playerRef, {
-        id: playerId,
-        ...data,
-        joinedAtMs: Date.now()
-    }, { merge: true });
+    try {
+        const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
+        await setDoc(playerRef, {
+            id: playerId,
+            ...data,
+            joinedAtMs: Date.now()
+        }, { merge: true });
+    } catch (e) {
+        handleFirestoreError(e, 'write', `rooms/${ROOM_ID}/players/${playerId}`);
+    }
 };
 
 export const updatePlayer = async (playerId, data) => {
-    const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
-    await updateDoc(playerRef, data);
+    try {
+        const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
+        await updateDoc(playerRef, data);
+    } catch (e) {
+        handleFirestoreError(e, 'update', `rooms/${ROOM_ID}/players/${playerId}`);
+    }
 };
 
 export const listenToPlayers = (callback) => {
@@ -208,24 +234,28 @@ export const listenToPlayers = (callback) => {
 
 // Scores
 export const addScore = async (playerId, playerName, round, points) => {
-    // 1. Add to history
-    const historyRef = collection(db, "rooms", ROOM_ID, "scoreHistory");
-    await addDoc(historyRef, {
-        playerId,
-        playerName,
-        round,
-        points,
-        timestamp: serverTimestamp()
-    });
+    try {
+        // 1. Add to history
+        const historyRef = collection(db, "rooms", ROOM_ID, "scoreHistory");
+        await addDoc(historyRef, {
+            playerId,
+            playerName,
+            round,
+            points,
+            timestamp: serverTimestamp()
+        });
 
-    // 2. Update player total score
-    const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
-    const playerSnap = await getDoc(playerRef);
-    const currentScore = playerSnap.exists() ? (playerSnap.data().score || 0) : 0;
-    
-    await updateDoc(playerRef, {
-        score: currentScore + points
-    });
+        // 2. Update player total score
+        const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
+        const playerSnap = await getDoc(playerRef);
+        const currentScore = playerSnap.exists() ? (playerSnap.data().score || 0) : 0;
+        
+        await updateDoc(playerRef, {
+            score: currentScore + points
+        });
+    } catch (e) {
+        handleFirestoreError(e, 'write', `rooms/${ROOM_ID}/scoreHistory`);
+    }
 };
 
 export const listenToScoreHistory = (callback) => {
