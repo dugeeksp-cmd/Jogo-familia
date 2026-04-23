@@ -40,7 +40,9 @@ export function setupChat(config) {
         // Pulse tab if not active and new message comes
         if (messages.length > 0 && tabs) {
             const lastMsg = messages[messages.length - 1];
-            if (lastMsg.senderId !== playerId && lastMsg.chatId !== currentChatId) {
+            // Only pulse if the message came from someone else
+            if (lastMsg.senderId !== playerId) {
+                // Find the tab that matches the message's chatId
                 const targetTab = Array.from(tabs).find(t => (t.dataset.chatMapping || t.dataset.chat) === lastMsg.chatId);
                 if (targetTab && !targetTab.classList.contains('active')) {
                     targetTab.classList.add('pulse-new');
@@ -52,7 +54,11 @@ export function setupChat(config) {
     const loadChat = (chatId) => {
         if (unsubscribe) unsubscribe();
         currentChatId = chatId;
-        unsubscribe = listenToMessages(chatId, renderMessages);
+        console.log(`[Chat] Carregando chat: ${chatId}`);
+        unsubscribe = listenToMessages(chatId, (msgs) => {
+            console.log(`[Chat] Recebidas ${msgs.length} mensagens para ${chatId}`);
+            renderMessages(msgs);
+        });
     };
 
     const handleSend = async () => {

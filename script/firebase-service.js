@@ -18,6 +18,7 @@ import {
     query, 
     orderBy, 
     limit, 
+    limitToLast,
     serverTimestamp,
     getDoc,
     getDocFromServer,
@@ -167,11 +168,17 @@ export const listenToMessages = (chatId, callback) => {
         messagesRef, 
         where("chatId", "==", chatId),
         orderBy("createdAt", "asc"),
-        limit(50)
+        limitToLast(50)
     );
     return onSnapshot(q, (snapshot) => {
         const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         callback(msgs);
+    }, (error) => {
+        console.error(`Erro no listener do chat ${chatId}:`, error);
+        // Se for erro de índice, o Firestore fornece a URL para criar o índice no erro
+        if (error.code === 'failed-precondition') {
+            console.warn('Verifique se o índice composto (chatId e createdAt) foi criado no Firestore.');
+        }
     });
 };
 
