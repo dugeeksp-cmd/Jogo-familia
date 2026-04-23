@@ -23,6 +23,8 @@ export function setupChat(config) {
             return;
         }
 
+        const isAtBottom = messagesList.scrollHeight - messagesList.scrollTop <= messagesList.clientHeight + 50;
+
         messagesList.innerHTML = messages.map(msg => `
             <div class="message ${msg.senderId === playerId ? 'msg-me' : 'msg-other'}">
                 <span class="message-sender">${msg.senderName}</span>
@@ -31,7 +33,20 @@ export function setupChat(config) {
             </div>
         `).join('');
         
-        messagesList.scrollTop = messagesList.scrollHeight;
+        if (isAtBottom) {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        // Pulse tab if not active and new message comes
+        if (messages.length > 0 && tabs) {
+            const lastMsg = messages[messages.length - 1];
+            if (lastMsg.senderId !== playerId && lastMsg.chatId !== currentChatId) {
+                const targetTab = Array.from(tabs).find(t => (t.dataset.chatMapping || t.dataset.chat) === lastMsg.chatId);
+                if (targetTab && !targetTab.classList.contains('active')) {
+                    targetTab.classList.add('pulse-new');
+                }
+            }
+        }
     };
 
     const loadChat = (chatId) => {
@@ -55,6 +70,7 @@ export function setupChat(config) {
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.remove('pulse-new');
                 tab.classList.add('active');
                 
                 // Logic for mapping tab to chatId should be external if complex, 

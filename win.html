@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fim de Jogo! - Quem Sou Eu?</title>
+    <link rel="stylesheet" href="style/main.css">
+    <style>
+        .win-main {
+            padding: 40px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            align-items: center;
+        }
+        .congrats-title {
+            font-size: 3rem;
+            color: #4ade80;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .winner-card {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(16, 185, 129, 0.2));
+            padding: 32px;
+            border-radius: 3rem;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(16, 185, 129, 0.3);
+        }
+        .final-scores-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+        .score-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px 24px;
+            border-radius: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .score-name { font-weight: 700; font-size: 1.2rem; }
+        .score-value { font-weight: 900; color: #f59e0b; font-size: 1.4rem; }
+        .win-trophy { font-size: 5rem; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="app-container fade-in">
+        <main class="win-main">
+            <div class="win-trophy">🏆</div>
+            <div>
+                <h1 class="congrats-title">Parabéns!</h1>
+                <p style="color: var(--text-muted);">Que partida incrível em família!</p>
+            </div>
+
+            <div class="winner-card" id="winner-display">
+                <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7;">Vencedor(a)</span>
+                <h2 id="winner-name" style="font-size: 2.5rem; margin: 8px 0;">Calculando...</h2>
+            </div>
+
+            <div class="final-scores-list" id="final-scores">
+                <!-- Scores dynamic -->
+            </div>
+
+            <a href="index.html" class="btn" style="width: 100%; background: #2a303c; border: 1px solid rgba(255,255,255,0.1);">
+                Voltar ao Início
+            </a>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initRoom, listenToPlayers, listenToRoom } from './script/firebase-service.js';
+
+        async function init() {
+            await initRoom();
+            
+            listenToPlayers(players => {
+                const sorted = [...players].sort((a,b) => (b.score || 0) - (a.score || 0));
+                
+                if (sorted.length > 0) {
+                    document.getElementById('winner-name').textContent = sorted[0].name;
+                    
+                    const scoreList = document.getElementById('final-scores');
+                    scoreList.innerHTML = sorted.map(p => `
+                        <div class="score-item">
+                            <span class="score-name">${p.name}</span>
+                            <span class="score-value">${p.score || 0} pts</span>
+                        </div>
+                    `).join('');
+                }
+            });
+
+            // If room restarts, optionally redirect back
+            listenToRoom(room => {
+                if (room.status === 'waiting') {
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+        init();
+    </script>
+</body>
+</html>

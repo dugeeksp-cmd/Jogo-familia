@@ -20,6 +20,7 @@ const meetContainer = document.getElementById('meet-container');
 const meetLink = document.getElementById('meet-link');
 const toggleCardBtn = document.getElementById('toggle-card');
 const gameCard = document.getElementById('game-card');
+const cardBgOverlay = document.getElementById('card-bg-overlay');
 const cardCat = document.getElementById('card-cat');
 const cardText = document.getElementById('card-text');
 const cardDiff = document.getElementById('card-diff');
@@ -51,9 +52,13 @@ async function init() {
 
     listenToPrivateHand(PLAYER_ID, (hand) => {
         if (hand && hand.card) {
-            cardCat.textContent = hand.card.category.toUpperCase();
+            const cat = hand.card.category.toLowerCase();
+            cardCat.textContent = cat.toUpperCase();
             cardText.textContent = hand.card.text;
             cardDiff.textContent = hand.card.difficulty.toUpperCase();
+            
+            // Apply category class to card for background image
+            gameCard.className = `game-card card-blur card-cat-${cat}`;
         }
     });
 
@@ -77,14 +82,19 @@ async function init() {
     // Invite Button
     if (inviteBtn) {
         inviteBtn.addEventListener('click', () => {
-            const url = window.location.origin;
-            navigator.clipboard.writeText(url).then(() => alert('Link de convite copiado!'));
+            const url = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}/index.html?room=${roomState?.code || "PRINCIPAL"}`;
+            navigator.clipboard.writeText(url).then(() => alert('Link de convite com código da sala copiado!'));
         });
     }
 }
 
 function updateUI() {
     if (!roomState) return;
+
+    if (roomState.status === 'finished') {
+        window.location.href = 'win.html';
+        return;
+    }
 
     // Public Chat Visibility for Guests
     const publicTab = Array.from(chatTabs).find(t => t.dataset.chat === 'public');
@@ -105,19 +115,34 @@ function updateUI() {
         const remaining = Math.max(0, Math.ceil((roomState.timer.endsAtMs - Date.now()) / 1000));
         timerNumber.textContent = remaining;
         
+        // Visual feedback for low time
+        const timerDisplay = document.querySelector('.timer-display');
+        if (timerDisplay) {
+            timerDisplay.style.borderColor = remaining <= 10 ? '#ef4444' : '#f97316';
+            timerDisplay.style.color = remaining <= 10 ? '#ef4444' : '#f97316';
+        }
+
         if (remaining === 0) {
             playSound('timerEnd');
         }
     } else {
         timerNumber.textContent = roomState.timer?.durationSeconds || 60;
+        const timerDisplay = document.querySelector('.timer-display');
+        if (timerDisplay) {
+            timerDisplay.style.borderColor = '#f97316';
+            timerDisplay.style.color = '#f97316';
+        }
     }
 
     // Turn
+    const timerArea = document.querySelector('.timer-area');
     if (roomState.currentTurnPlayerId === PLAYER_ID) {
         turnStatus.innerHTML = '<span class="turn-active">Sua vez de adivinhar!</span>';
+        if (timerArea) timerArea.classList.add('glow-turn');
     } else {
         const turnName = roomState.currentTurnPlayerId ? roomState.currentTurnPlayerId.charAt(0).toUpperCase() + roomState.currentTurnPlayerId.slice(1) : 'Aguardando';
         turnStatus.textContent = `Vez de: ${turnName}`;
+        if (timerArea) timerArea.classList.remove('glow-turn');
     }
 }
 

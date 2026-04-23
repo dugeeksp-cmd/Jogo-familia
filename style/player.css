@@ -84,9 +84,29 @@ body[data-player="sophia"] {
     padding: 40px;
     transition: var(--transition);
     position: relative;
-    overflow: visible;
+    overflow: hidden;
     box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.05), 0 30px 60px rgba(0, 0, 0, 0.5);
 }
+
+.card-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    filter: grayscale(80%) brightness(0.6);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Categorias com Imagens Reais (Unsplash placeholders para qualidade premium) */
+.card-cat-animais .card-bg-overlay { background-image: url('https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=500&auto=format&fit=crop'); }
+.card-cat-objetos .card-bg-overlay { background-image: url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=500&auto=format&fit=crop'); }
+.card-cat-profissões .card-bg-overlay { background-image: url('https://images.unsplash.com/photo-1454165833767-027eeef1593e?q=80&w=500&auto=format&fit=crop'); }
+.card-cat-lugares .card-bg-overlay { background-image: url('https://images.unsplash.com/photo-1493246507139-91e8bef99c02?q=80&w=500&auto=format&fit=crop'); }
+.card-cat-comida .card-bg-overlay { background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=500&auto=format&fit=crop'); }
+.card-cat-frutas .card-bg-overlay { background-image: url('https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=500&auto=format&fit=crop'); }
+.card-cat-personagens .card-bg-overlay { background-image: url('https://images.unsplash.com/photo-1544317316-053c2cae5999?q=80&w=500&auto=format&fit=crop'); }
 
 .game-card::before {
     content: "MINHA CARTA";

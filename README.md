@@ -22,11 +22,19 @@ App web mobile-first para jogar o clássico jogo de adivinhação em família du
 -   `rooms/PRINCIPAL/privateHands/{id}`: Carta atual do jogador (segurança por lógica de ID).
 -   `rooms/PRINCIPAL/messages/{id}`: Coleção única para mensagens, filtrada por `chatId` no cliente (group, papai-miguel, papai-sophia).
 
-## 🎮 Como Jogar
+## 🎮 Regras do Jogo 'Quem Sou Eu?'
 
-1.  **Papai** entra em `papai.html` (usa a senha).
-2.  **Miguel** entra em `miguel.html`.
-3.  **Sophia** entra em `sophia.html`.
-4.  Papai clica em **Gerar Cartas**. Cada filho clica em "Ver Carta" no seu celular.
-5.  Papai cola o link do **Google Meet** e clica em **Ativar**. O botão aparecerá para os filhos.
-6.  Papai inicia o **Cronômetro** e começa a rodada!
+O objetivo do game é adivinhar qual é o nome, animal, objeto ou lugar que está na sua "testa" (sua carta secreta) fazendo perguntas aos outros jogadores.
+
+### Como Jogar
+1.  **Acesso:** Papai entra em `papai.html` (senha padrão `420933`). Miguel, Sophia e Convidados entram pelas suas respectivas páginas.
+2.  **Preparação:** Papai clica em **Gerar Cartas**. Cada jogador ouve um som e sua carta aparece desfocada na tela.
+3.  **Sua Carta:** Você não deve ver sua própria carta! Ela é para que os outros saibam quem você é.
+4.  **Seu Turno:** Quando for a sua vez (indicada pelo brilho verde e pelo cronômetro), você deve fazer perguntas de "Sim" ou "Não" para os outros para tentar descobrir seu personagem.
+5.  **Cronômetro:** Você tem 60 segundos. Se o tempo acabar, a vez passa para o próximo.
+6.  **Adivinhando:** Se você acha que sabe quem é, faça o seu palpite. Se acertar, o Papai registra seus pontos no painel!
+
+### O Objetivo
+Acumular o máximo de pontos adivinhando corretamente suas cartas!
+
+---

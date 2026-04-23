@@ -23,6 +23,7 @@ const btnStartGame = document.getElementById('btn-start-game');
 const btnNextTurn = document.getElementById('btn-next-turn');
 const btnStartTimer = document.getElementById('btn-start-timer');
 const btnResetRound = document.getElementById('btn-reset-round');
+const btnEndGame = document.getElementById('btn-end-game');
 const playersList = document.getElementById('players-list');
 const filterDifficulty = document.getElementById('filter-difficulty');
 const filterCategory = document.getElementById('filter-category');
@@ -41,6 +42,13 @@ const scoreHistoryList = document.getElementById('score-history-list');
 const maxPlayersInput = document.getElementById('max-players-input');
 const btnSaveLimit = document.getElementById('btn-save-limit');
 const btnHidePublicChat = document.getElementById('btn-hide-public-chat');
+const papaiTimer = document.getElementById('papai-timer');
+const toggleCardBtn = document.getElementById('toggle-card');
+const gameCard = document.getElementById('game-card');
+const cardCat = document.getElementById('card-cat');
+const cardText = document.getElementById('card-text');
+const cardDiff = document.getElementById('card-diff');
+const papaiTurnStatus = document.getElementById('papai-turn-status');
 
 async function init() {
     await initRoom();
@@ -57,6 +65,16 @@ async function init() {
 
     listenToScoreHistory((history) => {
         renderScoreHistory(history);
+    });
+
+    listenToPrivateHand(PLAYER_ID, (hand) => {
+        if (hand && hand.card) {
+            const cat = hand.card.category.toLowerCase();
+            cardCat.textContent = cat.toUpperCase();
+            cardText.textContent = hand.card.text;
+            cardDiff.textContent = hand.card.difficulty.toUpperCase();
+            gameCard.className = `game-card card-blur card-cat-${cat}`;
+        }
     });
 
     // Initialize Chat
@@ -86,8 +104,8 @@ async function init() {
         inviteBtn.textContent = '🔗 Convidar';
         inviteBtn.style.cursor = 'pointer';
         inviteBtn.addEventListener('click', () => {
-            const url = window.location.origin;
-            navigator.clipboard.writeText(url).then(() => alert('Link de convite copiado!'));
+            const url = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}/index.html?room=${roomState?.code || "PRINCIPAL"}`;
+            navigator.clipboard.writeText(url).then(() => alert('Link de convite com código da sala copiado!'));
         });
         header.insertBefore(inviteBtn, header.querySelector('a'));
     }
@@ -111,6 +129,34 @@ function updateUI() {
     btnHidePublicChat.textContent = roomState.publicChatHiddenForGuests ? 'Mostrar Chat Público p/ Convidados' : 'Esconder Chat Público p/ Convidados';
     btnHidePublicChat.classList.toggle('btn-activate', roomState.publicChatHiddenForGuests);
     btnHidePublicChat.classList.toggle('btn-deactivate', !roomState.publicChatHiddenForGuests);
+
+    if (roomState.status === 'finished') {
+        window.location.href = 'win.html';
+        return;
+    }
+
+    // Update Timer for Papai
+    if (roomState.timer?.isRunning && roomState.timer?.endsAtMs) {
+        const remaining = Math.max(0, Math.ceil((roomState.timer.endsAtMs - Date.now()) / 1000));
+        papaiTimer.textContent = remaining + 's';
+        papaiTimer.style.background = remaining <= 10 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(249, 115, 22, 0.2)';
+        papaiTimer.style.color = remaining <= 10 ? '#ef4444' : '#f97316';
+    } else {
+        papaiTimer.textContent = (roomState.timer?.durationSeconds || 60) + 's';
+        papaiTimer.style.background = 'rgba(249, 115, 22, 0.2)';
+        papaiTimer.style.color = '#f97316';
+    }
+
+    // Turn status for Papai
+    const adminGameSection = document.querySelector('.admin-section[style*="border: 2px"]');
+    if (roomState.currentTurnPlayerId === PLAYER_ID) {
+        papaiTurnStatus.innerHTML = '<span class="turn-active" style="font-size: 1.1rem; font-weight: 800;">Sua vez de jogar!</span>';
+        if (adminGameSection) adminGameSection.classList.add('glow-turn');
+    } else {
+        const turnName = roomState.currentTurnPlayerId ? roomState.currentTurnPlayerId.charAt(0).toUpperCase() + roomState.currentTurnPlayerId.slice(1) : 'Aguardando';
+        papaiTurnStatus.innerHTML = `<span style="opacity: 0.6;">Vez de: ${turnName}</span>`;
+        if (adminGameSection) adminGameSection.classList.remove('glow-turn');
+    }
 }
 
 function updateScoreSelect(players) {
@@ -164,16 +210,50 @@ btnAddScore.addEventListener('click', async () => {
     playSound('message'); // Usar som de mensagem como feedback
 });
 
+// Play as Papai Controls
+toggleCardBtn.addEventListener('click', () => {
+    gameCard.classList.toggle('card-blur');
+    if (!gameCard.classList.contains('card-blur')) {
+        playSound('cardReveal');
+        toggleCardBtn.textContent = 'Esconder Minha Carta';
+    } else {
+        toggleCardBtn.textContent = 'Ver Minha Carta';
+    }
+});
+
 // Game Controls
 btnStartGame.addEventListener('click', async () => {
     await updateRoom({ gameStarted: true, status: 'playing', currentTurnPlayerId: 'miguel' });
 });
 
 btnNextTurn.addEventListener('click', async () => {
-    const playersArr = ['miguel', 'sophia', 'papai'];
-    const currentIndex = playersArr.indexOf(roomState.currentTurnPlayerId || 'papai');
-    const nextIndex = (currentIndex + 1) % playersArr.length;
-    await updateRoom({ currentTurnPlayerId: playersArr[nextIndex], 'timer.isRunning': false });
+    // Get all online players for turn rotation
+    const players = await new Promise(resolve => {
+        const unsub = listenToPlayers(p => { unsub(); resolve(p); });
+    });
+    
+    if (players.length === 0) return;
+
+    // Filter online players and sort them to keep a stable rotation
+    const activePlayers = players.filter(p => (Date.now() - p.joinedAtMs) < 300000).map(p => p.id);
+    if (activePlayers.length === 0) return;
+
+    const currentIndex = activePlayers.indexOf(roomState.currentTurnPlayerId);
+    const nextIndex = (currentIndex + 1) % activePlayers.length;
+    const nextPlayerId = activePlayers[nextIndex];
+
+    const now = Date.now();
+    const duration = 60; // Reset to 60 seconds for each turn
+    
+    await updateRoom({ 
+        currentTurnPlayerId: nextPlayerId,
+        'timer.isRunning': true,
+        'timer.startedAtMs': now,
+        'timer.endsAtMs': now + (duration * 1000),
+        'timer.durationSeconds': duration
+    });
+    
+    playSound('cardReveal');
 });
 
 btnStartTimer.addEventListener('click', async () => {
@@ -191,6 +271,12 @@ btnResetRound.addEventListener('click', async () => {
         roundNumber: (roomState.roundNumber || 0) + 1,
         'timer.isRunning': false 
     });
+});
+
+btnEndGame.addEventListener('click', async () => {
+    if (confirm('Tem certeza que deseja encerrar o jogo e ver o placar final?')) {
+        await updateRoom({ status: 'finished', 'timer.isRunning': false });
+    }
 });
 
 // Meeting Controls
@@ -243,5 +329,10 @@ btnGenerateCards.addEventListener('click', async () => {
     
     alert('Novas cartas geradas para todos!');
 });
+
+// setInterval for dynamic UI updates (timer)
+setInterval(() => {
+    if (roomState?.timer?.isRunning) updateUI();
+}, 1000);
 
 init();

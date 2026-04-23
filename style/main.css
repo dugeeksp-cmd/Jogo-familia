@@ -105,9 +105,28 @@ body {
     animation: fadeIn 0.5s ease-out forwards;
 }
 
+.pulse-new {
+    animation: pulse 0.8s ease-in-out infinite;
+}
+
+.glow-turn {
+    animation: glowTurn 2s linear infinite;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(74, 222, 128, 0.5); }
+    100% { transform: scale(1); }
+}
+
+@keyframes glowTurn {
+    0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.6); border-color: rgba(16, 185, 129, 0.8); }
 }
 
 /* Tipografia */
