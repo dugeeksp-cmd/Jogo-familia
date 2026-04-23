@@ -74,6 +74,7 @@ body[data-player="sophia"] {
     height: 100%;
     background: var(--card-gradient);
     backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-radius: 3rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;

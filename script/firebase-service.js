@@ -21,8 +21,7 @@ import {
     limitToLast,
     serverTimestamp,
     getDoc,
-    getDocFromServer,
-    where
+    getDocFromServer
 } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 

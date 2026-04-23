@@ -2,7 +2,9 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Convidado - Quem Sou Eu?</title>
     <link rel="stylesheet" href="style/main.css">
     <link rel="stylesheet" href="style/player.css">
@@ -173,7 +175,7 @@
                 return;
             }
 
-            PLAYER_ID = 'guest_' + user.uid.substr(0, 8);
+            PLAYER_ID = 'guest_' + user.uid.slice(0, 8);
             loginGuest.classList.add('hidden');
             guestContent.classList.remove('hidden');
             guestNameDisplay.textContent = PLAYER_NAME;
