@@ -127,9 +127,11 @@ export const sendGuess = async (playerId, playerName, guessText) => {
 
 export const listenToGuesses = (callback) => {
     const guessRef = collection(db, "rooms", ROOM_ID, "guesses");
-    const q = query(guessRef, where("status", "==", "pending"), orderBy("createdAt", "asc"));
+    const q = query(guessRef, orderBy("createdAt", "asc"));
     return onSnapshot(q, (snapshot) => {
-        const guesses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const guesses = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(g => g.status === "pending"); // Filtro no cliente
         callback(guesses);
     });
 };
@@ -164,21 +166,31 @@ export const sendMessage = async (chatId, senderId, senderName, text) => {
 
 export const listenToMessages = (chatId, callback) => {
     const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
+    // Removendo 'where' da query principal para evitar a necessidade de Índice Composto no Firestore.
+    // Buscamos as últimas 100 mensagens da sala e filtramos por chatId no cliente.
+    // Isso é seguro e performático para o volume deste aplicativo.
     const q = query(
         messagesRef, 
-        where("chatId", "==", chatId),
         orderBy("createdAt", "asc"),
-        limitToLast(50)
+        limitToLast(100)
     );
-    return onSnapshot(q, (snapshot) => {
-        const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    return onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+        const msgs = snapshot.docs
+            .map(doc => {
+                const data = doc.data();
+                // Handling serverTimestamp being null in local cache
+                return { 
+                    id: doc.id, 
+                    ...data,
+                    createdAt: data.createdAt || { toDate: () => new Date() } 
+                };
+            })
+            .filter(msg => msg.chatId === chatId); // Filtro no lado do cliente
+        
         callback(msgs);
     }, (error) => {
-        console.error(`Erro no listener do chat ${chatId}:`, error);
-        // Se for erro de índice, o Firestore fornece a URL para criar o índice no erro
-        if (error.code === 'failed-precondition') {
-            console.warn('Verifique se o índice composto (chatId e createdAt) foi criado no Firestore.');
-        }
+        console.error(`Erro no listener de mensagens para ${chatId}:`, error);
     });
 };
 

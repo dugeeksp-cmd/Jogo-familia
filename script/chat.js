@@ -65,10 +65,17 @@ export function setupChat(config) {
         const text = input.value.trim();
         if (!text) return;
         
+        const originalValue = input.value;
         input.value = '';
-        await sendMessage(currentChatId, playerId, playerName, text);
-        playSound('message');
-        if (onMessageSent) onMessageSent();
+        try {
+            await sendMessage(currentChatId, playerId, playerName, text);
+            playSound('message');
+            if (onMessageSent) onMessageSent();
+        } catch (e) {
+            console.error('[Chat] Erro ao enviar mensagem:', e);
+            input.value = originalValue;
+            alert('Erro ao enviar mensagem. Verifique sua conexão.');
+        }
     };
 
     // Event Listeners

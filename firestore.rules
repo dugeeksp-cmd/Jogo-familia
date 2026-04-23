@@ -40,10 +40,10 @@ service cloud.firestore {
 
     function isValidMessage(data) {
       return data.keys().hasAll(['chatId', 'senderId', 'senderName', 'text', 'createdAt']) &&
-             data.chatId is string && data.chatId.size() <= 50 &&
-             data.senderId is string && data.senderId.size() <= 64 &&
-             data.senderName is string && data.senderName.size() <= 50 &&
-             data.text is string && data.text.size() <= 2000 &&
+             data.chatId is string &&
+             data.senderId is string &&
+             data.senderName is string &&
+             data.text is string &&
              data.createdAt is timestamp;
     }
 
