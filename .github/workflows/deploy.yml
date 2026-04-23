@@ -1,0 +1,34 @@
+name: Deploy para Hospedagem via FTP
+
+on:
+  push:
+    branches:
+      - main  # Trigger do deploy quando houver push na branch main
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    environment: FTP_SERVER # Nome do ambiente onde você salvou os segredos
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: 🔨 Build Project
+      run: |
+        npm install
+        npm run build
+
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USER }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: ${{ secrets.FTP_DIR }} # O diretório no seu servidor (ex: /public_html/)
+        local-dir: ./dist/ # Pasta local gerada pelo build do Vite

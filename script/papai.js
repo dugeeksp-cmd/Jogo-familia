@@ -11,7 +11,9 @@ import {
     listenToPrivateHand,
     listenToGuesses,
     respondToGuess,
-    updatePlayer
+    updatePlayer,
+    loginWithGoogle,
+    onAuth
 } from './firebase-service.js';
 import { CARD_BANK } from './cards.js';
 import { shuffleArray } from './utils.js';
@@ -61,6 +63,8 @@ const cardCat = document.getElementById('card-cat');
 const cardText = document.getElementById('card-text');
 const cardDiff = document.getElementById('card-diff');
 const papaiTurnStatus = document.getElementById('papai-turn-status');
+const loginOverlay = document.getElementById('login-overlay');
+const btnGoogleLogin = document.getElementById('btn-google-login');
 
 // Dream Modal Elements
 const btnOpenDream = document.getElementById('btn-open-dream');
@@ -70,6 +74,28 @@ const btnCancelDream = document.getElementById('btn-cancel-dream');
 const btnSaveDream = document.getElementById('btn-save-dream');
 
 async function init() {
+    onAuth(async (user) => {
+        if (user) {
+            if (loginOverlay) loginOverlay.style.display = 'none';
+            await finishInit();
+        } else {
+            if (loginOverlay) loginOverlay.style.display = 'flex';
+        }
+    });
+
+    if (btnGoogleLogin) {
+        btnGoogleLogin.addEventListener('click', async () => {
+            try {
+                await loginWithGoogle();
+            } catch (e) {
+                console.error(e);
+                alert("Falha no login!");
+            }
+        });
+    }
+}
+
+async function finishInit() {
     await initRoom();
 
     listenToRoom((room) => {
@@ -423,6 +449,34 @@ btnGenerateCards.addEventListener('click', async () => {
     await updatePrivateHand('papai', shuffled[2]);
     
     alert('Novas cartas geradas para todos!');
+});
+
+// Dream Modal Events
+btnOpenDream.addEventListener('click', () => {
+    dreamInput.value = roomState?.gameObjective || '';
+    dreamModal.classList.remove('hidden');
+    dreamInput.focus();
+});
+
+btnCancelDream.addEventListener('click', () => {
+    dreamModal.classList.add('hidden');
+});
+
+btnSaveDream.addEventListener('click', async () => {
+    const objective = dreamInput.value.trim();
+    await updateRoom({ gameObjective: objective });
+    dreamModal.classList.add('hidden');
+    alert('Sonho de Jogo atualizado para todos!');
+});
+
+btnSaveEmojis.addEventListener('click', async () => {
+    const emojiM = emojiMiguel.value.trim();
+    const emojiS = emojiSophia.value.trim();
+    
+    if (emojiM) await updatePlayer('miguel', { emoji: emojiM });
+    if (emojiS) await updatePlayer('sophia', { emoji: emojiS });
+    
+    alert('Emojis atualizados!');
 });
 
 // Dream Modal Events

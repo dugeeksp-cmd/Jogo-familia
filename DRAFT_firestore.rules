@@ -49,12 +49,13 @@ service cloud.firestore {
 
     match /rooms/{roomCode} {
       // Pillar 3: Path Variable Hardening
-      allow get: if isSignedIn() && isValidId(roomCode);
-      allow list: if false; 
+      allow get: if isValidId(roomCode);
+      allow list: if false; // No blanket listing of rooms
       
       // Pillar 4 & 7: Write logic
-      allow create: if isSignedIn() && isValidRoom(incoming());
-      allow update: if isSignedIn() && isValidRoom(incoming()) && (
+      allow create: if isValidRoom(incoming());
+      allow update: if isValidRoom(incoming()) && (
+        // Action: Generic update (by Parent)
         (incoming().diff(existing()).affectedKeys().hasOnly([
             'status', 'currentTurnPlayerId', 'gameStarted', 'roundNumber', 
             'timer', 'filters', 'meeting', 'maxPlayers', 
@@ -63,34 +64,35 @@ service cloud.firestore {
       );
 
       match /players/{playerId} {
-        allow read: if isSignedIn() && isValidId(playerId);
-        allow create: if isSignedIn() && isValidId(playerId) && isValidPlayer(incoming());
-        allow update: if isSignedIn() && isValidId(playerId) && isValidPlayer(incoming()) && (
+        allow read: if isValidId(playerId);
+        allow create: if isValidId(playerId) && isValidPlayer(incoming());
+        allow update: if isValidId(playerId) && isValidPlayer(incoming()) && (
+            // Anyone can join/update status, or Parent updates score/emoji
             incoming().diff(existing()).affectedKeys().hasAny(['score', 'online', 'joinedAtMs', 'emoji'])
         );
       }
 
       match /privateHands/{playerId} {
-        allow read: if isSignedIn() && isValidId(playerId);
-        allow write: if isSignedIn() && isValidId(playerId);
+        allow read: if isValidId(playerId);
+        allow write: if isValidId(playerId);
       }
 
       match /messages/{messageId} {
-        allow read: if isSignedIn() && isValidId(messageId);
-        allow create: if isSignedIn() && isValidId(messageId) && isValidMessage(incoming());
+        allow read: if isValidId(messageId);
+        allow create: if isValidId(messageId) && isValidMessage(incoming());
       }
 
       match /guesses/{guessId} {
-        allow read: if isSignedIn() && isValidId(guessId);
-        allow create: if isSignedIn() && isValidId(guessId) && isValidGuess(incoming());
-        allow update: if isSignedIn() && isValidId(guessId) && isValidGuess(incoming()) && (
+        allow read: if isValidId(guessId);
+        allow create: if isValidId(guessId) && isValidGuess(incoming());
+        allow update: if isValidId(guessId) && isValidGuess(incoming()) && (
             incoming().diff(existing()).affectedKeys().hasOnly(['status', 'respondedAt'])
         );
       }
 
       match /scoreHistory/{historyId} {
-        allow read: if isSignedIn() && isValidId(historyId);
-        allow create: if isSignedIn() && isValidId(historyId);
+        allow read: if isValidId(historyId);
+        allow create: if isValidId(historyId);
       }
     }
   }

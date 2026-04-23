@@ -1,6 +1,13 @@
 /* script/firebase-service.js */
 import { initializeApp } from 'firebase/app';
 import { 
+    getAuth, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    signInAnonymously,
+    onAuthStateChanged 
+} from 'firebase/auth';
+import { 
     getFirestore, 
     doc, 
     onSnapshot, 
@@ -13,15 +20,53 @@ import {
     limit, 
     serverTimestamp,
     getDoc,
-    getDocs,
+    getDocFromServer,
     where
 } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+export const loginWithGoogle = async () => {
+    try {
+        const result = await signInWithPopup(auth, provider);
+        return result.user;
+    } catch (error) {
+        console.error("Erro ao fazer login:", error);
+        throw error;
+    }
+};
+
+export const loginAnonymously = async () => {
+    try {
+        const result = await signInAnonymously(auth);
+        return result.user;
+    } catch (error) {
+        console.error("Erro ao fazer login anônimo:", error);
+        throw error;
+    }
+};
+
+export const onAuth = (callback) => {
+    return onAuthStateChanged(auth, callback);
+};
 
 const ROOM_ID = "PRINCIPAL"; // Sala única para simplificar como pedido
+
+async function testConnection() {
+    try {
+        // Test with a non-existent doc just to check connectivity
+        await getDocFromServer(doc(db, 'rooms', 'test-connection'));
+    } catch (error) {
+        if (error instanceof Error && error.message.includes('the client is offline')) {
+            console.error("Please check your Firebase configuration or connection.");
+        }
+    }
+}
+testConnection();
 
 // Inicializar sala se não existir
 export const initRoom = async () => {
@@ -49,20 +94,28 @@ export const listenToRoom = (callback) => {
 };
 
 export const updateRoom = async (data) => {
-    const roomRef = doc(db, "rooms", ROOM_ID);
-    await updateDoc(roomRef, data);
+    try {
+        const roomRef = doc(db, "rooms", ROOM_ID);
+        await updateDoc(roomRef, data);
+    } catch (e) {
+        handleFirestoreError(e, 'update', `rooms/${ROOM_ID}`);
+    }
 };
 
 // Guesses
 export const sendGuess = async (playerId, playerName, guessText) => {
-    const guessRef = collection(db, "rooms", ROOM_ID, "guesses");
-    await addDoc(guessRef, {
-        playerId,
-        playerName,
-        text: guessText,
-        status: "pending",
-        createdAt: serverTimestamp()
-    });
+    try {
+        const guessRef = collection(db, "rooms", ROOM_ID, "guesses");
+        await addDoc(guessRef, {
+            playerId,
+            playerName,
+            text: guessText,
+            status: "pending",
+            createdAt: serverTimestamp()
+        });
+    } catch (e) {
+        handleFirestoreError(e, 'create', `rooms/${ROOM_ID}/guesses`);
+    }
 };
 
 export const listenToGuesses = (callback) => {
@@ -183,3 +236,27 @@ export const listenToScoreHistory = (callback) => {
         callback(history);
     });
 };
+
+export function handleFirestoreError(error, operationType, path = null) {
+    if (error.code === 'permission-denied') {
+        const user = auth.currentUser;
+        const errorInfo = {
+            error: error.message,
+            operationType,
+            path,
+            authInfo: {
+                userId: user?.uid || 'anonymous',
+                email: user?.email || 'N/A',
+                emailVerified: user?.emailVerified || false,
+                isAnonymous: user?.isAnonymous || true,
+                providerInfo: user?.providerData.map(p => ({
+                    providerId: p.providerId,
+                    displayName: p.displayName || '',
+                    email: p.email || ''
+                })) || []
+            }
+        };
+        throw new Error(JSON.stringify(errorInfo));
+    }
+    throw error;
+}

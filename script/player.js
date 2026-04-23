@@ -6,7 +6,9 @@ import {
     updatePlayerStatus,
     listenToPlayers,
     listenToAllHands,
-    sendGuess
+    sendGuess,
+    onAuth,
+    loginAnonymously
 } from './firebase-service.js';
 import { playSound } from './audio.js';
 import { setupChat } from './chat.js';
@@ -22,7 +24,6 @@ const meetContainer = document.getElementById('meet-container');
 const meetLink = document.getElementById('meet-link');
 const toggleCardBtn = document.getElementById('toggle-card');
 const gameCard = document.getElementById('game-card');
-const cardBgOverlay = document.getElementById('card-bg-overlay');
 const cardCat = document.getElementById('card-cat');
 const cardText = document.getElementById('card-text');
 const cardDiff = document.getElementById('card-diff');
@@ -47,6 +48,16 @@ const btnConfirmGuess = document.getElementById('btn-confirm-guess');
 const guessInput = document.getElementById('guess-input');
 
 async function init() {
+    onAuth(async (user) => {
+        if (!user) {
+            await loginAnonymously();
+            return; // Wait for onAuth to trigger again with user
+        }
+        await finishInit();
+    });
+}
+
+async function finishInit() {
     await initRoom();
     
     updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME });
@@ -161,6 +172,14 @@ function updateUI() {
         meetContainer.classList.remove('hidden');
     } else {
         meetContainer.classList.add('hidden');
+    }
+
+    // Objective
+    if (roomState.gameObjective) {
+        objectiveText.textContent = roomState.gameObjective;
+        objectiveContainer.classList.remove('hidden');
+    } else {
+        objectiveContainer.classList.add('hidden');
     }
 
     // Objective

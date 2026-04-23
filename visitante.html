@@ -49,6 +49,14 @@
                     </div>
                 </div>
 
+                <!-- Objetivo / Sonho de Jogo -->
+                <div id="objective-container" class="hidden" style="margin-bottom: 0px;">
+                    <div style="background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1)); border: 1px dashed #10b981; padding: 12px; border-radius: 12px; font-size: 0.8rem; text-align: center;">
+                        <div style="font-weight: 800; color: #10b981; margin-bottom: 4px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;">✨ Sonho de Jogo (Objetivo)</div>
+                        <div id="objective-text" style="color: white; line-height: 1.4;"></div>
+                    </div>
+                </div>
+
                 <!-- Cronômetro -->
                 <section class="timer-area">
                     <div class="timer-display">
@@ -106,7 +114,16 @@
     <!-- Scripts -->
     <script type="module">
         import { setupChat } from './script/chat.js';
-        import { initRoom, listenToRoom, updatePlayerStatus, listenToPlayers, listenToAllHands, sendGuess } from './script/firebase-service.js';
+        import { 
+            initRoom, 
+            listenToRoom, 
+            updatePlayerStatus, 
+            listenToPlayers, 
+            listenToAllHands, 
+            sendGuess,
+            onAuth,
+            loginAnonymously
+        } from './script/firebase-service.js';
         import { playSound } from './script/audio.js';
 
         let PLAYER_ID = '';
@@ -140,6 +157,18 @@
             PLAYER_NAME = guestNameInput.value.trim();
             if (!PLAYER_NAME) return;
 
+            onAuth(async (user) => {
+                if (!user) {
+                    await loginAnonymously();
+                    return;
+                }
+                await finishGuestJoin(user);
+            });
+        });
+
+        async function finishGuestJoin(user) {
+            if (PLAYER_ID) return; // Already joined
+            
             await initRoom();
             
             // Check room limit
@@ -152,7 +181,7 @@
                 return;
             }
 
-            PLAYER_ID = 'guest_' + Math.random().toString(36).substr(2, 9);
+            PLAYER_ID = 'guest_' + user.uid.substr(0, 8);
             loginGuest.classList.add('hidden');
             guestContent.classList.remove('hidden');
             guestNameDisplay.textContent = PLAYER_NAME;
@@ -221,6 +250,14 @@
                 meetContainer.classList.remove('hidden');
             } else {
                 meetContainer.classList.add('hidden');
+            }
+
+            // Objective
+            if (roomState.gameObjective) {
+                objectiveText.textContent = roomState.gameObjective;
+                objectiveContainer.classList.remove('hidden');
+            } else {
+                objectiveContainer.classList.add('hidden');
             }
 
             // Objective

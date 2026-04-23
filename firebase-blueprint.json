@@ -102,6 +102,20 @@
         "createdAt": { "type": "number", "format": "timestamp" }
       },
       "required": ["chatId", "senderId", "senderName", "text", "createdAt"]
+    },
+    "Guess": {
+      "title": "Palpite",
+      "description": "Um palpite enviado por um jogador.",
+      "type": "object",
+      "properties": {
+        "playerId": { "type": "string" },
+        "playerName": { "type": "string" },
+        "text": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "correct", "wrong"] },
+        "createdAt": { "type": "number", "format": "timestamp" },
+        "respondedAt": { "type": "number", "format": "timestamp" }
+      },
+      "required": ["playerId", "playerName", "text", "status", "createdAt"]
     }
   },
   "firestore": {
@@ -124,6 +138,10 @@
     "/rooms/{roomCode}/scoreHistory/{historyId}": {
       "schema": "ScoreEntry",
       "description": "Histórico de pontuação detalhado por rodada."
+    },
+    "/rooms/{roomCode}/guesses/{guessId}": {
+      "schema": "Guess",
+      "description": "Palpites enviados pelos jogadores."
     }
   }
 }
