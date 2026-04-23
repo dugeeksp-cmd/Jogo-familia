@@ -36,7 +36,7 @@ export const initRoom = async () => {
             roundNumber: 1,
             timer: { durationSeconds: 60, isRunning: false, startedAtMs: null, endsAtMs: null },
             filters: { difficulty: "all", category: "all", blockedCards: [] },
-            meeting: { enabled: false, link: "", updatedAt: Date.now() },
+            meeting: { enabled: false, link: "", updated_at: Date.now() },
             createdAt: serverTimestamp()
         });
     }
@@ -51,6 +51,35 @@ export const listenToRoom = (callback) => {
 export const updateRoom = async (data) => {
     const roomRef = doc(db, "rooms", ROOM_ID);
     await updateDoc(roomRef, data);
+};
+
+// Guesses
+export const sendGuess = async (playerId, playerName, guessText) => {
+    const guessRef = collection(db, "rooms", ROOM_ID, "guesses");
+    await addDoc(guessRef, {
+        playerId,
+        playerName,
+        text: guessText,
+        status: "pending",
+        createdAt: serverTimestamp()
+    });
+};
+
+export const listenToGuesses = (callback) => {
+    const guessRef = collection(db, "rooms", ROOM_ID, "guesses");
+    const q = query(guessRef, where("status", "==", "pending"), orderBy("createdAt", "asc"));
+    return onSnapshot(q, (snapshot) => {
+        const guesses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        callback(guesses);
+    });
+};
+
+export const respondToGuess = async (guessId, isCorrect) => {
+    const guessRef = doc(db, "rooms", ROOM_ID, "guesses", guessId);
+    await updateDoc(guessRef, {
+        status: isCorrect ? "correct" : "wrong",
+        respondedAt: serverTimestamp()
+    });
 };
 
 // Messaging
@@ -95,6 +124,13 @@ export const listenToPrivateHand = (playerId, callback) => {
     });
 };
 
+export const listenToAllHands = (callback) => {
+    return onSnapshot(collection(db, "rooms", ROOM_ID, "privateHands"), (snapshot) => {
+        const hands = snapshot.docs.map(doc => doc.data());
+        callback(hands);
+    });
+};
+
 // Players
 export const updatePlayerStatus = async (playerId, data) => {
     const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
@@ -103,6 +139,11 @@ export const updatePlayerStatus = async (playerId, data) => {
         ...data,
         joinedAtMs: Date.now()
     }, { merge: true });
+};
+
+export const updatePlayer = async (playerId, data) => {
+    const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
+    await updateDoc(playerRef, data);
 };
 
 export const listenToPlayers = (callback) => {

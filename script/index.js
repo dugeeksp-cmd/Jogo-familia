@@ -40,6 +40,28 @@ document.addEventListener('DOMContentLoaded', () => {
     passwordInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleLogin();
     });
+
+    // Info Modal Logic
+    const infoBtn = document.getElementById('info-btn');
+    const infoModal = document.getElementById('info-modal');
+    const closeInfoBtn = document.getElementById('close-info');
+
+    if (infoBtn && infoModal && closeInfoBtn) {
+        infoBtn.addEventListener('click', () => {
+            infoModal.classList.remove('hidden');
+        });
+
+        closeInfoBtn.addEventListener('click', () => {
+            infoModal.classList.add('hidden');
+        });
+
+        // Close on background click
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                infoModal.classList.add('hidden');
+            }
+        });
+    }
 });
 
 // Shake animation style

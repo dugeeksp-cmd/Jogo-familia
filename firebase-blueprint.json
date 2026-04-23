@@ -34,11 +34,12 @@
           "properties": {
             "enabled": { "type": "boolean" },
             "link": { "type": "string" },
-            "updatedAt": { "type": "number", "format": "timestamp" }
+            "updated_at": { "type": "number", "format": "timestamp" }
           }
         },
         "maxPlayers": { "type": "number", "default": 8 },
         "publicChatHiddenForGuests": { "type": "boolean", "description": "Controla se visitantes veem o histórico do chat público" },
+        "gameObjective": { "type": "string", "description": "Um objetivo ou bônus especial definido pelo moderador" },
         "createdAt": { "type": "number", "format": "timestamp" }
       },
       "required": ["code", "status", "parentPlayerId", "createdAt"]
@@ -53,7 +54,8 @@
         "role": { "type": "string", "enum": ["child", "parent", "guest"] },
         "joinedAtMs": { "type": "number", "format": "timestamp" },
         "online": { "type": "boolean" },
-        "score": { "type": "number" }
+        "score": { "type": "number" },
+        "emoji": { "type": "string", "description": "Emoji decorativo para o jogador" }
       },
       "required": ["id", "name", "role", "joinedAtMs"]
     },

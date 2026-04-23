@@ -6,7 +6,12 @@ import {
     updatePrivateHand,
     listenToPlayers,
     addScore,
-    listenToScoreHistory
+    listenToScoreHistory,
+    listenToAllHands,
+    listenToPrivateHand,
+    listenToGuesses,
+    respondToGuess,
+    updatePlayer
 } from './firebase-service.js';
 import { CARD_BANK } from './cards.js';
 import { shuffleArray } from './utils.js';
@@ -17,6 +22,8 @@ const PLAYER_ID = 'papai';
 const PLAYER_NAME = 'Papai';
 
 let roomState = null;
+let currentHands = [];
+let lastGuesses = [];
 
 // DOM Elements
 const btnStartGame = document.getElementById('btn-start-game');
@@ -42,13 +49,25 @@ const scoreHistoryList = document.getElementById('score-history-list');
 const maxPlayersInput = document.getElementById('max-players-input');
 const btnSaveLimit = document.getElementById('btn-save-limit');
 const btnHidePublicChat = document.getElementById('btn-hide-public-chat');
+const emojiMiguel = document.getElementById('emoji-miguel');
+const emojiSophia = document.getElementById('emoji-sophia');
+const btnSaveEmojis = document.getElementById('btn-save-emojis');
 const papaiTimer = document.getElementById('papai-timer');
+const allCardsDisplay = document.getElementById('all-cards-display');
+const pendingGuessesList = document.getElementById('pending-guesses-list');
 const toggleCardBtn = document.getElementById('toggle-card');
 const gameCard = document.getElementById('game-card');
 const cardCat = document.getElementById('card-cat');
 const cardText = document.getElementById('card-text');
 const cardDiff = document.getElementById('card-diff');
 const papaiTurnStatus = document.getElementById('papai-turn-status');
+
+// Dream Modal Elements
+const btnOpenDream = document.getElementById('btn-open-dream');
+const dreamModal = document.getElementById('dream-modal');
+const dreamInput = document.getElementById('dream-input');
+const btnCancelDream = document.getElementById('btn-cancel-dream');
+const btnSaveDream = document.getElementById('btn-save-dream');
 
 async function init() {
     await initRoom();
@@ -65,6 +84,17 @@ async function init() {
 
     listenToScoreHistory((history) => {
         renderScoreHistory(history);
+    });
+
+    listenToAllHands((hands) => {
+        currentHands = hands; // Armazenar para comparar palpites
+        renderAllCards(hands);
+        renderGuesses(lastGuesses);
+    });
+
+    listenToGuesses((guesses) => {
+        lastGuesses = guesses;
+        renderGuesses(guesses);
     });
 
     listenToPrivateHand(PLAYER_ID, (hand) => {
@@ -171,13 +201,77 @@ function updateScoreSelect(players) {
 function renderPlayersStatus(players) {
     playersList.innerHTML = players.map(p => {
         const isOnline = (Date.now() - p.joinedAtMs) < 60000; // Simples check de online de 1 min
+        const emoji = p.emoji ? `<span style="margin-right: 4px;">${p.emoji}</span>` : '';
         return `
             <div class="player-bubble ${isOnline ? 'player-online' : ''}">
-                ${p.name}: ${isOnline ? 'Online' : 'Offline'} 
+                ${emoji}${p.name}: ${isOnline ? 'Online' : 'Offline'} 
                 <span style="opacity: 0.6; margin-left: 8px;">(${p.score || 0} pts)</span>
             </div>
         `;
     }).join('');
+
+    // Pre-fill emoji inputs if they exist
+    const miguel = players.find(p => p.id === 'miguel');
+    const sophia = players.find(p => p.id === 'sophia');
+    if (miguel && miguel.emoji && !emojiMiguel.value) emojiMiguel.value = miguel.emoji;
+    if (sophia && sophia.emoji && !emojiSophia.value) emojiSophia.value = sophia.emoji;
+}
+
+function renderAllCards(hands) {
+    if (!allCardsDisplay) return;
+    allCardsDisplay.innerHTML = hands.map(h => `
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; border-radius: 12px; font-size: 0.75rem;">
+            <div style="font-weight: 800; color: #4ade80; margin-bottom: 2px;">${h.playerId === 'papai' ? 'VOCÊ' : h.playerId.toUpperCase()}</div>
+            <div style="color: white; font-weight: 600;">${h.card?.text || 'Sem carta'}</div>
+        </div>
+    `).join('');
+}
+
+function renderGuesses(guesses) {
+    if (!pendingGuessesList) return;
+    if (guesses.length === 0) {
+        pendingGuessesList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 10px;">Nenhum palpite aguardando...</p>';
+        return;
+    }
+
+    pendingGuessesList.innerHTML = guesses.map(g => {
+        const playerHand = currentHands.find(h => h.playerId === g.playerId);
+        const actualCard = playerHand?.card?.text || '???';
+        
+        return `
+            <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 800; color: #f59e0b;">${g.playerName}</span>
+                    <span style="font-size: 0.7rem; opacity: 0.5;">${new Date(g.createdAt?.toDate?.() || Date.now()).toLocaleTimeString()}</span>
+                </div>
+                <div style="font-size: 0.9rem;">Palpite: <strong style="color: white;">"${g.text}"</strong></div>
+                <div style="font-size: 0.8rem; opacity: 0.7;">Carta Real: <span style="color: #4ade80;">${actualCard}</span></div>
+                <div style="display: flex; gap: 8px; margin-top: 5px;">
+                    <button class="btn btn-correct" data-id="${g.id}" data-player="${g.playerId}" data-name="${g.playerName}" style="flex: 1; padding: 8px; font-size: 0.8rem; background: #16a34a;">✅ Correto</button>
+                    <button class="btn btn-wrong" data-id="${g.id}" style="flex: 1; padding: 8px; font-size: 0.8rem; background: #dc2626;">❌ Errado</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Event Listeners for Buttons
+    pendingGuessesList.querySelectorAll('.btn-correct').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const { id, player, name } = btn.dataset;
+            await respondToGuess(id, true);
+            await addScore(player, name, roomState?.roundNumber || 1, 10);
+            playSound('message');
+            alert(`Ponto para ${name}!`);
+        });
+    });
+
+    pendingGuessesList.querySelectorAll('.btn-wrong').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const { id } = btn.dataset;
+            await respondToGuess(id, false);
+            playSound('timerEnd');
+        });
+    });
 }
 
 function renderScoreHistory(history) {
@@ -267,6 +361,7 @@ btnStartTimer.addEventListener('click', async () => {
 });
 
 btnResetRound.addEventListener('click', async () => {
+    playSound('roundStart');
     await updateRoom({ 
         roundNumber: (roomState.roundNumber || 0) + 1,
         'timer.isRunning': false 
@@ -282,7 +377,7 @@ btnEndGame.addEventListener('click', async () => {
 // Meeting Controls
 btnSaveMeet.addEventListener('click', async () => {
     const link = meetLinkInput.value.trim();
-    await updateRoom({ 'meeting.link': link, 'meeting.updatedAt': Date.now() });
+    await updateRoom({ 'meeting.link': link, 'meeting.updated_at': Date.now() });
     alert('Link salvo!');
 });
 
@@ -328,6 +423,34 @@ btnGenerateCards.addEventListener('click', async () => {
     await updatePrivateHand('papai', shuffled[2]);
     
     alert('Novas cartas geradas para todos!');
+});
+
+// Dream Modal Events
+btnOpenDream.addEventListener('click', () => {
+    dreamInput.value = roomState?.gameObjective || '';
+    dreamModal.classList.remove('hidden');
+    dreamInput.focus();
+});
+
+btnCancelDream.addEventListener('click', () => {
+    dreamModal.classList.add('hidden');
+});
+
+btnSaveDream.addEventListener('click', async () => {
+    const objective = dreamInput.value.trim();
+    await updateRoom({ gameObjective: objective });
+    dreamModal.classList.add('hidden');
+    alert('Sonho de Jogo atualizado para todos!');
+});
+
+btnSaveEmojis.addEventListener('click', async () => {
+    const emojiM = emojiMiguel.value.trim();
+    const emojiS = emojiSophia.value.trim();
+    
+    if (emojiM) await updatePlayer('miguel', { emoji: emojiM });
+    if (emojiS) await updatePlayer('sophia', { emoji: emojiS });
+    
+    alert('Emojis atualizados!');
 });
 
 // setInterval for dynamic UI updates (timer)

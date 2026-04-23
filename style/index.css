@@ -60,6 +60,28 @@
     font-size: 2rem;
 }
 
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: #4ade80;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 8px;
+    vertical-align: middle;
+    transition: var(--transition);
+}
+
+.info-icon:hover {
+    background: rgba(74, 222, 128, 0.1);
+    transform: scale(1.1);
+}
+
 .game-intro {
     color: var(--text-muted);
     font-size: 0.9rem;

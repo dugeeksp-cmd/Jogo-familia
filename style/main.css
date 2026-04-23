@@ -125,8 +125,16 @@ body {
 }
 
 @keyframes glowTurn {
-    0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.3); }
-    50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.6); border-color: rgba(16, 185, 129, 0.8); }
+    0%, 100% { 
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.4), inset 0 0 10px rgba(16, 185, 129, 0.2); 
+        border-color: rgba(16, 185, 129, 0.5); 
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.8), inset 0 0 20px rgba(16, 185, 129, 0.4); 
+        border-color: rgba(16, 185, 129, 1); 
+        transform: scale(1.02);
+    }
 }
 
 /* Tipografia */

@@ -42,7 +42,26 @@
 
             <!-- Controle da Sala -->
             <section class="admin-section">
+                <div class="section-title">Palpites Pendentes 🎯</div>
+                <div id="pending-guesses-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 10px;">Nenhum palpite aguardando...</p>
+                </div>
+            </section>
+
+            <section class="admin-section">
                 <div class="section-title">Controle do Jogo</div>
+                
+                <div id="emoji-settings" style="margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">Emojis dos Jogadores</div>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 0.8rem; min-width: 50px;">Miguel:</span>
+                        <input type="text" id="emoji-miguel" class="input" placeholder="💡" style="width: 50px; text-align: center; font-size: 1.2rem; padding: 5px;">
+                        <span style="font-size: 0.8rem; min-width: 50px; margin-left: 10px;">Sophia:</span>
+                        <input type="text" id="emoji-sophia" class="input" placeholder="👸" style="width: 50px; text-align: center; font-size: 1.2rem; padding: 5px;">
+                        <button id="btn-save-emojis" class="btn" style="padding: 8px 12px; font-size: 0.7rem; background: #3b82f6; margin-left: auto;">Salvar Emojis</button>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="label">Limite de Jogadores</label>
                     <div class="filter-row">
@@ -50,6 +69,14 @@
                         <button id="btn-save-limit" class="btn btn-admin btn-activate">Salvar Limite</button>
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label class="label">Cartas na Mesa</label>
+                    <div id="all-cards-display" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                        <!-- Dinamizado -->
+                    </div>
+                </div>
+
                 <div class="control-grid">
                     <button id="btn-start-game" class="btn btn-admin btn-activate">Iniciar Jogo</button>
                     <button id="btn-next-turn" class="btn btn-admin">Próximo Turno</button>
@@ -83,7 +110,10 @@
 
             <section class="admin-section">
                 <div class="section-title">Ações Especiais</div>
-                <button id="btn-hide-public-chat" class="btn btn-admin btn-deactivate" style="width: 100%;">Esconder Chat Público p/ Visitantes</button>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button id="btn-open-dream" class="btn btn-admin btn-activate" style="width: 100%; filter: hue-rotate(45deg);">✨ Definir Sonho de Jogo</button>
+                    <button id="btn-hide-public-chat" class="btn btn-admin btn-deactivate" style="width: 100%;">Esconder Chat Público p/ Visitantes</button>
+                </div>
             </section>
 
             <!-- Moderação de Cartas -->
@@ -107,6 +137,10 @@
                                 <option value="animais">Animais</option>
                                 <option value="objetos">Objetos</option>
                                 <option value="profissões">Profissões</option>
+                                <option value="lugares">Lugares</option>
+                                <option value="comida">Comida</option>
+                                <option value="frutas">Frutas</option>
+                                <option value="personagens">Históricos</option>
                             </select>
                         </div>
                     </div>
@@ -149,6 +183,19 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Modal Sonho de Jogo -->
+    <div id="dream-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px;">
+        <div class="card" style="width: 100%; max-width: 450px; text-align: center;">
+            <h3 style="margin-bottom: 20px;">✨ Sonho de Jogo</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">Defina um objetivo especial ou bônus para a partida atual.</p>
+            <textarea id="dream-input" class="chat-input" placeholder="Ex: O primeiro a adivinhar em menos de 20 segundos ganha 20 pontos de bônus! 🚀" style="width: 100%; min-height: 120px; margin-bottom: 20px; padding: 15px; resize: none;"></textarea>
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-cancel-dream" class="btn" style="flex: 1; opacity: 0.6; background: transparent;">Cancelar</button>
+                <button id="btn-save-dream" class="btn" style="flex: 2; background: linear-gradient(45deg, #10b981, #3b82f6);">Salvar Sonho</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->

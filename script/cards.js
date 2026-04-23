@@ -50,6 +50,11 @@ export const CARD_BANK = [
     { text: "Feijoada", category: "comida", difficulty: "easy", safe: true },
     { text: "Espaguete", category: "comida", difficulty: "easy", safe: true },
     { text: "Croissant", category: "comida", difficulty: "medium", safe: true },
+    { text: "Fondue", category: "comida", difficulty: "medium", safe: true },
+    { text: "Coxinha", category: "comida", difficulty: "easy", safe: true },
+    { text: "Poke", category: "comida", difficulty: "medium", safe: true },
+    { text: "Caviar", category: "comida", difficulty: "hard", safe: true },
+    { text: "Crepe", category: "comida", difficulty: "medium", safe: true },
 
     // FRUTAS
     { text: "Banana", category: "frutas", difficulty: "easy", safe: true },
@@ -62,6 +67,11 @@ export const CARD_BANK = [
     { text: "Laranja", category: "frutas", difficulty: "easy", safe: true },
     { text: "Uva", category: "frutas", difficulty: "easy", safe: true },
     { text: "Manga", category: "frutas", difficulty: "easy", safe: true },
+    { text: "Carambola", category: "frutas", difficulty: "medium", safe: true },
+    { text: "Atemoia", category: "frutas", difficulty: "hard", safe: true },
+    { text: "Abacaxi", category: "frutas", difficulty: "easy", safe: true },
+    { text: "Pêssego", category: "frutas", difficulty: "medium", safe: true },
+    { text: "Acerola", category: "frutas", difficulty: "easy", safe: true },
 
     // PERSONAGENS HISTÓRICOS
     { text: "Leonardo da Vinci", category: "personagens", difficulty: "medium", safe: true },
@@ -73,5 +83,10 @@ export const CARD_BANK = [
     { text: "Marie Curie", category: "personagens", difficulty: "hard", safe: true },
     { text: "Dom Pedro I", category: "personagens", difficulty: "easy", safe: true },
     { text: "Julio César", category: "personagens", difficulty: "medium", safe: true },
-    { text: "Nelson Mandela", category: "personagens", difficulty: "medium", safe: true }
+    { text: "Nelson Mandela", category: "personagens", difficulty: "medium", safe: true },
+    { text: "Mahatma Gandhi", category: "personagens", difficulty: "medium", safe: true },
+    { text: "Joana d'Arc", category: "personagens", difficulty: "medium", safe: true },
+    { text: "Galileu Galilei", category: "personagens", difficulty: "hard", safe: true },
+    { text: "Princesa Isabel", category: "personagens", difficulty: "medium", safe: true },
+    { text: "Wolfgang Amadeus Mozart", category: "personagens", difficulty: "medium", safe: true }
 ];

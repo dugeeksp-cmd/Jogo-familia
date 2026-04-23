@@ -22,7 +22,10 @@
         </header>
 
         <main class="index-content">
-            <h1 class="game-title">Quem Sou Eu? <span>Online</span></h1>
+            <h1 class="game-title">
+                Quem Sou Eu? <span>Online</span>
+                <button id="info-btn" class="info-icon" title="Como Jogar">ⓘ</button>
+            </h1>
             <p class="game-intro">O jogo de cartas da família. Escolha seu perfil para começar a diversão.</p>
 
             <div class="player-selection">
@@ -57,6 +60,29 @@
                 <button id="confirm-password" class="btn btn-papai" style="flex: 2;">Acessar</button>
             </div>
             <p id="password-error" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-top: 15px;">Senha incorreta. Tente novamente.</p>
+        </div>
+    </div>
+
+    <!-- Modal de Informações -->
+    <div id="info-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px;">
+        <div class="card" style="width: 100%; max-width: 450px; text-align: left; max-height: 80vh; overflow-y: auto;">
+            <h2 style="color: #4ade80; margin-bottom: 16px;">Como Jogar 🎭</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px; font-size: 0.9rem; color: rgba(255,255,255,0.8);">
+                <p><strong>1. O Objetivo:</strong> Adivinhar qual é a carta na sua "testa" fazendo perguntas de "Sim" ou "Não" para os outros jogadores.</p>
+                
+                <p><strong>2. Sua Carta:</strong> Você recebe uma carta que todos veem, menos você. Ela aparece desfocada na sua tela.</p>
+                
+                <p><strong>3. Seu Turno:</strong> Quando brilhar sua vez, você tem 60 segundos para perguntar e tentar adivinhar. Use o chat ou voz!</p>
+                
+                <p><strong>4. Pontuação e Vitória:</strong> Se adivinhar antes do tempo acabar, o Papai te dá pontos. O maior pontuador vence!</p>
+                
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 8px 0;">
+                
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Dica: Use o botão "Ver Carta" apenas se o moderador pedir ou para conferir se a imagem carregou (mas cuidado com o spoiler!).</p>
+            </div>
+
+            <button id="close-info" class="btn" style="width: 100%; margin-top: 24px; background: rgba(255,255,255,0.1);">Entendi!</button>
         </div>
     </div>
 
