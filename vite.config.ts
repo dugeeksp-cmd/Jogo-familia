@@ -5,7 +5,20 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
+    base: './',
     plugins: [tailwindcss()],
+    build: {
+      rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+          miguel: path.resolve(__dirname, 'miguel.html'),
+          sophia: path.resolve(__dirname, 'sophia.html'),
+          visitante: path.resolve(__dirname, 'visitante.html'),
+          papai: path.resolve(__dirname, 'papai.html'),
+          win: path.resolve(__dirname, 'win.html'),
+        }
+      }
+    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },

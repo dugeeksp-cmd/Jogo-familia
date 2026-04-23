@@ -50,7 +50,7 @@
     </div>
 
     <!-- Modal de Senha -->
-    <div id="password-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px;">
+    <div id="password-modal" class="modal-overlay hidden">
         <div class="card" style="width: 100%; max-width: 350px; text-align: center;">
             <h3 style="margin-bottom: 20px;">Acesso Restrito</h3>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Digite a senha para acessar o painel do Papai.</p>
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Modal de Informações -->
-    <div id="info-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px;">
+    <div id="info-modal" class="modal-overlay hidden">
         <div class="card" style="width: 100%; max-width: 450px; text-align: left; max-height: 80vh; overflow-y: auto;">
             <h2 style="color: #4ade80; margin-bottom: 16px;">Como Jogar 🎭</h2>
             
@@ -86,6 +86,6 @@
         </div>
     </div>
 
-    <script src="script/index.js"></script>
+    <script type="module" src="script/index.js"></script>
 </body>
 </html>
