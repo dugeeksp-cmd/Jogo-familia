@@ -62,6 +62,11 @@ async function finishInit() {
     
     updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME });
 
+    // Online Heartbeat
+    setInterval(() => {
+        updatePlayerStatus(PLAYER_ID, { lastSeen: Date.now(), online: true });
+    }, 30000);
+
     listenToRoom((room) => {
         roomState = room;
         updateUI();
@@ -252,6 +257,47 @@ toggleCardBtn.addEventListener('click', () => {
         toggleCardBtn.textContent = 'Ver Carta';
     }
 });
+
+// New Game / Create Room Button
+const btnNewGame = document.getElementById('btn-new-game');
+if (btnNewGame) {
+    btnNewGame.addEventListener('click', async () => {
+        if (confirm('Deseja iniciar uma nova rodada e gerar novas cartas?')) {
+            const { CARD_BANK } = await import('./cards.js');
+            const { shuffleArray } = await import('./utils.js');
+            const { updatePrivateHand, updateRoom } = await import('./firebase-service.js');
+            
+            const shuffled = shuffleArray(CARD_BANK);
+            await updatePrivateHand('miguel', shuffled[0]);
+            await updatePrivateHand('sophia', shuffled[1]);
+            await updatePrivateHand('papai', shuffled[2]);
+            await updateRoom({ 
+                roundNumber: (roomState?.roundNumber || 0) + 1,
+                status: 'playing',
+                gameStarted: true,
+                'timer.isRunning': false
+            });
+            alert('Novo jogo iniciado!');
+        }
+    });
+}
+
+// Change Password Button
+const btnChangePass = document.getElementById('btn-change-pass');
+if (btnChangePass) {
+    btnChangePass.addEventListener('click', async () => {
+        const newPass = prompt('Digite sua nova senha:');
+        if (newPass && newPass.length >= 3) {
+            const { updateRoom } = await import('./firebase-service.js');
+            const updates = {};
+            updates[`passwords.${PLAYER_ID}`] = newPass;
+            await updateRoom(updates);
+            alert('Senha alterada com sucesso!');
+        } else if (newPass) {
+            alert('Senha muito curta!');
+        }
+    });
+}
 
 // Timer auto-refresh every second for smooth countdown
 setInterval(() => {

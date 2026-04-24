@@ -150,6 +150,7 @@ export const respondToGuess = async (guessId, isCorrect) => {
 // Messaging
 export const sendMessage = async (chatId, senderId, senderName, text) => {
     try {
+        console.log(`[Firebase] Enviando mensagem para ${chatId}: "${text}"`);
         const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
         await addDoc(messagesRef, {
             chatId,
@@ -159,6 +160,7 @@ export const sendMessage = async (chatId, senderId, senderName, text) => {
             createdAt: serverTimestamp()
         });
     } catch (e) {
+        console.error('[Firebase] Erro ao enviar mensagem:', e);
         handleFirestoreError(e, 'create', `rooms/${ROOM_ID}/messages`);
     }
 };

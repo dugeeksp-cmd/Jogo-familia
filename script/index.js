@@ -1,44 +1,102 @@
 /* script/index.js */
+import { 
+    listenToPlayers, 
+    listenToRoom, 
+    loginWithGoogle
+} from './firebase-service.js';
+
 document.addEventListener('DOMContentLoaded', () => {
+    const miguelBtn = document.getElementById('miguel-btn');
+    const sophiaBtn = document.getElementById('sophia-btn');
     const papaiBtn = document.getElementById('papai-btn');
-    const modal = document.getElementById('password-modal');
-    const cancelBtn = document.getElementById('cancel-password');
-    const confirmBtn = document.getElementById('confirm-password');
-    const passwordInput = document.getElementById('admin-password');
-    const errorMsg = document.getElementById('password-error');
+    
+    const adminModal = document.getElementById('password-modal');
+    const playerModal = document.getElementById('player-password-modal');
+    
+    const playerPasswordInput = document.getElementById('player-password-input');
+    const playerPasswordError = document.getElementById('player-password-error');
+    const playerModalTitle = document.getElementById('player-modal-title');
+    const confirmPlayerBtn = document.getElementById('confirm-player-password');
+    const cancelPlayerBtn = document.getElementById('cancel-player-password');
+    
+    const papaiLoginBtn = document.getElementById('papai-login-confirm');
+    const cancelAdminBtn = document.getElementById('cancel-password');
+    
+    const onlinePlayersList = document.getElementById('online-players-list');
+    
+    let currentRoom = null;
+    let selectedPlayerId = null;
 
-    const FIXED_PASSWORD = "420933";
+    // Listen to players for online status
+    listenToPlayers((players) => {
+        onlinePlayersList.innerHTML = players.map(p => {
+            if (!p.online) return '';
+            return `
+                <div style="display: flex; align-items: center; gap: 6px; background: rgba(74, 222, 128, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.2);">
+                    <div style="width: 6px; height: 6px; background: #4ade80; border-radius: 50%;"></div>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #4ade80;">${p.name}</span>
+                </div>
+            `;
+        }).join('') || '<p style="font-size: 0.7rem; opacity: 0.4;">Ninguém online no momento.</p>';
+    });
 
+    listenToRoom((room) => {
+        currentRoom = room;
+    });
+
+    // Admin Access (Google Login)
     papaiBtn.addEventListener('click', () => {
-        modal.classList.remove('hidden');
-        passwordInput.focus();
+        adminModal.classList.remove('hidden');
     });
 
-    cancelBtn.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        passwordInput.value = '';
-        errorMsg.classList.add('hidden');
+    cancelAdminBtn.addEventListener('click', () => {
+        adminModal.classList.add('hidden');
     });
 
-    const handleLogin = () => {
-        if (passwordInput.value === FIXED_PASSWORD) {
-            window.location.href = 'papai.html';
+    if (papaiLoginBtn) {
+        papaiLoginBtn.addEventListener('click', async () => {
+            try {
+                await loginWithGoogle();
+                window.location.href = 'papai.html';
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    }
+
+    // Player Access (With custom password)
+    const openPlayerModal = (id, name) => {
+        selectedPlayerId = id;
+        playerModalTitle.textContent = `Acesso ${name}`;
+        playerModal.classList.remove('hidden');
+        playerPasswordError.classList.add('hidden');
+        playerPasswordInput.value = '';
+        playerPasswordInput.focus();
+    };
+
+    miguelBtn.addEventListener('click', () => openPlayerModal('miguel', 'Miguel'));
+    sophiaBtn.addEventListener('click', () => openPlayerModal('sophia', 'Sophia'));
+
+    cancelPlayerBtn.addEventListener('click', () => {
+        playerModal.classList.add('hidden');
+    });
+
+    const verifyPass = () => {
+        const input = playerPasswordInput.value.trim();
+        const correct = currentRoom?.passwords?.[selectedPlayerId] || '123abc';
+        
+        if (input === correct) {
+            window.location.href = `${selectedPlayerId}.html`;
         } else {
-            errorMsg.classList.remove('hidden');
-            passwordInput.value = '';
-            passwordInput.focus();
-            
-            // Shake effect
-            modal.querySelector('.card').style.animation = 'shake 0.4s ease';
-            setTimeout(() => {
-                modal.querySelector('.card').style.animation = '';
-            }, 400);
+            playerPasswordError.classList.remove('hidden');
+            playerPasswordInput.value = '';
+            playerPasswordInput.focus();
         }
     };
 
-    confirmBtn.addEventListener('click', handleLogin);
-    passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
+    confirmPlayerBtn.addEventListener('click', verifyPass);
+    playerPasswordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') verifyPass();
     });
 
     // Info Modal Logic
@@ -47,20 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeInfoBtn = document.getElementById('close-info');
 
     if (infoBtn && infoModal && closeInfoBtn) {
-        infoBtn.addEventListener('click', () => {
-            infoModal.classList.remove('hidden');
-        });
-
-        closeInfoBtn.addEventListener('click', () => {
-            infoModal.classList.add('hidden');
-        });
-
-        // Close on background click
-        infoModal.addEventListener('click', (e) => {
-            if (e.target === infoModal) {
-                infoModal.classList.add('hidden');
-            }
-        });
+        infoBtn.addEventListener('click', () => infoModal.classList.remove('hidden'));
+        closeInfoBtn.addEventListener('click', () => infoModal.classList.add('hidden'));
     }
 });
 

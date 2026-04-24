@@ -54,6 +54,10 @@ const btnHidePublicChat = document.getElementById('btn-hide-public-chat');
 const emojiMiguel = document.getElementById('emoji-miguel');
 const emojiSophia = document.getElementById('emoji-sophia');
 const btnSaveEmojis = document.getElementById('btn-save-emojis');
+const passMiguelInput = document.getElementById('pass-miguel-input');
+const passSophiaInput = document.getElementById('pass-sophia-input');
+const btnSaveMiguelAll = document.getElementById('btn-save-miguel-all');
+const btnSaveSophiaAll = document.getElementById('btn-save-sophia-all');
 const papaiTimer = document.getElementById('papai-timer');
 const allCardsDisplay = document.getElementById('all-cards-display');
 const pendingGuessesList = document.getElementById('pending-guesses-list');
@@ -152,19 +156,41 @@ async function finishInit() {
         sendBtn: sendMsgBtn
     });
 
-    // Invite Button
-    const header = document.querySelector('.player-header');
-    if (header) {
-        const inviteBtn = document.createElement('button');
-        inviteBtn.className = 'status-badge';
-        inviteBtn.textContent = '🔗 Convidar';
-        inviteBtn.style.cursor = 'pointer';
-        inviteBtn.addEventListener('click', () => {
-            const url = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}/index.html?room=${roomState?.code || "PRINCIPAL"}`;
-            navigator.clipboard.writeText(url).then(() => alert('Link de convite com código da sala copiado!'));
-        });
-        header.insertBefore(inviteBtn, header.querySelector('a'));
+    btnSaveMiguelAll.addEventListener('click', async () => {
+        const emoji = emojiMiguel.value.trim();
+        const password = passMiguelInput.value.trim();
+        const updates = {};
+        if (emoji) await updatePlayer('miguel', { emoji: emoji });
+        if (password) {
+            updates[`passwords.miguel`] = password;
+            await updateRoom(updates);
+        }
+        alert('Dados do Miguel salvos!');
+    });
+
+    btnSaveSophiaAll.addEventListener('click', async () => {
+        const emoji = emojiSophia.value.trim();
+        const password = passSophiaInput.value.trim();
+        const updates = {};
+        if (emoji) await updatePlayer('sophia', { emoji: emoji });
+        if (password) {
+            updates[`passwords.sophia`] = password;
+            await updateRoom(updates);
+        }
+        alert('Dados da Sophia salvos!');
+    });
+
+    // Pulse effects for chat
+    const style = document.createElement('style');
+    style.textContent = `
+    @keyframes pulse-chat {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); background: rgba(236, 72, 153, 0.2); }
+        100% { transform: scale(1); }
     }
+    .pulse-new { animation: pulse-chat 1s infinite !important; }
+    `;
+    document.head.appendChild(style);
 }
 
 function updateUI() {
@@ -226,7 +252,7 @@ function updateScoreSelect(players) {
 
 function renderPlayersStatus(players) {
     playersList.innerHTML = players.map(p => {
-        const isOnline = (Date.now() - p.joinedAtMs) < 60000; // Simples check de online de 1 min
+        const isOnline = (Date.now() - (p.lastSeen || 0)) < 60000;
         const emoji = p.emoji ? `<span style="margin-right: 4px;">${p.emoji}</span>` : '';
         return `
             <div class="player-bubble ${isOnline ? 'player-online' : ''}">
@@ -241,6 +267,10 @@ function renderPlayersStatus(players) {
     const sophia = players.find(p => p.id === 'sophia');
     if (miguel && miguel.emoji && !emojiMiguel.value) emojiMiguel.value = miguel.emoji;
     if (sophia && sophia.emoji && !emojiSophia.value) emojiSophia.value = sophia.emoji;
+    
+    // Pre-fill password inputs
+    if (miguel && roomState?.passwords?.miguel && !passMiguelInput.value) passMiguelInput.value = roomState.passwords.miguel;
+    if (sophia && roomState?.passwords?.sophia && !passSophiaInput.value) passSophiaInput.value = roomState.passwords.sophia;
 }
 
 function renderAllCards(hands) {

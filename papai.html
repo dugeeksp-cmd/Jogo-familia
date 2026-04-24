@@ -2,9 +2,10 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
     <title>Papai Admin - Quem Sou Eu?</title>
     <link rel="stylesheet" href="style/main.css">
     <link rel="stylesheet" href="style/papai.css">
@@ -26,8 +27,37 @@
             <header class="player-header">
                 <h2>O Painel do Papai</h2>
                 <div id="papai-timer" class="status-badge" style="background: rgba(249, 115, 22, 0.2); color: #f97316; font-weight: 800;">60s</div>
-                <a href="index.html" class="status-badge">Sair</a>
+                <div style="display: flex; gap: 8px;">
+                    <a href="index.html" class="status-badge" style="text-decoration: none;">🏠 Início</a>
+                </div>
             </header>
+
+            <section class="admin-section">
+                <div class="section-title">🔐 Senhas e Perfil dos Kids</div>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: 800; color: #10b981;">MIGUEL 👦</span>
+                            <input type="text" id="emoji-miguel" class="input" placeholder="💡" style="width: 45px; text-align: center; padding: 4px;">
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="pass-miguel-input" class="input" placeholder="Alterar senha..." style="flex: 1; font-size: 0.85rem;">
+                            <button id="btn-save-miguel-all" class="btn" style="background: #10b981; font-size: 0.75rem; padding: 0 15px;">Salvar</button>
+                        </div>
+                    </div>
+
+                    <div style="padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: 800; color: #8b5cf6;">SOPHIA 👧</span>
+                            <input type="text" id="emoji-sophia" class="input" placeholder="👸" style="width: 45px; text-align: center; padding: 4px;">
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="pass-sophia-input" class="input" placeholder="Alterar senha..." style="flex: 1; font-size: 0.85rem;">
+                            <button id="btn-save-sophia-all" class="btn" style="background: #8b5cf6; font-size: 0.75rem; padding: 0 15px;">Salvar</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <!-- Espaço do Jogo (O Papai também joga!) -->
             <section class="admin-section" style="border: 2px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
@@ -211,6 +241,6 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="./script/papai.js"></script>
+    <script type="module" src="script/papai.js"></script>
 </body>
 </html>

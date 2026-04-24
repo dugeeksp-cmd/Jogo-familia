@@ -2,9 +2,10 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
     <title>Quem Sou Eu? Online</title>
     <link rel="stylesheet" href="style/main.css">
     <link rel="stylesheet" href="style/index.css">
@@ -31,14 +32,14 @@
             <p class="game-intro">O jogo de cartas da família. Escolha seu perfil para começar a diversão.</p>
 
             <div class="player-selection">
-                <a href="miguel.html" class="btn selection-btn btn-miguel">
+                <button id="miguel-btn" class="btn selection-btn btn-miguel">
                     <span class="btn-icon">👦</span>
                     <span>Miguel</span>
-                </a>
-                <a href="sophia.html" class="btn selection-btn btn-sophia">
+                </button>
+                <button id="sophia-btn" class="btn selection-btn btn-sophia">
                     <span class="btn-icon">👧</span>
                     <span>Sophia</span>
-                </a>
+                </button>
                 <a href="visitante.html" class="btn selection-btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
                     <span class="btn-icon">🤝</span>
                     <span>Convidado</span>
@@ -48,20 +49,55 @@
                     <span>Papai</span>
                 </button>
             </div>
+
+            <div class="online-players-section card" style="margin-top: 32px; padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+                    <div style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 8px #4ade80;"></div>
+                    <h3 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">Jogadores Online</h3>
+                </div>
+                <div id="online-players-list" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                    <p style="font-size: 0.75rem; opacity: 0.5;">Aguardando jogadores...</p>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Modal de Senha -->
+    <footer class="premium-footer">
+        <div class="footer-image-container">
+            <img src="./assets/family.png" alt="Sophia, Miguel e Papai" class="footer-image">
+        </div>
+        <div class="footer-content">
+            <p class="footer-rights">Quem sou Eu? © Todos os direitos reservados</p>
+            <p class="footer-dedication">Jogo Desenvolvido por <strong>Eduardo Lima</strong> em homenagem a <strong>Sophia</strong> e <strong>Miguel</strong> ❤️ Papai ama muito vocês!</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Senha Admin/Papai -->
     <div id="password-modal" class="modal-overlay hidden">
         <div class="card" style="width: 100%; max-width: 350px; text-align: center;">
-            <h3 style="margin-bottom: 20px;">Acesso Restrito</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Digite a senha para acessar o painel do Papai.</p>
-            <input type="password" id="admin-password" class="input" placeholder="••••••" style="width: 100%; text-align: center; font-size: 1.5rem; letter-spacing: 0.5em; margin-bottom: 24px;">
-            <div style="display: flex; gap: 10px;">
-                <button id="cancel-password" class="btn" style="flex: 1; opacity: 0.6; background: transparent;">Voltar</button>
-                <button id="confirm-password" class="btn btn-papai" style="flex: 2;">Acessar</button>
+            <h3 style="margin-bottom: 20px;">Acesso Papai</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px;">Clique abaixo para entrar com o Google:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button id="papai-login-confirm" class="btn btn-papai" style="background: white; color: #0f172a; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800;">
+                    <img src="https://www.google.com/favicon.ico" width="18"> Entrar com Google
+                </button>
+                <button id="cancel-password" class="btn" style="opacity: 0.6; background: transparent;">Voltar</button>
             </div>
-            <p id="password-error" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-top: 15px;">Senha incorreta. Tente novamente.</p>
+        </div>
+    </div>
+
+    <!-- Modal de Senha Jogador (Miguel/Sophia) -->
+    <div id="player-password-modal" class="modal-overlay hidden">
+        <div class="card" style="width: 100%; max-width: 350px; text-align: center;">
+            <h3 id="player-modal-title" style="margin-bottom: 10px;">Acesso</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Digite sua senha para entrar:</p>
+            <input type="password" id="player-password-input" class="input" placeholder="••••••" style="width: 100%; text-align: center; font-size: 1.5rem; letter-spacing: 0.5em; margin-bottom: 24px;">
+            <div style="display: flex; gap: 10px;">
+                <button id="cancel-player-password" class="btn" style="flex: 1; opacity: 0.6; background: transparent;">Voltar</button>
+                <button id="confirm-player-password" class="btn btn-primary" style="flex: 2;">Acessar</button>
+            </div>
+            <p id="player-password-error" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-top: 15px;">Senha incorreta. Tente novamente.</p>
         </div>
     </div>
 
@@ -88,6 +124,6 @@
         </div>
     </div>
 
-    <script type="module" src="./script/index.js"></script>
+    <script type="module" src="script/index.js"></script>
 </body>
 </html>

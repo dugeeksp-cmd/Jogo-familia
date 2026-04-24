@@ -40,6 +40,14 @@
         "maxPlayers": { "type": "number", "default": 8 },
         "publicChatHiddenForGuests": { "type": "boolean", "description": "Controla se visitantes veem o histórico do chat público" },
         "gameObjective": { "type": "string", "description": "Um objetivo ou bônus especial definido pelo moderador" },
+        "passwords": {
+          "type": "object",
+          "description": "Senhas para acesso de Miguel e Sophia",
+          "properties": {
+            "miguel": { "type": "string", "default": "123abc" },
+            "sophia": { "type": "string", "default": "123abc" }
+          }
+        },
         "createdAt": { "type": "number", "format": "timestamp" }
       },
       "required": ["code", "status", "parentPlayerId", "createdAt"]
@@ -54,6 +62,7 @@
         "role": { "type": "string", "enum": ["child", "parent", "guest"] },
         "joinedAtMs": { "type": "number", "format": "timestamp" },
         "online": { "type": "boolean" },
+        "lastSeen": { "type": "number", "format": "timestamp" },
         "score": { "type": "number" },
         "emoji": { "type": "string", "description": "Emoji decorativo para o jogador" }
       },

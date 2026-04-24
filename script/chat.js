@@ -102,6 +102,8 @@ export function setupChat(config) {
     // Initial Load
     loadChat(currentChatId);
 
+    console.log(`[Chat] Chat inicializado para ${playerId}`);
+
     return {
         loadChat,
         destroy: () => unsubscribe && unsubscribe()

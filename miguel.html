@@ -2,9 +2,10 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6366f1">
     <title>Miguel - Quem Sou Eu?</title>
     <link rel="stylesheet" href="style/main.css">
     <link rel="stylesheet" href="style/player.css">
@@ -23,9 +24,15 @@
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <button id="invite-btn" class="status-badge" style="cursor: pointer;">🔗 Convidar</button>
-                    <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem;">Sair</a>
+                    <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem;">🏠 Início</a>
                 </div>
             </header>
+
+            <!-- Ações Rápidas -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button id="btn-new-game" class="btn" style="flex: 1; background: #3b82f6; font-size: 0.75rem; padding: 12px; font-weight: 800; border-radius: 12px;">🎮 Criar Novo Jogo</button>
+                <button id="btn-change-pass" class="btn" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; padding: 12px; font-weight: 800; border-radius: 12px;">🔑 Trocar Minha Senha</button>
+            </div>
 
             <!-- Objetivo / Sonho de Jogo -->
             <div id="objective-container" class="hidden" style="margin-bottom: 15px;">
@@ -123,6 +130,6 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="./script/player.js"></script>
+    <script type="module" src="script/player.js"></script>
 </body>
 </html>
