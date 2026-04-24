@@ -17,6 +17,7 @@ import {
     addDoc, 
     query, 
     orderBy, 
+    where,
     limit, 
     limitToLast,
     serverTimestamp,
@@ -166,32 +167,39 @@ export const sendMessage = async (chatId, senderId, senderName, text) => {
 };
 
 export const listenToMessages = (chatId, callback) => {
+    console.log(`[Firebase] Iniciando listener para chat: ${chatId}`);
     const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
-    // Removendo 'where' da query principal para evitar a necessidade de Índice Composto no Firestore.
-    // Buscamos as últimas 100 mensagens da sala e filtramos por chatId no cliente.
-    // Isso é seguro e performático para o volume deste aplicativo.
+    
+    // Querying by chatId without orderBy to avoid composite index requirement.
+    // We fetch all messages for this chat and sort on the client.
     const q = query(
         messagesRef, 
-        orderBy("createdAt", "asc"),
-        limitToLast(100)
+        where("chatId", "==", chatId)
     );
     
     return onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
-        const msgs = snapshot.docs
-            .map(doc => {
-                const data = doc.data();
-                // Handling serverTimestamp being null in local cache
-                return { 
-                    id: doc.id, 
-                    ...data,
-                    createdAt: data.createdAt || { toDate: () => new Date() } 
-                };
-            })
-            .filter(msg => msg.chatId === chatId); // Filtro no lado do cliente
+        const msgs = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return { 
+                id: doc.id, 
+                ...data,
+                // Handle local cache having null serverTimestamp
+                createdAt: data.createdAt || { toDate: () => new Date() } 
+            };
+        });
         
+        // Client-side sort by createdAt
+        msgs.sort((a, b) => {
+            const timeA = a.createdAt.toDate ? a.createdAt.toDate() : a.createdAt;
+            const timeB = b.createdAt.toDate ? b.createdAt.toDate() : b.createdAt;
+            return timeA - timeB;
+        });
+        
+        console.log(`[Firebase] Chat ${chatId}: ${msgs.length} mensagens carregadas.`);
         callback(msgs);
     }, (error) => {
         console.error(`Erro no listener de mensagens para ${chatId}:`, error);
+        handleFirestoreError(error, 'list', `rooms/${ROOM_ID}/messages`);
     });
 };
 

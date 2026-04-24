@@ -23,7 +23,7 @@ export function setupChat(config) {
             return;
         }
 
-        const isAtBottom = messagesList.scrollHeight - messagesList.scrollTop <= messagesList.clientHeight + 50;
+        const isAtBottom = messagesList.scrollHeight - messagesList.scrollTop <= messagesList.clientHeight + 100;
 
         messagesList.innerHTML = messages.map(msg => `
             <div class="message ${msg.senderId === playerId ? 'msg-me' : 'msg-other'}">
@@ -33,7 +33,11 @@ export function setupChat(config) {
             </div>
         `).join('');
         
-        if (isAtBottom) {
+        // Always scroll if I am the sender, or if I was already at the bottom
+        const lastMsg = messages[messages.length - 1];
+        const iAmSender = lastMsg && lastMsg.senderId === playerId;
+
+        if (isAtBottom || iAmSender) {
             messagesList.scrollTop = messagesList.scrollHeight;
         }
 

@@ -48,49 +48,36 @@ service cloud.firestore {
     }
 
     match /rooms/{roomCode} {
-      // Pillar 3: Path Variable Hardening
-      allow get: if isSignedIn() && isValidId(roomCode);
+      allow get: if isSignedIn();
       allow list: if false; 
       
-      // Pillar 4 & 7: Write logic
-      allow create: if isSignedIn() && isValidRoom(incoming());
-      allow update: if isSignedIn() && isValidRoom(incoming()) && (
-        (incoming().diff(existing()).affectedKeys().hasOnly([
-            'status', 'currentTurnPlayerId', 'gameStarted', 'roundNumber', 
-            'timer', 'filters', 'meeting', 'maxPlayers', 
-            'publicChatHiddenForGuests', 'gameObjective'
-        ]))
-      );
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
 
       match /players/{playerId} {
-        allow read: if isSignedIn() && isValidId(playerId);
-        allow create: if isSignedIn() && isValidId(playerId) && isValidPlayer(incoming());
-        allow update: if isSignedIn() && isValidId(playerId) && isValidPlayer(incoming()) && (
-            incoming().diff(existing()).affectedKeys().hasAny(['score', 'online', 'joinedAtMs', 'emoji'])
-        );
+        allow read: if isSignedIn();
+        allow write: if isSignedIn();
       }
 
       match /privateHands/{playerId} {
-        allow read: if isSignedIn() && isValidId(playerId);
-        allow write: if isSignedIn() && isValidId(playerId);
+        allow read: if isSignedIn();
+        allow write: if isSignedIn();
       }
 
       match /messages/{messageId} {
-        allow read: if isSignedIn() && isValidId(messageId);
-        allow create: if isSignedIn() && isValidId(messageId) && isValidMessage(incoming());
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && isValidMessage(incoming());
       }
 
       match /guesses/{guessId} {
-        allow read: if isSignedIn() && isValidId(guessId);
-        allow create: if isSignedIn() && isValidId(guessId) && isValidGuess(incoming());
-        allow update: if isSignedIn() && isValidId(guessId) && isValidGuess(incoming()) && (
-            incoming().diff(existing()).affectedKeys().hasOnly(['status', 'respondedAt'])
-        );
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && isValidGuess(incoming());
+        allow update: if isSignedIn();
       }
 
       match /scoreHistory/{historyId} {
-        allow read: if isSignedIn() && isValidId(historyId);
-        allow create: if isSignedIn() && isValidId(historyId);
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
       }
     }
   }

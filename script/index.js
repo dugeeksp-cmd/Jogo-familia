@@ -2,7 +2,9 @@
 import { 
     listenToPlayers, 
     listenToRoom, 
-    loginWithGoogle
+    loginWithGoogle,
+    onAuth,
+    loginAnonymously
 } from './firebase-service.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,22 +29,33 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentRoom = null;
     let selectedPlayerId = null;
 
-    // Listen to players for online status
-    listenToPlayers((players) => {
-        onlinePlayersList.innerHTML = players.map(p => {
-            if (!p.online) return '';
-            return `
-                <div style="display: flex; align-items: center; gap: 6px; background: rgba(74, 222, 128, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.2);">
-                    <div style="width: 6px; height: 6px; background: #4ade80; border-radius: 50%;"></div>
-                    <span style="font-size: 0.75rem; font-weight: 700; color: #4ade80;">${p.name}</span>
-                </div>
-            `;
-        }).join('') || '<p style="font-size: 0.7rem; opacity: 0.4;">Ninguém online no momento.</p>';
+    // Ensure user is at least anonymously logged in to see online players
+    onAuth(async (user) => {
+        if (!user) {
+            await loginAnonymously();
+            return;
+        }
+        startListeners();
     });
 
-    listenToRoom((room) => {
-        currentRoom = room;
-    });
+    function startListeners() {
+        // Listen to players for online status
+        listenToPlayers((players) => {
+            onlinePlayersList.innerHTML = players.map(p => {
+                if (!p.online) return '';
+                return `
+                    <div style="display: flex; align-items: center; gap: 6px; background: rgba(74, 222, 128, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.2);">
+                        <div style="width: 6px; height: 6px; background: #4ade80; border-radius: 50%;"></div>
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #4ade80;">${p.name}</span>
+                    </div>
+                `;
+            }).join('') || '<p style="font-size: 0.7rem; opacity: 0.4;">Ninguém online no momento.</p>';
+        });
+
+        listenToRoom((room) => {
+            currentRoom = room;
+        });
+    }
 
     // Admin Access (Google Login)
     papaiBtn.addEventListener('click', () => {

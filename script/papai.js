@@ -77,11 +77,16 @@ const dreamInput = document.getElementById('dream-input');
 const btnCancelDream = document.getElementById('btn-cancel-dream');
 const btnSaveDream = document.getElementById('btn-save-dream');
 
+let isInitialized = false;
+
 async function init() {
     onAuth(async (user) => {
         if (user) {
             if (loginOverlay) loginOverlay.style.display = 'none';
-            await finishInit();
+            if (!isInitialized) {
+                isInitialized = true;
+                await finishInit();
+            }
         } else {
             if (loginOverlay) loginOverlay.style.display = 'flex';
         }

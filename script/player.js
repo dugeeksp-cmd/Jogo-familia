@@ -47,13 +47,19 @@ const btnCancelGuess = document.getElementById('btn-cancel-guess');
 const btnConfirmGuess = document.getElementById('btn-confirm-guess');
 const guessInput = document.getElementById('guess-input');
 
+let isInitialized = false;
+
 async function init() {
     onAuth(async (user) => {
         if (!user) {
             await loginAnonymously();
             return; // Wait for onAuth to trigger again with user
         }
-        await finishInit();
+        
+        if (!isInitialized) {
+            isInitialized = true;
+            await finishInit();
+        }
     });
 }
 
