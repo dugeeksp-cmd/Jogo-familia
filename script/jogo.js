@@ -207,13 +207,37 @@ function updateUI() {
         
         updateTimerUI();
     } else if (roomState.status === 'finished') {
-        alert("O jogo terminou!");
-        window.location.href = 'index.html';
+        window.location.href = `win.html?room=${GAME_ROOM_ID}`;
     }
 }
 
 function renderLobbyPlayers() {
     if (!roomState) return;
+
+    // 0. Update Online Indicator at the Top (v1.2.0)
+    const onlineIndicator = document.getElementById('room-online-indicator');
+    if (onlineIndicator) {
+        const now = Date.now();
+        const ACTIVE_THRESHOLD = 45000;
+        const uniqueOnline = {};
+        allPlayers.forEach(p => {
+            const identifier = (p.slug || p.name || p.id || 'anon').toLowerCase();
+            const isRecentlySeen = (now - (p.lastSeen || 0)) < ACTIVE_THRESHOLD;
+            if (p.online && isRecentlySeen) {
+                if (!uniqueOnline[identifier] || (p.lastSeen > uniqueOnline[identifier].lastSeen)) {
+                    uniqueOnline[identifier] = p;
+                }
+            }
+        });
+
+        const activeList = Object.values(uniqueOnline);
+        onlineIndicator.innerHTML = activeList.map(p => `
+            <div class="flex items-center gap-1.5 bg-gray-800/80 border border-green-500/20 px-2.5 py-1 rounded-full whitespace-nowrap">
+                <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-[10px] font-bold text-green-500 uppercase">${p.name || 'Jogador'}</span>
+            </div>
+        `).join('') || '<div class="text-[10px] text-gray-500 italic">Ninguém mais online agora</div>';
+    }
 
     // 1. Render Registered Players in the Room
     playersInRoomList.innerHTML = (roomState.joinedPlayers || []).map(uid => {
@@ -447,8 +471,9 @@ btnTimerReset.addEventListener('click', async () => {
 });
 
 btnEndGame.addEventListener('click', async () => {
-    if (confirm("Deseja mesmo finalizar o jogo para todos?")) {
+    if (confirm("Deseja mesmo finalizar o jogo para todos? Os pontos serão calculados e a tela de vitória exibida.")) {
         await updateGameRoom(GAME_ROOM_ID, { status: 'finished' });
+        // The listener will automatically redirect to win.html?room=...
     }
 });
 

@@ -101,26 +101,21 @@
             // If room restarts, optionally redirect back
             listenToRoom(room => {
                 if (room.status === 'playing' || room.status === 'waiting') {
-                    const lastPlayerId = localStorage.getItem('last_player_id');
-                    if (lastPlayerId) {
-                        window.location.href = `${lastPlayerId}.html`;
-                    } else {
-                        window.location.href = 'index.html';
-                    }
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const roomId = urlParams.get('room') || 'PRINCIPAL';
+                    window.location.href = `jogo.html?room=${roomId}`;
                 }
             });
 
             btnVoltar.addEventListener('click', async () => {
                 try {
-                    // Update room status to 'concluído' as requested
-                    await updateRoom({ status: 'concluído' });
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const roomId = urlParams.get('room') || 'PRINCIPAL';
                     
-                    const lastPlayerId = localStorage.getItem('last_player_id');
-                    if (lastPlayerId) {
-                        window.location.href = `${lastPlayerId}.html`;
-                    } else {
-                        window.location.href = 'index.html';
-                    }
+                    // Update room status to 'waiting' to reset it
+                    await updateRoom({ status: 'waiting', gameStarted: false });
+                    
+                    window.location.href = `jogo.html?room=${roomId}`;
                 } catch (e) {
                     console.error("Erro ao voltar:", e);
                     window.location.href = 'index.html';

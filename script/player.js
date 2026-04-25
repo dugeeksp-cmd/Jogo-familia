@@ -261,7 +261,9 @@ function updateUI() {
     if (!roomState) return;
 
     if (roomState.status === 'finished') {
-        window.location.href = 'win.html';
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room') || 'PRINCIPAL';
+        window.location.href = `win.html?room=${roomId}`;
         return;
     }
     

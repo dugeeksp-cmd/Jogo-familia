@@ -274,9 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveVersionBtn = document.getElementById('save-version-btn');
         const validatedSection = document.getElementById('validated-section'); // I'll add this to HTML
         
-        versionBtn.addEventListener('click', async () => {
-            versionModal.classList.remove('hidden');
-            // Load history
+        async function loadValidationHistory() {
             try {
                 const res = await fetch('/api/validated');
                 const history = await res.json();
@@ -296,12 +294,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         li.style.marginBottom = '4px';
                         li.textContent = `✓ ${cb.parentElement.textContent.replace('Fix:', '').replace('Novo:', '').trim()}`;
                         validatedList.appendChild(li);
-                        cb.parentElement.style.opacity = '0.3'; // Dim the pending one
+                        cb.parentElement.style.display = 'none'; // Hide it from pending list if already validated
                     } else {
+                        cb.parentElement.style.display = 'flex';
                         cb.parentElement.style.opacity = '1';
                     }
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error("[Version] Erro ao carregar histórico:", e); 
+            }
+        }
+
+        versionBtn.addEventListener('click', async () => {
+            versionModal.classList.remove('hidden');
+            await loadValidationHistory();
         });
         
         closeVersionBtn.addEventListener('click', () => versionModal.classList.add('hidden'));
@@ -314,8 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const results = Array.from(checkboxes).map(cb => ({
                     version: cb.closest('.version-list').dataset.version,
                     feat: cb.dataset.feat,
-                    checked: cb.checked,
-                    label: cb.parentElement.textContent.trim()
+                    checked: cb.checked
                 }));
 
                 try {
@@ -337,15 +342,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     saveVersionBtn.textContent = "✅ Validação Salva!";
                     
-                    // After brief delay, could "refresh" the list?
+                    // Refresh history UI immediately
+                    await loadValidationHistory();
+
                     setTimeout(() => {
                         saveVersionBtn.textContent = "Salvar Validação";
                         saveVersionBtn.disabled = false;
-                        // Optional: trigger a subtle UI change or close
                     }, 2000);
 
                 } catch (e) {
-                     // ... error handling
                     console.error("[Version] Erro ao salvar validações:", e);
                     saveVersionBtn.textContent = "❌ Erro ao Salvar";
                     setTimeout(() => {

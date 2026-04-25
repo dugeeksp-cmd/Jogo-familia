@@ -69,7 +69,7 @@
         <div class="footer-content">
             <p class="footer-rights">Quem sou Eu? © Todos os direitos reservados</p>
             <p class="footer-dedication">Jogo Desenvolvido por <strong>Eduardo Lima</strong> em homenagem a <strong>Sophia</strong> e <strong>Miguel</strong> ❤️ Papai ama muito vocês!</p>
-            <button id="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.1.1</button>
+            <button id="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.2.0</button>
         </div>
     </footer>
 
@@ -81,11 +81,33 @@
             </h2>
             
             <div style="display: flex; flex-direction: column; gap: 24px;">
-                <!-- Versão 1.1.1 -->
+                <!-- Versão 1.2.0 -->
                 <div class="version-item">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <strong style="color: #4ade80;">v1.1.1</strong>
+                        <strong style="color: #4ade80;">v1.2.0</strong>
                         <span style="font-size: 0.7rem; opacity: 0.5;">Atuais</span>
+                    </div>
+                    <ul class="version-list" data-version="1.2.0" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Online Indicator in Room">
+                            Novo: Indicador de jogadores online no topo da sala.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Stay in Room after Finish">
+                            Fix: Finalizar partida agora mantém os jogadores na sala.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Victory Return Fix">
+                            Fix: Tela de vitória agora volta para a sala de jogo.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Versão 1.1.1 (Pending items move here) -->
+                <div class="version-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong style="color: #60a5fa;">v1.1.1</strong>
+                        <span style="font-size: 0.7rem; opacity: 0.5;">Pendente</span>
                     </div>
                     <ul class="version-list" data-version="1.1.1" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
                         <li style="display: flex; align-items: center; gap: 8px;">
@@ -108,18 +130,14 @@
                             <input type="checkbox" class="v-check" data-feat="Auto-offline">
                             Fix: Status offline automático ao sair da página.
                         </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Version history Persistence">
-                            Fix: Histórico de versões agora salva validações.
-                        </li>
                     </ul>
                 </div>
 
                 <!-- Seção de Validados -->
-                <div id="validated-section" style="border-top: 1px solid rgba(255,255,255,0.1); pt-4;">
-                    <strong style="font-size: 0.7rem; opacity: 0.4; text-transform: uppercase;">Já Validados</strong>
-                    <div id="validated-list" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 8px;">
-                        <!-- Itens validados virão para cá via JS? -->
+                <div id="validated-section" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 10px;">
+                    <strong style="font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; color: #4ade80;">✓ Já Validados pela Família</strong>
+                    <div id="validated-list" style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+                        <!-- Itens validados virão para cá via JS -->
                     </div>
                 </div>
 
