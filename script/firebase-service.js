@@ -44,9 +44,18 @@ export const loginWithGoogle = async () => {
 export const loginAnonymously = async () => {
     try {
         const result = await signInAnonymously(auth);
+        console.log("[AUTH] Login anônimo realizado com sucesso:", result.user.uid);
         return result.user;
     } catch (error) {
-        console.error("Erro ao fazer login anônimo:", error);
+        console.error("[AUTH] Erro ao fazer login anônimo:", error);
+
+        if (error.code === "auth/admin-restricted-operation") {
+            console.error(
+                "[AUTH] O login anônimo está bloqueado/desativado no Firebase. " +
+                "Ative em: Firebase Console > Authentication > Sign-in method > Anonymous > Enable"
+            );
+        }
+
         throw error;
     }
 };

@@ -2,7 +2,25 @@
 
 App web mobile-first para jogar o clássico jogo de adivinhação em família durante chamadas de video.
 
-## 🚀 Como Configurar o Firebase
+## 🚀 Configuração Crítica do Firebase
+
+Para que o jogo funcione corretamente (Miguel, Sophia e Papai), você **PRECISA** ativar os provedores de autenticação no Console do Firebase:
+
+1.  **Login Anônimo** (Para os filhos):
+    *   Vá em: **Firebase Console** > **Authentication** > **Sign-in method**.
+    *   Clique em **Add new provider** (ou localize na lista).
+    *   Selecione **Anonymous**.
+    *   Ative (**Enable**) e salve.
+
+2.  **Login com Google** (Para o Papai):
+    *   Vá em: **Firebase Console** > **Authentication** > **Sign-in method**.
+    *   Clique em **Add new provider**.
+    *   Selecione **Google**.
+    *   Ative (**Enable**), configure o e-mail de suporte e salve.
+
+Sem essas configurações, o aplicativo mostrará erros de "admin-restricted-operation" e não inicializará.
+
+## 🛠️ Como Configurar o Firestore
 
 1.  O app já está configurado com o Firestore.
 2.  As regras foram implantadas para permitir leitura/escrita sincronizada.

@@ -51,16 +51,83 @@ let isInitialized = false;
 
 async function init() {
     onAuth(async (user) => {
-        if (!user) {
-            await loginAnonymously();
-            return; // Wait for onAuth to trigger again with user
-        }
-        
-        if (!isInitialized) {
-            isInitialized = true;
-            await finishInit();
+        try {
+            if (!user) {
+                console.log("[AUTH] Nenhum usuário autenticado. Tentando login anônimo...");
+
+                try {
+                    await loginAnonymously();
+                    return; // Wait for onAuth to trigger again
+                } catch (authError) {
+                    console.error("[AUTH] Falha no login anônimo. O app não pode continuar sem autenticação.", authError);
+
+                    showAuthError(
+                        "Não foi possível entrar automaticamente. " +
+                        "O login anônimo precisa estar ativado no Firebase para Miguel e Sophia acessarem o jogo."
+                    );
+
+                    return;
+                }
+            }
+
+            if (!isInitialized) {
+                isInitialized = true;
+                console.log("[APP] Usuário autenticado. Inicializando página do jogador...");
+                await finishInit();
+            }
+
+        } catch (error) {
+            console.error("[APP] Erro crítico na inicialização do jogador:", error);
+            showAuthError("Erro ao iniciar o jogo. Veja o console para detalhes.");
         }
     });
+}
+
+function showAuthError(message) {
+    const existing = document.getElementById("auth-error-box");
+    if (existing) existing.remove();
+
+    const box = document.createElement("div");
+    box.id = "auth-error-box";
+    box.style.cssText = `
+        position: fixed;
+        inset: 16px;
+        z-index: 9999;
+        background: rgba(15, 23, 42, 0.96);
+        color: white;
+        border: 1px solid rgba(239, 68, 68, 0.45);
+        border-radius: 18px;
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        justify-content: center;
+        text-align: center;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    `;
+
+    box.innerHTML = `
+        <div style="font-size: 42px;">⚠️</div>
+        <h2 style="margin: 0; font-size: 20px;">Erro de acesso ao jogo</h2>
+        <p style="margin: 0; color: #cbd5e1; line-height: 1.5;">${message}</p>
+        <div style="margin-top: 10px; padding: 12px; background: rgba(255,255,255,0.06); border-radius: 12px; font-size: 13px; color: #fca5a5;">
+            Ative no Firebase: Authentication > Sign-in method > Anonymous
+        </div>
+        <button onclick="location.reload()" style="
+            margin-top: 12px;
+            height: 46px;
+            border: 0;
+            border-radius: 12px;
+            background: #ef4444;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+        ">
+            Tentar novamente
+        </button>
+    `;
+
+    document.body.appendChild(box);
 }
 
 async function finishInit() {
@@ -108,9 +175,13 @@ async function finishInit() {
     });
 
     // Initialize Chat
-    chatTabs.forEach(tab => {
-        const chatId = tab.dataset.chat;
-        tab.dataset.chatMapping = chatId;
+    console.log("[CHAT] Preparando setupChat:", {
+        playerId: PLAYER_ID,
+        playerName: PLAYER_NAME,
+        tabs: chatTabs.length,
+        messagesList: !!messagesList,
+        chatInput: !!chatInput,
+        sendMsgBtn: !!sendMsgBtn
     });
 
     setupChat({
@@ -122,6 +193,8 @@ async function finishInit() {
         input: chatInput,
         sendBtn: sendMsgBtn
     });
+
+    console.log("[CHAT] setupChat chamado com sucesso.");
 
     // Invite Button
     if (inviteBtn) {

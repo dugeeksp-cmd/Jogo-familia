@@ -83,24 +83,41 @@ let isInitialized = false;
 
 async function init() {
     onAuth(async (user) => {
-        if (user) {
-            if (loginOverlay) loginOverlay.style.display = 'none';
-            if (!isInitialized) {
-                isInitialized = true;
-                await finishInit();
+        try {
+            if (user) {
+                console.log("[AUTH] Papai autenticado:", user.uid);
+
+                if (loginOverlay) {
+                    loginOverlay.style.display = "none";
+                }
+
+                if (!isInitialized) {
+                    isInitialized = true;
+                    console.log("[APP] Inicializando painel do Papai...");
+                    await finishInit();
+                }
+
+            } else {
+                console.log("[AUTH] Papai ainda não autenticado.");
+
+                if (loginOverlay) {
+                    loginOverlay.style.display = "flex";
+                }
             }
-        } else {
-            if (loginOverlay) loginOverlay.style.display = 'flex';
+        } catch (error) {
+            console.error("[APP] Erro crítico ao inicializar Papai:", error);
+            alert("Erro ao iniciar o painel do Papai. Veja o console.");
         }
     });
 
     if (btnGoogleLogin) {
-        btnGoogleLogin.addEventListener('click', async () => {
+        btnGoogleLogin.addEventListener("click", async () => {
             try {
                 await loginWithGoogle();
+                console.log("[AUTH] Clique no login realizado.");
             } catch (e) {
-                console.error(e);
-                alert("Falha no login!");
+                console.error("[AUTH] Falha no login Google do Papai:", e);
+                alert("Falha no login do Papai. Verifique se o login com Google está ativado no Firebase Authentication.");
             }
         });
     }
