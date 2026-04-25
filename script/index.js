@@ -194,7 +194,9 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'visitante.html';
         } catch (error) {
             console.error("[SIGNUP]", error);
-            guestAuthError.textContent = "Erro ao criar conta. Tente outro usuário ou e-mail.";
+            guestAuthError.textContent = error.message.includes('permission-denied') 
+                ? "Erro de permissão no servidor." 
+                : error.message || "Erro ao criar conta. Tente outro usuário ou e-mail.";
             guestAuthError.classList.remove('hidden');
         }
     });

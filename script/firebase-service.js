@@ -87,6 +87,15 @@ const generateRandomColor = () => {
 
 export const signUpGuest = async (username, email, password) => {
     try {
+        const cleanUsername = username.toLowerCase().trim();
+        
+        // 0. Check if username is already taken
+        const usernameRef = doc(db, USERNAMES_COL, cleanUsername);
+        const usernameSnap = await getDoc(usernameRef);
+        if (usernameSnap.exists()) {
+            throw new Error("Este nome de usuário já está em uso.");
+        }
+
         // 1. Create user in Auth
         const result = await createUserWithEmailAndPassword(auth, email, password);
         const user = result.user;
@@ -94,7 +103,7 @@ export const signUpGuest = async (username, email, password) => {
         const chatColor = generateRandomColor();
         const profile = {
             uid: user.uid,
-            username: username.toLowerCase(),
+            username: cleanUsername,
             email: email,
             displayName: username,
             role: "guest",
@@ -107,15 +116,24 @@ export const signUpGuest = async (username, email, password) => {
         await setDoc(doc(db, GUEST_USERS_COL, user.uid), profile);
 
         // 3. Save username index
-        await setDoc(doc(db, USERNAMES_COL, username.toLowerCase()), {
+        await setDoc(usernameRef, {
             uid: user.uid,
             email: email,
-            username: username.toLowerCase()
+            username: cleanUsername
         });
 
         return user;
     } catch (error) {
         console.error("[Firebase] Erro no cadastro de convidado:", error);
+        if (error.code === 'auth/email-already-in-use') {
+            throw new Error("Este e-mail já está cadastrado.");
+        }
+        if (error.code === 'auth/invalid-email') {
+            throw new Error("O e-mail fornecido é inválido.");
+        }
+        if (error.code === 'auth/weak-password') {
+            throw new Error("A senha é muito fraca (use pelo menos 6 caracteres).");
+        }
         throw error;
     }
 };

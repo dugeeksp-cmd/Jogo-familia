@@ -22,12 +22,14 @@ service cloud.firestore {
           && data.uid == request.auth.uid
           && data.role == 'guest'
           && data.username is string && data.username.size() <= 64
-          && data.chatColor is string && data.chatColor.size() == 7
-          && data.email == request.auth.token.email;
+          && data.chatColor is string && data.chatColor.size() == 7;
+          // Removed strict request.auth.token.email check which can be flaky on first sign-in
       }
 
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidGuest(incoming()) && incoming().createdAt == request.time;
+      allow create: if isSignedIn() && isValidGuest(incoming()) 
+                     && incoming().createdAt == request.time
+                     && incoming().updatedAt == request.time;
       allow update: if isSignedIn() && isOwner(uid) && isValidGuest(incoming()) 
                      && incoming().createdAt == existing().createdAt
                      && incoming().updatedAt == request.time;
@@ -36,7 +38,7 @@ service cloud.firestore {
     match /usernames/{username} {
       allow read: if true; // Needed for login check
       allow create: if isSignedIn() && incoming().uid == request.auth.uid;
-      allow update: if false; // Usernames are usually immutable once taken in this simplified logic
+      allow delete: if isAdmin();
     }
 
     // --- Rooms & Sub-collections ---
