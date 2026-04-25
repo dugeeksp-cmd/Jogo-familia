@@ -39,12 +39,9 @@ service cloud.firestore {
     }
 
     function isValidMessage(data) {
-      return data.keys().hasAll(['chatId', 'senderId', 'senderName', 'text', 'createdAt']) &&
+      return data.keys().hasAll(['chatId', 'text']) &&
              data.chatId is string &&
-             data.senderId is string &&
-             data.senderName is string &&
-             data.text is string &&
-             data.createdAt is timestamp;
+             data.text is string;
     }
 
     match /rooms/{roomCode} {

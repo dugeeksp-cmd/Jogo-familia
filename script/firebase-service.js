@@ -170,21 +170,28 @@ export const listenToMessages = (chatId, callback) => {
     console.log(`[Firebase] Iniciando listener para chat: ${chatId}`);
     const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
     
-    // Querying by chatId without orderBy to avoid composite index requirement.
-    // We fetch all messages for this chat and sort on the client.
+    // Simplest possible query to avoid index issues
     const q = query(
         messagesRef, 
         where("chatId", "==", chatId)
     );
     
-    return onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+    return onSnapshot(q, (snapshot) => {
+        console.log(`[Firebase] Snapshot recebido para ${chatId}. Total docs: ${snapshot.docs.length}. From cache: ${snapshot.metadata.fromCache}`);
+        
         const msgs = snapshot.docs.map(doc => {
             const data = doc.data();
+            // Handle server timestamp and missing createdAt
+            let createdAt = data.createdAt;
+            if (!createdAt) {
+                createdAt = { toDate: () => new Date() };
+                console.warn(`[Firebase] Mensagem ${doc.id} sem createdAt. Usando data atual.`);
+            }
+
             return { 
                 id: doc.id, 
                 ...data,
-                // Handle local cache having null serverTimestamp
-                createdAt: data.createdAt || { toDate: () => new Date() } 
+                createdAt
             };
         });
         
@@ -192,14 +199,14 @@ export const listenToMessages = (chatId, callback) => {
         msgs.sort((a, b) => {
             const timeA = a.createdAt.toDate ? a.createdAt.toDate() : a.createdAt;
             const timeB = b.createdAt.toDate ? b.createdAt.toDate() : b.createdAt;
-            return timeA - timeB;
+            return (timeA || 0) - (timeB || 0);
         });
         
-        console.log(`[Firebase] Chat ${chatId}: ${msgs.length} mensagens carregadas.`);
         callback(msgs);
     }, (error) => {
-        console.error(`Erro no listener de mensagens para ${chatId}:`, error);
-        handleFirestoreError(error, 'list', `rooms/${ROOM_ID}/messages`);
+        console.error(`[Firebase] Erro CRÍTICO no listener de mensagens para ${chatId}:`, error);
+        // If we get permission denied here, it's definitely a rules issue
+        handleFirestoreError(error, 'list', `rooms/${ROOM_ID}/messages (chatId=${chatId})`);
     });
 };
 

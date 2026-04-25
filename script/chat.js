@@ -14,12 +14,21 @@ export function setupChat(config) {
         onMessageSent
     } = config;
 
+    console.log(`[CHAT] Inicializando chat para ${playerId} (${playerName})`, { initialChatId });
+
+    if (!messagesList || !input || !sendBtn) {
+        console.error('[CHAT] Elementos obrigatórios não encontrados:', { messagesList, input, sendBtn });
+        return;
+    }
+
     let currentChatId = initialChatId;
     let unsubscribe = null;
 
     const renderMessages = (messages) => {
+        console.log(`[CHAT] Renderizando ${messages.length} mensagens para o chat ${currentChatId}`);
+        
         if (messages.length === 0) {
-            messagesList.innerHTML = '<div class="empty-chat"><span>💬</span><p>Sem mensagens ainda. Dê um oi!</p></div>';
+            messagesList.innerHTML = '<div class="empty-chat"><span>💬</span><p>Sem mensagens ainda nesta aba. Dê um oi!</p></div>';
             return;
         }
 
@@ -47,7 +56,6 @@ export function setupChat(config) {
             // Only pulse and play sound if the message came from someone else
             if (lastMessage.senderId !== playerId) {
                 // If it's a "new" message (not just loading history)
-                // We can check if the last message ID is different from what we had
                 if (messagesList.dataset.lastId !== lastMessage.id) {
                     playSound('message');
                     messagesList.dataset.lastId = lastMessage.id;
@@ -59,18 +67,29 @@ export function setupChat(config) {
                     targetTab.classList.add('pulse-new');
                 }
             } else {
-                // Update last ID if I am the sender to avoid sound on my own messages
                 messagesList.dataset.lastId = lastMessage.id;
             }
         }
     };
 
     const loadChat = (chatId) => {
-        if (unsubscribe) unsubscribe();
+        if (!chatId) {
+            console.error('[CHAT] Tentativa de carregar chat com ID inválido');
+            return;
+        }
+
+        if (unsubscribe) {
+            console.log(`[CHAT] Encerrando listener anterior do chat`);
+            unsubscribe();
+        }
+        
         currentChatId = chatId;
-        console.log(`[Chat] Carregando chat: ${chatId}`);
+        console.log(`[CHAT] Aba ativa: ${currentChatId}`);
+        
+        messagesList.innerHTML = '<div class="loading-chat">Carregando mensagens...</div>';
+        
         unsubscribe = listenToMessages(chatId, (msgs) => {
-            console.log(`[Chat] Recebidas ${msgs.length} mensagens para ${chatId}`);
+            console.log(`[CHAT] Mensagens recebidas para ${chatId}: ${msgs.length}`);
             renderMessages(msgs);
         });
     };
@@ -79,33 +98,37 @@ export function setupChat(config) {
         const text = input.value.trim();
         if (!text) return;
         
+        console.log(`[CHAT] Enviando mensagem para ${currentChatId}:`, text);
         const originalValue = input.value;
         input.value = '';
+        
         try {
             await sendMessage(currentChatId, playerId, playerName, text);
             playSound('message');
             if (onMessageSent) onMessageSent();
         } catch (e) {
-            console.error('[Chat] Erro ao enviar mensagem:', e);
+            console.error('[CHAT] Erro ao enviar mensagem:', e);
             input.value = originalValue;
-            alert('Erro ao enviar mensagem. Verifique sua conexão.');
+            alert('Erro ao enviar mensagem. Tente novamente.');
         }
     };
 
-    // Event Listeners
-    if (tabs) {
+    // Tabs logic
+    if (tabs && tabs.length > 0) {
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
+                const newChatId = tab.dataset.chatMapping || tab.dataset.chat;
+                console.log(`[CHAT] Clique na aba: ${tab.textContent} -> ${newChatId}`);
+                
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.remove('pulse-new');
                 tab.classList.add('active');
                 
-                // Logic for mapping tab to chatId should be external if complex, 
-                // but let's assume tab has a data attribute.
-                const newChatId = tab.dataset.chatMapping || tab.dataset.chat;
                 loadChat(newChatId);
             });
         });
+    } else {
+        console.warn('[CHAT] Nenhuma aba encontrada para configurar alternância');
     }
 
     sendBtn.addEventListener('click', handleSend);
@@ -116,10 +139,11 @@ export function setupChat(config) {
     // Initial Load
     loadChat(currentChatId);
 
-    console.log(`[Chat] Chat inicializado para ${playerId}`);
-
     return {
         loadChat,
-        destroy: () => unsubscribe && unsubscribe()
+        destroy: () => {
+            console.log('[CHAT] Destruindo chat');
+            if (unsubscribe) unsubscribe();
+        }
     };
 }

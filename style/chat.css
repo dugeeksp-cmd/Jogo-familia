@@ -34,13 +34,13 @@
 }
 
 .chat-window {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
     border-radius: 2rem;
-    height: 380px;
+    height: 420px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .messages-list {
@@ -56,7 +56,7 @@
     max-width: 85%;
     padding: 10px 14px;
     border-radius: 12px;
-    font-size: 11px;
+    font-size: 13px;
     position: relative;
     animation: messageIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }

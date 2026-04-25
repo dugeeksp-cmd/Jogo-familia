@@ -15,7 +15,7 @@ import { setupChat } from './chat.js';
 
 const PLAYER_ID = document.body.dataset.player;
 const PLAYER_NAME = PLAYER_ID.charAt(0).toUpperCase() + PLAYER_ID.slice(1);
-const PRIVATE_CHAT_ID = PLAYER_ID === 'miguel' ? 'papai-miguel' : 'papai-sophia';
+const PRIVATE_CHAT_ID = `private-papai-${PLAYER_ID}`;
 
 let roomState = null;
 
@@ -109,8 +109,9 @@ async function finishInit() {
 
     // Initialize Chat
     chatTabs.forEach(tab => {
-        if (tab.dataset.chat === 'private') tab.dataset.chatMapping = PRIVATE_CHAT_ID;
-        else if (tab.dataset.chat === 'public') tab.dataset.chatMapping = 'public';
+        const type = tab.dataset.chat;
+        if (type === 'private-papai') tab.dataset.chatMapping = PRIVATE_CHAT_ID;
+        else if (type === 'family') tab.dataset.chatMapping = 'family';
         else tab.dataset.chatMapping = 'group';
     });
 

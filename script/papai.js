@@ -53,6 +53,8 @@ const btnSaveLimit = document.getElementById('btn-save-limit');
 const btnHidePublicChat = document.getElementById('btn-hide-public-chat');
 const emojiMiguel = document.getElementById('emoji-miguel');
 const emojiSophia = document.getElementById('emoji-sophia');
+const emojiMiguelSettings = document.getElementById('emoji-miguel-settings');
+const emojiSophiaSettings = document.getElementById('emoji-sophia-settings');
 const btnSaveEmojis = document.getElementById('btn-save-emojis');
 const passMiguelInput = document.getElementById('pass-miguel-input');
 const passSophiaInput = document.getElementById('pass-sophia-input');
@@ -145,10 +147,8 @@ async function finishInit() {
     // Initialize Chat
     chatTabs.forEach(tab => {
         const tabData = tab.dataset.chat;
-        if (tabData === 'private-miguel') tab.dataset.chatMapping = 'papai-miguel';
-        else if (tabData === 'private-sophia') tab.dataset.chatMapping = 'papai-sophia';
-        else if (tabData === 'public') tab.dataset.chatMapping = 'public';
-        else tab.dataset.chatMapping = 'group';
+        // The data-chat now directly contains the chatId we want to use
+        tab.dataset.chatMapping = tabData;
     });
 
     setupChat({
@@ -161,29 +161,29 @@ async function finishInit() {
         sendBtn: sendMsgBtn
     });
 
-    btnSaveMiguelAll.addEventListener('click', async () => {
-        const emoji = emojiMiguel.value.trim();
-        const password = passMiguelInput.value.trim();
-        const updates = {};
-        if (emoji) await updatePlayer('miguel', { emoji: emoji });
-        if (password) {
-            updates[`passwords.miguel`] = password;
-            await updateRoom(updates);
-        }
-        alert('Dados do Miguel salvos!');
-    });
+btnSaveMiguelAll.addEventListener('click', async () => {
+    const emoji = emojiMiguel.value.trim();
+    const password = passMiguelInput.value.trim();
+    const updates = {};
+    if (emoji) await updatePlayer('miguel', { emoji: emoji });
+    if (password) {
+        updates[`passwords.miguel`] = password;
+        await updateRoom(updates);
+    }
+    alert('Dados do Miguel salvos!');
+});
 
-    btnSaveSophiaAll.addEventListener('click', async () => {
-        const emoji = emojiSophia.value.trim();
-        const password = passSophiaInput.value.trim();
-        const updates = {};
-        if (emoji) await updatePlayer('sophia', { emoji: emoji });
-        if (password) {
-            updates[`passwords.sophia`] = password;
-            await updateRoom(updates);
-        }
-        alert('Dados da Sophia salvos!');
-    });
+btnSaveSophiaAll.addEventListener('click', async () => {
+    const emoji = emojiSophia.value.trim();
+    const password = passSophiaInput.value.trim();
+    const updates = {};
+    if (emoji) await updatePlayer('sophia', { emoji: emoji });
+    if (password) {
+        updates[`passwords.sophia`] = password;
+        await updateRoom(updates);
+    }
+    alert('Dados da Sophia salvos!');
+});
 
     // Pulse effects for chat
     const style = document.createElement('style');
@@ -267,11 +267,17 @@ function renderPlayersStatus(players) {
         `;
     }).join('');
 
-    // Pre-fill emoji inputs if they exist
+    // Pre-fill emoji inputs if they exist (using both simple profile and settings)
     const miguel = players.find(p => p.id === 'miguel');
     const sophia = players.find(p => p.id === 'sophia');
-    if (miguel && miguel.emoji && !emojiMiguel.value) emojiMiguel.value = miguel.emoji;
-    if (sophia && sophia.emoji && !emojiSophia.value) emojiSophia.value = sophia.emoji;
+    if (miguel && miguel.emoji) {
+        if (!emojiMiguel.value) emojiMiguel.value = miguel.emoji;
+        if (!emojiMiguelSettings.value) emojiMiguelSettings.value = miguel.emoji;
+    }
+    if (sophia && sophia.emoji) {
+        if (!emojiSophia.value) emojiSophia.value = sophia.emoji;
+        if (!emojiSophiaSettings.value) emojiSophiaSettings.value = sophia.emoji;
+    }
     
     // Pre-fill password inputs
     if (miguel && roomState?.passwords?.miguel && !passMiguelInput.value) passMiguelInput.value = roomState.passwords.miguel;
@@ -511,8 +517,8 @@ btnSaveDream.addEventListener('click', async () => {
 
 btnSaveEmojis.addEventListener('click', async () => {
     playSound('click');
-    const emojiM = emojiMiguel.value.trim();
-    const emojiS = emojiSophia.value.trim();
+    const emojiM = emojiMiguelSettings.value.trim();
+    const emojiS = emojiSophiaSettings.value.trim();
     
     if (emojiM) await updatePlayer('miguel', { emoji: emojiM });
     if (emojiS) await updatePlayer('sophia', { emoji: emojiS });

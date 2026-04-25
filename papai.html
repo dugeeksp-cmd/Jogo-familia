@@ -97,9 +97,9 @@
                     <div style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em;">Emojis dos Jogadores</div>
                     <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
                         <span style="font-size: 0.8rem; min-width: 50px;">Miguel:</span>
-                        <input type="text" id="emoji-miguel" class="input" placeholder="💡" style="width: 50px; text-align: center; font-size: 1.2rem; padding: 5px;">
+                        <input type="text" id="emoji-miguel-settings" class="input" placeholder="💡" style="width: 50px; text-align: center; font-size: 1.2rem; padding: 5px;">
                         <span style="font-size: 0.8rem; min-width: 50px; margin-left: 10px;">Sophia:</span>
-                        <input type="text" id="emoji-sophia" class="input" placeholder="👸" style="width: 50px; text-align: center; font-size: 1.2rem; padding: 5px;">
+                        <input type="text" id="emoji-sophia-settings" class="input" placeholder="👸" style="width: 50px; text-align: center; font-size: 1.2rem; padding: 5px;">
                         <button id="btn-save-emojis" class="btn" style="padding: 8px 12px; font-size: 0.7rem; background: #3b82f6; margin-left: auto;">Salvar Emojis</button>
                     </div>
                 </div>
@@ -208,18 +208,22 @@
             <!-- Chats (Abas por Jogador) -->
             <section class="chats-section">
                 <div class="chat-tabs" id="papai-chat-tabs">
-                    <button class="chat-tab active" data-chat="group">Geral</button>
-                    <button class="chat-tab" data-chat="public">Público</button>
-                    <button class="chat-tab" data-chat="private-miguel">Miguel</button>
-                    <button class="chat-tab" data-chat="private-sophia">Sophia</button>
+                    <button class="chat-tab active" data-chat="group">Chat Grupo</button>
+                    <button class="chat-tab" data-chat="family">Chat Família</button>
+                    <button class="chat-tab" data-chat="private-papai-miguel">Chat Miguel</button>
+                    <button class="chat-tab" data-chat="private-papai-sophia">Chat Sophia</button>
                 </div>
 
                 <div class="chat-window papai-chat-container">
                     <div id="messages-list" class="messages-list">
                         <!-- Mensagens -->
+                        <div class="empty-chat">
+                            <span>💬</span>
+                            <p>Selecione um chat para começar.</p>
+                        </div>
                     </div>
                     <div class="chat-input-area">
-                        <input type="text" id="chat-input" class="chat-input" placeholder="Responder...">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Escreva aqui...">
                         <button id="send-msg" class="btn-send">➤</button>
                     </div>
                 </div>
