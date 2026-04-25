@@ -44,8 +44,8 @@
           "type": "object",
           "description": "Senhas para acesso de Miguel e Sophia",
           "properties": {
-            "miguel": { "type": "string", "default": "123abc" },
-            "sophia": { "type": "string", "default": "123abc" }
+            "miguel": { "type": "string", "default": "qwerty" },
+            "sophia": { "type": "string", "default": "qwerty" }
           }
         },
         "createdAt": { "type": "number", "format": "timestamp" }

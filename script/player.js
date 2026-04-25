@@ -66,8 +66,11 @@ async function init() {
                     console.error("[AUTH] Falha no login. O app não pode continuar sem autenticação.", authError);
 
                     showAuthError(
-                        "Não foi possível entrar automaticamente. " +
-                        `O usuário ${PLAYER_ID}@sabermidia.com.br precisa estar cadastrado e ativo no Firebase.`
+                        "⚠️ Erro de Autenticação Automática<br><br>" +
+                        "Não foi possível entrar com a conta da família.<br>" +
+                        `<b>Usuário:</b> ${PLAYER_ID}@sabermidia.com.br<br>` +
+                        "<b>Senha:</b> qwerty<br><br>" +
+                        "Verifique se o login com <b>E-mail/Senha</b> está ativado no Firebase Console e se os usuários foram criados corretamente."
                     );
 
                     return;

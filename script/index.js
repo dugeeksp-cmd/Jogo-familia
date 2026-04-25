@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const verifyPass = () => {
         const input = playerPasswordInput.value.trim();
-        const correct = currentRoom?.passwords?.[selectedPlayerId] || '123abc';
+        const correct = currentRoom?.passwords?.[selectedPlayerId] || 'qwerty';
         
         if (input === correct) {
             window.location.href = `${selectedPlayerId}.html`;
