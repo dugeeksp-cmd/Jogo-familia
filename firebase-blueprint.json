@@ -104,13 +104,41 @@
       "description": "Mensagem de chat (grupo ou privada).",
       "type": "object",
       "properties": {
-        "chatId": { "type": "string", "description": "ID do chat ('group', 'papai-miguel', 'papai-sophia')" },
+        "chatId": { "type": "string", "description": "ID do chat ('group', 'family', 'private-papai-miguel', 'private-papai-sophia')" },
         "senderId": { "type": "string" },
         "senderName": { "type": "string" },
+        "senderRole": { "type": "string", "enum": ["child", "parent", "guest"] },
+        "senderColor": { "type": "string" },
         "text": { "type": "string" },
-        "createdAt": { "type": "number", "format": "timestamp" }
+        "createdAt": { "type": "number", "format": "timestamp" },
+        "createdAtMs": { "type": "number" }
       },
       "required": ["chatId", "senderId", "senderName", "text", "createdAt"]
+    },
+    "GuestUser": {
+      "title": "Perfil de Convidado",
+      "description": "Perfil persistente de um convidado autenticado.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "default": "guest" },
+        "chatColor": { "type": "string" },
+        "createdAt": { "type": "number", "format": "timestamp" },
+        "updatedAt": { "type": "number", "format": "timestamp" }
+      }
+    },
+    "UsernameIndex": {
+      "title": "Índice de Usuários",
+      "description": "Mapeamento de username para UID/Email para facilitar login.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "username": { "type": "string" }
+      }
     },
     "Guess": {
       "title": "Palpite",
@@ -151,6 +179,14 @@
     "/rooms/{roomCode}/guesses/{guessId}": {
       "schema": "Guess",
       "description": "Palpites enviados pelos jogadores."
+    },
+    "/guestUsers/{uid}": {
+      "schema": "GuestUser",
+      "description": "Perfis de convidados cadastrados."
+    },
+    "/usernames/{username}": {
+      "schema": "UsernameIndex",
+      "description": "Índice de nomes de usuários para login rápido."
     }
   }
 }

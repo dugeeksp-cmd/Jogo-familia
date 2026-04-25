@@ -172,6 +172,8 @@ async function finishInit() {
     setupChat({
         playerId: PLAYER_ID,
         playerName: PLAYER_NAME,
+        playerRole: 'family',
+        senderColor: '#22c55e',
         initialChatId: 'group',
         tabs: chatTabs,
         messagesList: messagesList,

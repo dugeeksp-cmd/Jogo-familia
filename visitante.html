@@ -28,11 +28,9 @@
                 </div>
             </header>
 
-            <div id="login-guest" class="card" style="margin-top: 20px;">
-                <h3 style="margin-bottom: 12px;">Entrar como Convidado</h3>
-                <input type="text" id="guest-name-input" class="input" placeholder="Seu nome..." style="margin-bottom: 16px;">
-                <button id="btn-join-guest" class="btn btn-activate" style="width: 100%;">Entrar na Sala</button>
-                <p id="room-full-msg" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-top: 12px; text-align: center;">A sala está cheia!</p>
+            <div id="login-guest" class="card hidden" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 12px;">Carregando Perfil...</h3>
+                <p style="opacity: 0.7;">Aguarde enquanto entramos na sala.</p>
             </div>
 
             <div id="guest-content" class="hidden" style="display: flex; flex-direction: column; gap: 32px;">
@@ -77,8 +75,7 @@
                 <!-- Chats -->
                 <section class="chats-section">
                     <div class="chat-tabs">
-                        <button class="chat-tab active" data-chat="group">Grupo Família</button>
-                        <button class="chat-tab" data-chat="public">Chat Público</button>
+                        <button class="chat-tab active" data-chat="group">Chat Público</button>
                     </div>
 
                     <div class="chat-window">
@@ -117,18 +114,18 @@
             listenToAllHands, 
             sendGuess,
             onAuth,
-            loginAnonymously
+            getGuestProfile
         } from './script/firebase-service.js';
         import { playSound } from './script/audio.js';
 
         let PLAYER_ID = '';
         let PLAYER_NAME = '';
+        let PLAYER_ROLE = 'guest';
+        let SENDER_COLOR = '#f59e0b';
         let roomState = null;
 
         const loginGuest = document.getElementById('login-guest');
         const guestContent = document.getElementById('guest-content');
-        const guestNameInput = document.getElementById('guest-name-input');
-        const btnJoinGuest = document.getElementById('btn-join-guest');
         const guestNameDisplay = document.getElementById('guest-name-display');
         const timerNumber = document.getElementById('timer-number');
         const turnStatus = document.getElementById('turn-status');
@@ -148,17 +145,12 @@
         const btnConfirmGuess = document.getElementById('btn-confirm-guess');
         const guessInput = document.getElementById('guess-input');
 
-        btnJoinGuest.addEventListener('click', async () => {
-            PLAYER_NAME = guestNameInput.value.trim();
-            if (!PLAYER_NAME) return;
-
-            onAuth(async (user) => {
-                if (!user) {
-                    await loginAnonymously();
-                    return;
-                }
-                await finishGuestJoin(user);
-            });
+        onAuth(async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            await finishGuestJoin(user);
         });
 
         async function finishGuestJoin(user) {
@@ -166,27 +158,51 @@
             
             await initRoom();
             
+            // Fetch Profile
+            const profile = await getGuestProfile(user.uid);
+            if (!profile) {
+                // If no profile, maybe it's Miguel/Sophia accidentally accessing this?
+                // For now, redirect or create a temp one.
+                window.location.href = 'index.html';
+                return;
+            }
+
+            PLAYER_NAME = profile.displayName;
+            PLAYER_ROLE = profile.role;
+            SENDER_COLOR = profile.chatColor || '#f59e0b';
+
             // Check room limit
             const players = await new Promise(resolve => {
                 const unsub = listenToPlayers(p => { unsub(); resolve(p); });
             });
 
             if (players.length >= (roomState?.maxPlayers || 8)) {
-                roomFullMsg.classList.remove('hidden');
+                if (loginGuest) {
+                    loginGuest.innerHTML = '<h3 style="color: #ef4444;">Sala Cheia!</h3><p>Não há espaço para novos jogadores.</p>';
+                    loginGuest.classList.remove('hidden');
+                }
                 return;
             }
 
             PLAYER_ID = 'guest_' + user.uid.slice(0, 8);
-            loginGuest.classList.add('hidden');
+            if (loginGuest) loginGuest.classList.add('hidden');
             guestContent.classList.remove('hidden');
             guestNameDisplay.textContent = PLAYER_NAME;
 
-            await updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME, role: 'guest', score: 0 });
+            await updatePlayerStatus(PLAYER_ID, { 
+                online: true, 
+                name: PLAYER_NAME, 
+                role: PLAYER_ROLE, 
+                chatColor: SENDER_COLOR, 
+                score: 0 
+            });
 
             // Setup Chat
             setupChat({
                 playerId: PLAYER_ID,
                 playerName: PLAYER_NAME,
+                playerRole: PLAYER_ROLE,
+                senderColor: SENDER_COLOR,
                 initialChatId: 'group',
                 tabs: document.querySelectorAll('.chat-tab'),
                 messagesList: document.getElementById('messages-list'),

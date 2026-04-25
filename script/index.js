@@ -4,17 +4,45 @@ import {
     listenToRoom, 
     loginWithGoogle,
     onAuth,
-    loginAnonymously
+    loginAnonymously,
+    signUpGuest,
+    loginWithUsernameOrEmail,
+    syncGoogleGuestProfile
 } from './firebase-service.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const miguelBtn = document.getElementById('miguel-btn');
     const sophiaBtn = document.getElementById('sophia-btn');
     const papaiBtn = document.getElementById('papai-btn');
+    const guestBtn = document.getElementById('guest-btn');
     
     const adminModal = document.getElementById('password-modal');
     const playerModal = document.getElementById('player-password-modal');
+    const guestAuthModal = document.getElementById('guest-auth-modal');
     
+    // Guest Auth Elements
+    const guestOptionsMenu = document.getElementById('guest-options-menu');
+    const guestLoginForm = document.getElementById('guest-login-form');
+    const guestSignupForm = document.getElementById('guest-signup-form');
+    const guestAuthError = document.getElementById('guest-auth-error');
+
+    const optLoginBtn = document.getElementById('opt-login-btn');
+    const optSignupBtn = document.getElementById('opt-signup-btn');
+    const guestGoogleLogin = document.getElementById('guest-google-login');
+    const closeGuestModal = document.getElementById('close-guest-modal');
+
+    const backToOptionsLogin = document.getElementById('back-to-guest-options-login');
+    const backToOptionsSignup = document.getElementById('back-to-guest-options-signup');
+
+    const loginIdInput = document.getElementById('login-id');
+    const loginPassInput = document.getElementById('login-pass');
+    const guestLoginConfirm = document.getElementById('guest-login-confirm');
+
+    const signupUserInput = document.getElementById('signup-user');
+    const signupEmailInput = document.getElementById('signup-email');
+    const signupPassInput = document.getElementById('signup-pass');
+    const guestSignupConfirm = document.getElementById('guest-signup-confirm');
+
     const playerPasswordInput = document.getElementById('player-password-input');
     const playerPasswordError = document.getElementById('player-password-error');
     const playerModalTitle = document.getElementById('player-modal-title');
@@ -89,6 +117,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
     miguelBtn.addEventListener('click', () => openPlayerModal('miguel', 'Miguel'));
     sophiaBtn.addEventListener('click', () => openPlayerModal('sophia', 'Sophia'));
+
+    // Guest Auth Logic
+    guestBtn.addEventListener('click', () => {
+        guestAuthModal.classList.remove('hidden');
+        showGuestMenu();
+    });
+
+    const showGuestMenu = () => {
+        guestOptionsMenu.classList.remove('hidden');
+        guestLoginForm.classList.add('hidden');
+        guestSignupForm.classList.add('hidden');
+        guestAuthError.classList.add('hidden');
+    };
+
+    optLoginBtn.addEventListener('click', () => {
+        guestOptionsMenu.classList.add('hidden');
+        guestLoginForm.classList.remove('hidden');
+    });
+
+    optSignupBtn.addEventListener('click', () => {
+        guestOptionsMenu.classList.add('hidden');
+        guestSignupForm.classList.remove('hidden');
+    });
+
+    backToOptionsLogin.addEventListener('click', showGuestMenu);
+    backToOptionsSignup.addEventListener('click', showGuestMenu);
+    closeGuestModal.addEventListener('click', () => guestAuthModal.classList.add('hidden'));
+
+    guestGoogleLogin.addEventListener('click', async () => {
+        try {
+            const user = await loginWithGoogle();
+            await syncGoogleGuestProfile(user);
+            window.location.href = 'visitante.html';
+        } catch (e) {
+            console.error(e);
+            guestAuthError.textContent = "Erro ao entrar com Google.";
+            guestAuthError.classList.remove('hidden');
+        }
+    });
+
+    guestLoginConfirm.addEventListener('click', async () => {
+        const login = loginIdInput.value.trim();
+        const pass = loginPassInput.value.trim();
+        if (!login || !pass) return;
+
+        try {
+            await loginWithUsernameOrEmail(login, pass);
+            window.location.href = 'visitante.html';
+        } catch (e) {
+            guestAuthError.textContent = "Login ou senha inválidos.";
+            guestAuthError.classList.remove('hidden');
+        }
+    });
+
+    guestSignupConfirm.addEventListener('click', async () => {
+        const user = signupUserInput.value.trim();
+        const email = signupEmailInput.value.trim();
+        const pass = signupPassInput.value.trim();
+
+        if (!user || !email || !pass) {
+            guestAuthError.textContent = "Preencha todos os campos.";
+            guestAuthError.classList.remove('hidden');
+            return;
+        }
+
+        if (pass.length < 6) {
+            guestAuthError.textContent = "A senha deve ter pelo menos 6 caracteres.";
+            guestAuthError.classList.remove('hidden');
+            return;
+        }
+
+        try {
+            await signUpGuest(user, email, pass);
+            window.location.href = 'visitante.html';
+        } catch (e) {
+            guestAuthError.textContent = "Erro ao criar conta. Tente outro usuário ou e-mail.";
+            guestAuthError.classList.remove('hidden');
+        }
+    });
 
     cancelPlayerBtn.addEventListener('click', () => {
         playerModal.classList.add('hidden');

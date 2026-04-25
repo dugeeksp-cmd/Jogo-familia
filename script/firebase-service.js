@@ -6,6 +6,7 @@ import {
     GoogleAuthProvider, 
     signInAnonymously,
     signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
     onAuthStateChanged 
 } from 'firebase/auth';
 import { 
@@ -22,7 +23,8 @@ import {
     limit, 
     serverTimestamp,
     getDoc,
-    getDocFromServer
+    getDocFromServer,
+    getDocs
 } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -68,6 +70,118 @@ export const loginWithEmail = async (email, password) => {
     } catch (error) {
         console.error("[AUTH] Erro ao fazer login com e-mail:", error);
         throw error;
+    }
+};
+
+// --- GUEST AUTH & PROFILE ---
+
+const GUEST_USERS_COL = "guestUsers";
+const USERNAMES_COL = "usernames";
+
+const generateRandomColor = () => {
+    const colors = [
+        '#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', 
+        '#ef4444', '#06b6d4', '#f97316', '#a855f7', '#14b8a6'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+};
+
+export const signUpGuest = async (username, email, password) => {
+    try {
+        // 1. Create user in Auth
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        const user = result.user;
+
+        const chatColor = generateRandomColor();
+        const profile = {
+            uid: user.uid,
+            username: username.toLowerCase(),
+            email: email,
+            displayName: username,
+            role: "guest",
+            chatColor: chatColor,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        };
+
+        // 2. Save profile in Firestore
+        await setDoc(doc(db, GUEST_USERS_COL, user.uid), profile);
+
+        // 3. Save username index
+        await setDoc(doc(db, USERNAMES_COL, username.toLowerCase()), {
+            uid: user.uid,
+            email: email,
+            username: username.toLowerCase()
+        });
+
+        return user;
+    } catch (error) {
+        console.error("[Firebase] Erro no cadastro de convidado:", error);
+        throw error;
+    }
+};
+
+export const loginWithUsernameOrEmail = async (login, password) => {
+    try {
+        let email = login;
+
+        // If it's not an email, assume it's a username and look it up
+        if (!login.includes('@')) {
+            const usernameDoc = await getDoc(doc(db, USERNAMES_COL, login.toLowerCase()));
+            if (usernameDoc.exists()) {
+                email = usernameDoc.data().email;
+            } else {
+                throw new Error("Usuário não encontrado.");
+            }
+        }
+
+        return await loginWithEmail(email, password);
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const syncGoogleGuestProfile = async (user) => {
+    try {
+        const profileRef = doc(db, GUEST_USERS_COL, user.uid);
+        const profileSnap = await getDoc(profileRef);
+
+        if (!profileSnap.exists()) {
+            const chatColor = generateRandomColor();
+            const profile = {
+                uid: user.uid,
+                username: user.email.split('@')[0].toLowerCase(),
+                email: user.email,
+                displayName: user.displayName || user.email.split('@')[0],
+                role: "guest",
+                chatColor: chatColor,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            };
+            await setDoc(profileRef, profile);
+            
+            // Also update usernames index
+            await setDoc(doc(db, USERNAMES_COL, profile.username), {
+                uid: user.uid,
+                email: user.email,
+                username: profile.username
+            });
+        } else {
+            await updateDoc(profileRef, { updatedAt: serverTimestamp() });
+        }
+        return (await getDoc(profileRef)).data();
+    } catch (error) {
+        console.error("[Firebase] Erro ao sincronizar perfil Google:", error);
+        throw error;
+    }
+};
+
+export const getGuestProfile = async (uid) => {
+    try {
+        const docSnap = await getDoc(doc(db, GUEST_USERS_COL, uid));
+        return docSnap.exists() ? docSnap.data() : null;
+    } catch (e) {
+        return null;
     }
 };
 
@@ -169,12 +283,20 @@ export const respondToGuess = async (guessId, isCorrect) => {
 };
 
 // Messaging
-export const sendMessage = async (chatId, senderId, senderName, text) => {
+export const sendMessage = async (chatId, senderId, senderName, text, extra = {}) => {
     try {
         console.log(`[Firebase] Enviando mensagem para ${chatId}: "${text}"`);
 
+        const { senderRole = 'guest', senderColor = '#f59e0b' } = extra;
+
         if (!chatId || !senderId || !senderName || !text.trim()) {
             throw new Error("Dados inválidos para envio de mensagem");
+        }
+
+        // Security check for family chat
+        if (senderRole === 'guest' && chatId === 'family') {
+            console.error("[Security] Convidados não podem enviar para o chat da família.");
+            return;
         }
 
         const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
@@ -183,6 +305,8 @@ export const sendMessage = async (chatId, senderId, senderName, text) => {
             chatId,
             senderId,
             senderName,
+            senderRole,
+            senderColor,
             text: text.trim(),
             createdAt: serverTimestamp(),
             createdAtMs: Date.now()

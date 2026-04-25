@@ -40,10 +40,10 @@
                     <span class="btn-icon">👧</span>
                     <span>Sophia</span>
                 </button>
-                <a href="visitante.html" class="btn selection-btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                <button id="guest-btn" class="btn selection-btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
                     <span class="btn-icon">🤝</span>
                     <span>Convidado</span>
-                </a>
+                </button>
                 <button id="papai-btn" class="btn selection-btn btn-papai">
                     <span class="btn-icon">👨</span>
                     <span>Papai</span>
@@ -98,6 +98,64 @@
                 <button id="confirm-player-password" class="btn btn-primary" style="flex: 2;">Acessar</button>
             </div>
             <p id="player-password-error" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-top: 15px;">Senha incorreta. Tente novamente.</p>
+        </div>
+    </div>
+
+    <!-- Modal de Autenticação de Convidado -->
+    <div id="guest-auth-modal" class="modal-overlay hidden">
+        <div class="card" style="width: 100%; max-width: 400px; text-align: center; padding: 24px;">
+            <h2 id="guest-modal-main-title" style="margin-bottom: 24px;">Entrar como Convidado</h2>
+            
+            <!-- Menu de Opções -->
+            <div id="guest-options-menu" style="display: flex; flex-direction: column; gap: 12px;">
+                <button id="opt-login-btn" class="btn btn-primary" style="width: 100%;">Já tenho cadastro</button>
+                <button id="opt-signup-btn" class="btn" style="width: 100%; background: rgba(255,255,255,0.05);">Criar cadastro</button>
+                <div style="margin: 10px 0; opacity: 0.3; font-size: 0.8rem;">ou</div>
+                <button id="guest-google-login" class="btn" style="background: white; color: #0f172a; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; width: 100%;">
+                    <img src="https://www.google.com/favicon.ico" width="18"> Entrar com Google
+                </button>
+                <button id="close-guest-modal" class="btn" style="margin-top: 10px; opacity: 0.6; background: transparent;">Voltar ao Início</button>
+            </div>
+
+            <!-- Form de Login -->
+            <div id="guest-login-form" class="hidden">
+                <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Minha Conta</h3>
+                <div style="display: flex; flex-direction: column; gap: 16px; text-align: left;">
+                    <div>
+                        <label style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 6px;">Usuário ou E-mail</label>
+                        <input type="text" id="login-id" class="input" placeholder="Seu usuário ou e-mail" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 6px;">Senha</label>
+                        <input type="password" id="login-pass" class="input" placeholder="Sua senha" style="width: 350px;">
+                    </div>
+                    <button id="guest-login-confirm" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Entrar</button>
+                    <button id="back-to-guest-options-login" class="btn" style="width: 100%; opacity: 0.6; background: transparent;">Voltar</button>
+                </div>
+            </div>
+
+            <!-- Form de Cadastro -->
+            <div id="guest-signup-form" class="hidden">
+                <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Criar Cadastro</h3>
+                <div style="display: flex; flex-direction: column; gap: 16px; text-align: left;">
+                    <div>
+                        <label style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 6px;">Nome de Usuário</label>
+                        <input type="text" id="signup-user" class="input" placeholder="Ex: amigao2024" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 6px;">E-mail</label>
+                        <input type="email" id="signup-email" class="input" placeholder="seu@email.com" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800; display: block; margin-bottom: 6px;">Senha</label>
+                        <input type="password" id="signup-pass" class="input" placeholder="Mínimo 6 caracteres" style="width: 100%;">
+                    </div>
+                    <button id="guest-signup-confirm" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Criar cadastro</button>
+                    <button id="back-to-guest-options-signup" class="btn" style="width: 100%; opacity: 0.6; background: transparent;">Voltar</button>
+                </div>
+            </div>
+
+            <p id="guest-auth-error" class="hidden" style="color: #ef4444; font-size: 0.8rem; margin-top: 20px;"></p>
         </div>
     </div>
 

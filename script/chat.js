@@ -6,6 +6,8 @@ export function setupChat(config) {
     const { 
         playerId, 
         playerName, 
+        playerRole = 'guest',
+        senderColor: customSenderColor = null,
         initialChatId, 
         tabs, 
         messagesList, 
@@ -14,7 +16,14 @@ export function setupChat(config) {
         onMessageSent
     } = config;
 
-    console.log(`[CHAT] Inicializando chat para ${playerId} (${playerName})`, { initialChatId });
+    const getDefaultSenderColor = (senderId) => {
+        if (senderId === "sophia") return "#ec4899";
+        if (senderId === "miguel") return "#3b82f6";
+        if (senderId === "papai") return "#22c55e";
+        return "#f59e0b";
+    };
+
+    console.log(`[CHAT] Inicializando chat para ${playerId} (${playerName}) - Role: ${playerRole}`, { initialChatId });
     console.log("[CHAT] tabs encontrados:", tabs?.length);
     console.log("[CHAT] messagesList:", messagesList);
     console.log("[CHAT] chat-input:", input);
@@ -38,13 +47,16 @@ export function setupChat(config) {
 
         const isAtBottom = messagesList.scrollHeight - messagesList.scrollTop <= messagesList.clientHeight + 100;
 
-        messagesList.innerHTML = messages.map(msg => `
-            <div class="message ${msg.senderId === playerId ? 'msg-me' : 'msg-other'}">
-                <span class="message-sender">${msg.senderName}</span>
-                <p>${msg.text}</p>
-                <span class="message-time">${msg.createdAt ? new Date(msg.createdAt.toDate ? msg.createdAt.toDate() : msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
-            </div>
-        `).join('');
+        messagesList.innerHTML = messages.map(msg => {
+            const color = msg.senderColor || getDefaultSenderColor(msg.senderId);
+            return `
+                <div class="message ${msg.senderId === playerId ? 'msg-me' : 'msg-other'}">
+                    <span class="message-sender" style="color: ${color}">${msg.senderName}</span>
+                    <p>${msg.text}</p>
+                    <span class="message-time">${msg.createdAt ? new Date(msg.createdAt.toDate ? msg.createdAt.toDate() : msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
+                </div>
+            `;
+        }).join('');
         
         // Always scroll if I am the sender, or if I was already at the bottom
         const lastMsg = messages[messages.length - 1];
@@ -115,7 +127,12 @@ export function setupChat(config) {
         input.value = '';
         
         try {
-            await sendMessage(currentChatId, playerId, playerName, text);
+            const extra = {
+                senderRole: playerRole,
+                senderColor: customSenderColor || getDefaultSenderColor(playerId)
+            };
+            
+            await sendMessage(currentChatId, playerId, playerName, text, extra);
             playSound('message');
             if (onMessageSent) onMessageSent();
         } catch (e) {
@@ -130,6 +147,13 @@ export function setupChat(config) {
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const newChatId = tab.dataset.chatMapping || tab.dataset.chat;
+                
+                // Guest security: block family chat if they try to access it
+                if (playerRole === 'guest' && (newChatId === 'family' || newChatId === 'Chat Família')) {
+                    console.warn('[CHAT] Convidado tentou acessar chat da família.');
+                    return;
+                }
+
                 console.log(`[CHAT] Clique na aba: ${tab.textContent.trim()} -> ${newChatId}`);
                 
                 tabs.forEach(t => t.classList.remove('active'));

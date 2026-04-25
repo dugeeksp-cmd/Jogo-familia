@@ -198,9 +198,13 @@ async function finishInit() {
         sendMsgBtn: !!sendMsgBtn
     });
 
+    const senderColor = PLAYER_ID === 'miguel' ? '#3b82f6' : '#ec4899';
+
     setupChat({
         playerId: PLAYER_ID,
         playerName: PLAYER_NAME,
+        playerRole: 'family',
+        senderColor: senderColor,
         initialChatId: 'group',
         tabs: chatTabs,
         messagesList: messagesList,
