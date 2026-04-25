@@ -149,6 +149,7 @@ async function finishInit() {
 
     if (btnConfirmGuess) {
         btnConfirmGuess.addEventListener('click', async () => {
+            playSound('click');
             const text = guessInput.value.trim();
             if (!text) return;
 
@@ -193,14 +194,6 @@ function updateUI() {
         objectiveContainer.classList.add('hidden');
     }
 
-    // Objective
-    if (roomState.gameObjective) {
-        objectiveText.textContent = roomState.gameObjective;
-        objectiveContainer.classList.remove('hidden');
-    } else {
-        objectiveContainer.classList.add('hidden');
-    }
-
     // Timer
     if (roomState.timer?.isRunning && roomState.timer?.endsAtMs) {
         const remaining = Math.max(0, Math.ceil((roomState.timer.endsAtMs - Date.now()) / 1000));
@@ -211,10 +204,6 @@ function updateUI() {
         if (timerDisplay) {
             timerDisplay.style.borderColor = remaining <= 10 ? '#ef4444' : '#f97316';
             timerDisplay.style.color = remaining <= 10 ? '#ef4444' : '#f97316';
-        }
-
-        if (remaining === 0) {
-            playSound('timerEnd');
         }
     } else {
         timerNumber.textContent = roomState.timer?.durationSeconds || 60;
@@ -268,6 +257,7 @@ toggleCardBtn.addEventListener('click', () => {
 const btnNewGame = document.getElementById('btn-new-game');
 if (btnNewGame) {
     btnNewGame.addEventListener('click', async () => {
+        playSound('click');
         if (confirm('Deseja iniciar uma nova rodada e gerar novas cartas?')) {
             const { CARD_BANK } = await import('./cards.js');
             const { shuffleArray } = await import('./utils.js');
@@ -306,8 +296,22 @@ if (btnChangePass) {
 }
 
 // Timer auto-refresh every second for smooth countdown
+let lastRemaining = null;
 setInterval(() => {
-    if (roomState && roomState.timer?.isRunning) {
+    if (roomState && roomState.timer?.isRunning && roomState.timer?.endsAtMs) {
+        const remaining = Math.max(0, Math.ceil((roomState.timer.endsAtMs - Date.now()) / 1000));
+        
+        // Play warning sound every second when under 5
+        if (remaining <= 5 && remaining > 0 && remaining !== lastRemaining) {
+            playSound('timerWarning');
+        }
+        
+        // Play end sound
+        if (remaining === 0 && lastRemaining === 1) {
+            playSound('timerEnd');
+        }
+        
+        lastRemaining = remaining;
         updateUI();
     }
 }, 1000);

@@ -321,7 +321,7 @@ function renderGuesses(guesses) {
             const { id, player, name } = btn.dataset;
             await respondToGuess(id, true);
             await addScore(player, name, roomState?.roundNumber || 1, 10);
-            playSound('message');
+            playSound('correct');
             alert(`Ponto para ${name}!`);
         });
     });
@@ -330,7 +330,7 @@ function renderGuesses(guesses) {
         btn.addEventListener('click', async () => {
             const { id } = btn.dataset;
             await respondToGuess(id, false);
-            playSound('timerEnd');
+            playSound('wrong');
         });
     });
 }
@@ -378,10 +378,12 @@ toggleCardBtn.addEventListener('click', () => {
 
 // Game Controls
 btnStartGame.addEventListener('click', async () => {
+    playSound('click');
     await updateRoom({ gameStarted: true, status: 'playing', currentTurnPlayerId: 'miguel' });
 });
 
 btnNextTurn.addEventListener('click', async () => {
+    playSound('click');
     // Get all online players for turn rotation
     const players = await new Promise(resolve => {
         const unsub = listenToPlayers(p => { unsub(); resolve(p); });
@@ -412,6 +414,7 @@ btnNextTurn.addEventListener('click', async () => {
 });
 
 btnStartTimer.addEventListener('click', async () => {
+    playSound('click');
     const now = Date.now();
     const duration = roomState.timer?.durationSeconds || 60;
     await updateRoom({
@@ -465,6 +468,7 @@ btnHidePublicChat.addEventListener('click', async () => {
 
 // Card Generation
 btnGenerateCards.addEventListener('click', async () => {
+    playSound('click');
     const difficultyArr = filterDifficulty.value;
     const categoryArr = filterCategory.value;
     
@@ -498,6 +502,7 @@ btnCancelDream.addEventListener('click', () => {
 });
 
 btnSaveDream.addEventListener('click', async () => {
+    playSound('click');
     const objective = dreamInput.value.trim();
     await updateRoom({ gameObjective: objective });
     dreamModal.classList.add('hidden');
@@ -505,34 +510,7 @@ btnSaveDream.addEventListener('click', async () => {
 });
 
 btnSaveEmojis.addEventListener('click', async () => {
-    const emojiM = emojiMiguel.value.trim();
-    const emojiS = emojiSophia.value.trim();
-    
-    if (emojiM) await updatePlayer('miguel', { emoji: emojiM });
-    if (emojiS) await updatePlayer('sophia', { emoji: emojiS });
-    
-    alert('Emojis atualizados!');
-});
-
-// Dream Modal Events
-btnOpenDream.addEventListener('click', () => {
-    dreamInput.value = roomState?.gameObjective || '';
-    dreamModal.classList.remove('hidden');
-    dreamInput.focus();
-});
-
-btnCancelDream.addEventListener('click', () => {
-    dreamModal.classList.add('hidden');
-});
-
-btnSaveDream.addEventListener('click', async () => {
-    const objective = dreamInput.value.trim();
-    await updateRoom({ gameObjective: objective });
-    dreamModal.classList.add('hidden');
-    alert('Sonho de Jogo atualizado para todos!');
-});
-
-btnSaveEmojis.addEventListener('click', async () => {
+    playSound('click');
     const emojiM = emojiMiguel.value.trim();
     const emojiS = emojiSophia.value.trim();
     
@@ -543,8 +521,24 @@ btnSaveEmojis.addEventListener('click', async () => {
 });
 
 // setInterval for dynamic UI updates (timer)
+let lastRemaining = null;
 setInterval(() => {
-    if (roomState?.timer?.isRunning) updateUI();
+    if (roomState?.timer?.isRunning && roomState.timer?.endsAtMs) {
+        const remaining = Math.max(0, Math.ceil((roomState.timer.endsAtMs - Date.now()) / 1000));
+        
+        // Play warning sound every second when under 5
+        if (remaining <= 5 && remaining > 0 && remaining !== lastRemaining) {
+            playSound('timerWarning');
+        }
+        
+        // Play end sound
+        if (remaining === 0 && lastRemaining === 1) {
+            playSound('timerEnd');
+        }
+        
+        lastRemaining = remaining;
+        updateUI();
+    }
 }, 1000);
 
 init();

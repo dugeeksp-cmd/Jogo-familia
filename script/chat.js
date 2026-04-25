@@ -43,14 +43,24 @@ export function setupChat(config) {
 
         // Pulse tab if not active and new message comes
         if (messages.length > 0 && tabs) {
-            const lastMsg = messages[messages.length - 1];
-            // Only pulse if the message came from someone else
-            if (lastMsg.senderId !== playerId) {
+            const lastMessage = messages[messages.length - 1];
+            // Only pulse and play sound if the message came from someone else
+            if (lastMessage.senderId !== playerId) {
+                // If it's a "new" message (not just loading history)
+                // We can check if the last message ID is different from what we had
+                if (messagesList.dataset.lastId !== lastMessage.id) {
+                    playSound('message');
+                    messagesList.dataset.lastId = lastMessage.id;
+                }
+
                 // Find the tab that matches the message's chatId
-                const targetTab = Array.from(tabs).find(t => (t.dataset.chatMapping || t.dataset.chat) === lastMsg.chatId);
+                const targetTab = Array.from(tabs).find(t => (t.dataset.chatMapping || t.dataset.chat) === lastMessage.chatId);
                 if (targetTab && !targetTab.classList.contains('active')) {
                     targetTab.classList.add('pulse-new');
                 }
+            } else {
+                // Update last ID if I am the sender to avoid sound on my own messages
+                messagesList.dataset.lastId = lastMessage.id;
             }
         }
     };
