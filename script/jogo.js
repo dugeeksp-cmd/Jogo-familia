@@ -131,7 +131,7 @@ function setupListeners() {
     const senderColor = lowerName === 'miguel' ? '#3b82f6' : (lowerName === 'sophia' ? '#ec4899' : '#f59e0b');
 
     setupChat({
-        playerId: currentUser.uid,
+        playerId: currentUser.uid, // USE UID
         playerName: name,
         playerRole: playerRole,
         senderColor: senderColor,

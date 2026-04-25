@@ -254,34 +254,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeVersionBtn = document.getElementById('close-version');
 
     if (versionBtn && versionModal && closeVersionBtn) {
+        const saveVersionBtn = document.getElementById('save-version-btn');
         versionBtn.addEventListener('click', () => versionModal.classList.remove('hidden'));
         closeVersionBtn.addEventListener('click', () => versionModal.classList.add('hidden'));
 
-        // Handle Checkboxes
+        // Handle Checkboxes and Save Button
         const checkboxes = document.querySelectorAll('.v-check');
-        checkboxes.forEach(cb => {
-            const version = cb.closest('.version-list').dataset.version;
-            const feat = cb.dataset.feat;
+        
+        if (saveVersionBtn) {
+            saveVersionBtn.addEventListener('click', async () => {
+                const results = Array.from(checkboxes).map(cb => ({
+                    version: cb.closest('.version-list').dataset.version,
+                    feat: cb.dataset.feat,
+                    checked: cb.checked
+                }));
 
-            // Optional: Initial state could be loaded from API if needed
-            
-            cb.addEventListener('change', async () => {
                 try {
-                    await fetch('/api/validate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            version: version,
-                            feature: feat,
-                            validated: cb.checked
-                        })
-                    });
-                    console.log(`[Version] ${feat} validado: ${cb.checked}`);
+                    saveVersionBtn.textContent = "Salvando...";
+                    saveVersionBtn.disabled = true;
+
+                    // Send all checked states to server
+                    for (const item of results) {
+                        await fetch('/api/validate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                version: item.version,
+                                feature: item.feat,
+                                validated: item.checked
+                            })
+                        });
+                    }
+
+                    saveVersionBtn.textContent = "✅ Validação Salva!";
+                    setTimeout(() => {
+                        saveVersionBtn.textContent = "Salvar Validação";
+                        saveVersionBtn.disabled = false;
+                    }, 2000);
+
                 } catch (e) {
-                    console.error("[Version] Erro ao salvar validação:", e);
+                    console.error("[Version] Erro ao salvar validações:", e);
+                    saveVersionBtn.textContent = "❌ Erro ao Salvar";
+                    setTimeout(() => {
+                        saveVersionBtn.textContent = "Salvar Validação";
+                        saveVersionBtn.disabled = false;
+                    }, 2000);
                 }
             });
-        });
+        }
     }
 });
 

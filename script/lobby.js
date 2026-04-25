@@ -110,7 +110,7 @@ function setupLobby() {
     // 5. Chat Setup
     const senderColor = PLAYER_ID === 'miguel' ? '#3b82f6' : '#ec4899';
     setupChat({
-        playerId: PLAYER_ID,
+        playerId: currentUser.uid, // USE UID INSTEAD OF SLUG
         playerName: PLAYER_NAME,
         playerRole: 'family',
         senderColor: senderColor,
@@ -125,10 +125,10 @@ function setupLobby() {
     btnCreateRoom.addEventListener('click', async () => {
         playSound('click');
         try {
-            console.log("[LOBBY] Criando sala p/ ID:", currentUser.uid);
+            console.log("[LOBBY] Criando sala p/ UID:", currentUser.uid);
             const roomId = await createGameRoom(currentUser.uid, currentUser.displayName || PLAYER_NAME);
             if (roomId) {
-                console.log("[LOBBY] Sala criada:", roomId);
+                console.log("[LOBBY] Sala criada ID:", roomId);
                 window.location.href = `jogo.html?room=${roomId}`;
             }
         } catch (error) {
