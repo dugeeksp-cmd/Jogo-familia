@@ -23,8 +23,7 @@ import {
     limit, 
     serverTimestamp,
     getDoc,
-    getDocFromServer,
-    getDocs
+    getDocFromServer
 } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -180,7 +179,8 @@ export const getGuestProfile = async (uid) => {
     try {
         const docSnap = await getDoc(doc(db, GUEST_USERS_COL, uid));
         return docSnap.exists() ? docSnap.data() : null;
-    } catch (e) {
+    } catch (error) {
+        console.error("[Firebase] erro ao pegar perfil:", error);
         return null;
     }
 };

@@ -150,8 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = await loginWithGoogle();
             await syncGoogleGuestProfile(user);
             window.location.href = 'visitante.html';
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error(error);
             guestAuthError.textContent = "Erro ao entrar com Google.";
             guestAuthError.classList.remove('hidden');
         }
@@ -165,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await loginWithUsernameOrEmail(login, pass);
             window.location.href = 'visitante.html';
-        } catch (e) {
+        } catch (error) {
+            console.error("[LOGIN]", error);
             guestAuthError.textContent = "Login ou senha inválidos.";
             guestAuthError.classList.remove('hidden');
         }
@@ -191,7 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await signUpGuest(user, email, pass);
             window.location.href = 'visitante.html';
-        } catch (e) {
+        } catch (error) {
+            console.error("[SIGNUP]", error);
             guestAuthError.textContent = "Erro ao criar conta. Tente outro usuário ou e-mail.";
             guestAuthError.classList.remove('hidden');
         }
@@ -203,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const verifyPass = () => {
         const input = playerPasswordInput.value.trim();
-        const correct = currentRoom?.passwords?.[selectedPlayerId] || 'qwerty';
+        const correct = currentRoom?.passwords?.[selectedPlayerId] || 'qwerty'; // Default: qwerty
         
         if (input === correct) {
             window.location.href = `${selectedPlayerId}.html`;
