@@ -68,14 +68,16 @@
                 <!-- Scores dynamic -->
             </div>
 
-            <a href="index.html" class="btn" style="width: 100%; background: #2a303c; border: 1px solid rgba(255,255,255,0.1);">
-                Voltar ao Início
-            </a>
+            <button id="btn-voltar" class="btn" style="width: 100%; background: #2a303c; border: 1px solid rgba(255,255,255,0.1); margin-top: 20px;">
+                Voltar ao Jogo
+            </button>
         </main>
     </div>
 
     <script type="module">
-        import { initRoom, listenToPlayers, listenToRoom } from './script/firebase-service.js';
+        import { initRoom, listenToPlayers, listenToRoom, updateRoom } from './script/firebase-service.js';
+
+        const btnVoltar = document.getElementById('btn-voltar');
 
         async function init() {
             await initRoom();
@@ -98,7 +100,29 @@
 
             // If room restarts, optionally redirect back
             listenToRoom(room => {
-                if (room.status === 'waiting') {
+                if (room.status === 'playing' || room.status === 'waiting') {
+                    const lastPlayerId = localStorage.getItem('last_player_id');
+                    if (lastPlayerId) {
+                        window.location.href = `${lastPlayerId}.html`;
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }
+            });
+
+            btnVoltar.addEventListener('click', async () => {
+                try {
+                    // Update room status to 'concluído' as requested
+                    await updateRoom({ status: 'concluído' });
+                    
+                    const lastPlayerId = localStorage.getItem('last_player_id');
+                    if (lastPlayerId) {
+                        window.location.href = `${lastPlayerId}.html`;
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                } catch (e) {
+                    console.error("Erro ao voltar:", e);
                     window.location.href = 'index.html';
                 }
             });

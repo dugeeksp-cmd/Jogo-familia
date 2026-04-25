@@ -8,7 +8,7 @@ import {
     listenToAllHands,
     sendGuess,
     onAuth,
-    loginAnonymously
+    loginWithEmail
 } from './firebase-service.js';
 import { playSound } from './audio.js';
 import { setupChat } from './chat.js';
@@ -50,20 +50,25 @@ const guessInput = document.getElementById('guess-input');
 let isInitialized = false;
 
 async function init() {
+    // Store my ID for win page redirect
+    localStorage.setItem('last_player_id', PLAYER_ID);
+    
     onAuth(async (user) => {
         try {
             if (!user) {
-                console.log("[AUTH] Nenhum usuário autenticado. Tentando login anônimo...");
+                console.log("[AUTH] Nenhum usuário autenticado. Tentando login com e-mail...");
 
                 try {
-                    await loginAnonymously();
+                    const email = `${PLAYER_ID}@sabermidia.com.br`;
+                    const password = 'qwerty';
+                    await loginWithEmail(email, password);
                     return; // Wait for onAuth to trigger again
                 } catch (authError) {
-                    console.error("[AUTH] Falha no login anônimo. O app não pode continuar sem autenticação.", authError);
+                    console.error("[AUTH] Falha no login. O app não pode continuar sem autenticação.", authError);
 
                     showAuthError(
                         "Não foi possível entrar automaticamente. " +
-                        "O login anônimo precisa estar ativado no Firebase para Miguel e Sophia acessarem o jogo."
+                        `O usuário ${PLAYER_ID}@sabermidia.com.br precisa estar cadastrado e ativo no Firebase.`
                     );
 
                     return;
@@ -111,7 +116,7 @@ function showAuthError(message) {
         <h2 style="margin: 0; font-size: 20px;">Erro de acesso ao jogo</h2>
         <p style="margin: 0; color: #cbd5e1; line-height: 1.5;">${message}</p>
         <div style="margin-top: 10px; padding: 12px; background: rgba(255,255,255,0.06); border-radius: 12px; font-size: 13px; color: #fca5a5;">
-            Ative no Firebase: Authentication > Sign-in method > Anonymous
+            Verifique se Miguel e Sophia estão cadastrados no Firebase com as senhas corretas.
         </div>
         <button onclick="location.reload()" style="
             margin-top: 12px;
@@ -242,6 +247,11 @@ function updateUI() {
     if (roomState.status === 'finished') {
         window.location.href = 'win.html';
         return;
+    }
+    
+    // Status Concluído avoids the loop
+    if (roomState.status === 'concluído') {
+        turnStatus.innerHTML = '<span style="color: #4ade80;">Jogo Concluído! 🏆</span>';
     }
 
     // Public Chat Visibility for Guests

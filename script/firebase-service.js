@@ -5,6 +5,7 @@ import {
     signInWithPopup, 
     GoogleAuthProvider, 
     signInAnonymously,
+    signInWithEmailAndPassword,
     onAuthStateChanged 
 } from 'firebase/auth';
 import { 
@@ -56,6 +57,17 @@ export const loginAnonymously = async () => {
             );
         }
 
+        throw error;
+    }
+};
+
+export const loginWithEmail = async (email, password) => {
+    try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        console.log("[AUTH] Login realizado com sucesso:", result.user.email);
+        return result.user;
+    } catch (error) {
+        console.error("[AUTH] Erro ao fazer login com e-mail:", error);
         throw error;
     }
 };

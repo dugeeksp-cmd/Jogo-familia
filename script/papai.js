@@ -82,6 +82,7 @@ const btnSaveDream = document.getElementById('btn-save-dream');
 let isInitialized = false;
 
 async function init() {
+    localStorage.setItem('last_player_id', 'papai');
     onAuth(async (user) => {
         try {
             if (user) {
@@ -237,6 +238,10 @@ function updateUI() {
     if (roomState.status === 'finished') {
         window.location.href = 'win.html';
         return;
+    }
+
+    if (roomState.status === 'concluído') {
+        if (papaiTurnStatus) papaiTurnStatus.innerHTML = '<span style="color: #4ade80; font-weight: 800;">JOGO CONCLUÍDO 🏆</span>';
     }
 
     // Update Timer for Papai

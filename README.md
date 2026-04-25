@@ -4,21 +4,22 @@ App web mobile-first para jogar o clássico jogo de adivinhação em família du
 
 ## 🚀 Configuração Crítica do Firebase
 
-Para que o jogo funcione corretamente (Miguel, Sophia e Papai), você **PRECISA** ativar os provedores de autenticação no Console do Firebase:
+Para que o jogo funcione corretamente (Miguel, Sophia e Papai), você **PRECISA** garantir que os usuários e provedores estejam configurados no Console do Firebase:
 
-1.  **Login Anônimo** (Para os filhos):
+1.  **Login com E-mail e Senha** (Para Miguel e Sophia):
     *   Vá em: **Firebase Console** > **Authentication** > **Sign-in method**.
-    *   Clique em **Add new provider** (ou localize na lista).
-    *   Selecione **Anonymous**.
-    *   Ative (**Enable**) e salve.
+    *   Clique em **Add new provider** e selecione **Email/Password**.
+    *   Ative-o e salve.
+    *   Vá na aba **Users** e crie os dois usuários abaixo (se já não existirem):
+        *   `miguel@sabermidia.com.br` / Senha: `qwerty`
+        *   `sophia@sabermidia.com.br` / Senha: `qwerty`
 
 2.  **Login com Google** (Para o Papai):
     *   Vá em: **Firebase Console** > **Authentication** > **Sign-in method**.
-    *   Clique em **Add new provider**.
-    *   Selecione **Google**.
-    *   Ative (**Enable**), configure o e-mail de suporte e salve.
+    *   Clique em **Add new provider** e selecione **Google**.
+    *   Ative-o, configure o e-mail de suporte e salve.
 
-Sem essas configurações, o aplicativo mostrará erros de "admin-restricted-operation" e não inicializará.
+Sem essas configurações, o aplicativo não conseguirá autenticar os jogadores.
 
 ## 🛠️ Como Configurar o Firestore
 
