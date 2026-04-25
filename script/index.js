@@ -286,13 +286,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkboxes.forEach(cb => {
                     const version = cb.closest('.version-list').dataset.version;
                     const feat = cb.dataset.feat;
-                    const isCheck = history[version] && history[version][feat];
+                    // Check specific version OR the new 'current' flat map for persistence
+                    const isCheck = (history[version] && history[version][feat]) || (history["current"] && history["current"][feat]);
                     cb.checked = isCheck;
                     
                     if (isCheck) {
                         const li = document.createElement('div');
-                        li.style.marginBottom = '4px';
-                        li.textContent = `✓ ${cb.parentElement.textContent.replace('Fix:', '').replace('Novo:', '').trim()}`;
+                        li.style.cssText = "font-size: 0.75rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 6px;";
+                        li.innerHTML = `
+                            <svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span style="text-decoration: line-through;">${cb.parentElement.textContent.replace('Fix:', '').replace('Novo:', '').trim()}</span>
+                        `;
                         validatedList.appendChild(li);
                         cb.parentElement.style.display = 'none'; // Hide it from pending list if already validated
                     } else {
@@ -317,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (saveVersionBtn) {
             saveVersionBtn.addEventListener('click', async () => {
+                const checkboxes = document.querySelectorAll('.v-check');
                 const results = Array.from(checkboxes).map(cb => ({
                     version: cb.closest('.version-list').dataset.version,
                     feat: cb.dataset.feat,
@@ -328,22 +335,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveVersionBtn.disabled = true;
 
                     // Send all checked states to server
+                    // We need to send them as a block or handle carefully
+                    const validatedData = {};
                     for (const item of results) {
-                        await fetch('/api/validate', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                version: item.version,
-                                feature: item.feat,
-                                validated: item.checked
-                            })
-                        });
+                        if (item.checked) {
+                            validatedData[item.feat] = true;
+                        }
                     }
 
-                    saveVersionBtn.textContent = "✅ Validação Salva!";
-                    
-                    // Refresh history UI immediately
-                    await loadValidationHistory();
+                    const resp = await fetch('/api/validate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(validatedData)
+                    });
+
+                    if (resp.ok) {
+                        saveVersionBtn.textContent = "✅ Validação Salva!";
+                        playSound('success');
+                        
+                        // Refresh history UI immediately
+                        await loadValidationHistory();
+                    } else {
+                        throw new Error("Falha no servidor");
+                    }
 
                     setTimeout(() => {
                         saveVersionBtn.textContent = "Salvar Validação";
@@ -360,6 +374,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // Add Correction report functionality
+        const addCorrectionBtn = document.getElementById('add-correction-btn');
+        const correctionArea = document.getElementById('correction-area');
+        const sendCorrectionBtn = document.getElementById('send-correction-btn');
+        const correctionText = document.getElementById('correction-text');
+
+        addCorrectionBtn?.addEventListener('click', () => {
+            correctionArea.classList.toggle('hidden');
+        });
+
+        sendCorrectionBtn?.addEventListener('click', async () => {
+            const text = correctionText.value.trim();
+            if (!text) return;
+
+            sendCorrectionBtn.disabled = true;
+            sendCorrectionBtn.textContent = 'Enviando...';
+
+            try {
+                console.log("[CORRECTION] Novo relato:", text);
+                const resp = await fetch('/api/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [`RELATO_${Date.now()}`]: text })
+                });
+
+                if (resp.ok) {
+                    playSound('success');
+                    correctionText.value = '';
+                    correctionArea.classList.add('hidden');
+                    alert("Obrigado! Sua correção foi enviada para o desenvolvedor.");
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                sendCorrectionBtn.disabled = false;
+                sendCorrectionBtn.textContent = 'Enviar Relato';
+            }
+        });
     }
 });
 

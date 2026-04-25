@@ -69,7 +69,7 @@
         <div class="footer-content">
             <p class="footer-rights">Quem sou Eu? © Todos os direitos reservados</p>
             <p class="footer-dedication">Jogo Desenvolvido por <strong>Eduardo Lima</strong> em homenagem a <strong>Sophia</strong> e <strong>Miguel</strong> ❤️ Papai ama muito vocês!</p>
-            <button id="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.2.0</button>
+            <button id="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.2.1</button>
         </div>
     </footer>
 
@@ -81,24 +81,46 @@
             </h2>
             
             <div style="display: flex; flex-direction: column; gap: 24px;">
-                <!-- Versão 1.2.0 -->
+                <!-- Versão 1.2.1 -->
                 <div class="version-item">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <strong style="color: #4ade80;">v1.2.0</strong>
+                        <strong style="color: #4ade80;">v1.2.1</strong>
                         <span style="font-size: 0.7rem; opacity: 0.5;">Atuais</span>
+                    </div>
+                    <ul class="version-list" data-version="1.2.1" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Start Button for Kids">
+                            Novo: Botão para iniciar jogo disponível para Miguel e Sophia.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Auto Room Deletion">
+                            Novo: Salar são excluídas automaticamente quando ficam vazias.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Version Sync Fix">
+                            Fix: Persistência e movimentação das validações no histórico.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Versão 1.2.0 (Move pending here) -->
+                <div class="version-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong style="color: #60a5fa;">v1.2.0</strong>
+                        <span style="font-size: 0.7rem; opacity: 0.5;">Aguardando</span>
                     </div>
                     <ul class="version-list" data-version="1.2.0" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
                         <li style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" class="v-check" data-feat="Online Indicator in Room">
-                            Novo: Indicador de jogadores online no topo da sala.
+                            Indicador de jogadores online no topo da sala.
                         </li>
                         <li style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" class="v-check" data-feat="Stay in Room after Finish">
-                            Fix: Finalizar partida agora mantém os jogadores na sala.
+                            Finalizar partida agora mantém os jogadores na sala.
                         </li>
                         <li style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" class="v-check" data-feat="Victory Return Fix">
-                            Fix: Tela de vitória agora volta para a sala de jogo.
+                            Tela de vitória agora volta para a sala de jogo.
                         </li>
                     </ul>
                 </div>
@@ -155,8 +177,14 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button id="save-version-btn" class="btn btn-primary" style="width: 100%; margin-top: 20px; background: #6366f1;">Salvar Validação</button>
-                <button id="close-version" class="btn" style="width: 100%; background: rgba(255,255,255,0.05);">Fechar</button>
+                <div id="correction-area" class="hidden" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 15px; rounded: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <label style="font-size: 0.7rem; font-weight: 800; color: #f87171; text-transform: uppercase;">Relatar Nova Correção</label>
+                    <textarea id="correction-text" class="input" placeholder="O que não está funcionando?" style="width: 100%; font-size: 0.75rem; min-height: 60px; margin-top: 8px;"></textarea>
+                    <button id="send-correction-btn" class="btn" style="width: 100%; margin-top: 8px; background: #f87171; font-size: 0.75rem;">Enviar Relato</button>
+                </div>
+                <button id="add-correction-btn" class="btn" style="width: 100%; margin-top: 10px; background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid #f87171; font-size: 0.75rem;">+ Adicionar Correção Necessária</button>
+                <button id="save-version-btn" class="btn btn-primary" style="width: 100%; margin-top: 10px; background: #6366f1;">Salvar Validação</button>
+                <button id="close-version" class="btn" style="width: 100%; background: rgba(255,255,255,0.05); margin-top: 5px;">Fechar</button>
             </div>
         </div>
     </div>

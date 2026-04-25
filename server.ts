@@ -11,8 +11,9 @@ async function startServer() {
 
   // API to save validated tests
   app.post("/api/validate", (req, res) => {
-    const { version, feature, validated } = req.body;
+    const data = req.body;
     const logPath = path.join(process.cwd(), "validated_tests.json");
+    const txtPath = path.join(process.cwd(), "validacoes.txt");
     
     let history = {};
     if (fs.existsSync(logPath)) {
@@ -23,16 +24,33 @@ async function startServer() {
       }
     }
 
-    if (!history[version]) history[version] = {};
-    history[version][feature] = validated;
+    if (data.feature && data.version) {
+      // Legacy single validation
+      if (!history[data.version]) history[data.version] = {};
+      history[data.version][data.feature] = data.validated;
+      
+      const txtLine = `[${new Date().toLocaleString()}] Versão ${data.version}: ${data.feature} -> ${data.validated ? 'VALIDADO' : 'PENDENTE'}\n`;
+      fs.appendFileSync(txtPath, txtLine);
+    } else {
+      // Bulk update or Correction report
+      Object.keys(data).forEach(key => {
+        if (key.startsWith('RELATO_')) {
+          const report = data[key];
+          const txtLine = `[${new Date().toLocaleString()}] NOVO RELATO DE CORREÇÃO: ${report}\n`;
+          fs.appendFileSync(txtPath, txtLine);
+        } else {
+          // Assume feature key (feat) and we find which version it belongs to
+          // Or we just store it in a flat validations map for easier UI retrieval
+          if (!history["current"]) history["current"] = {};
+          history["current"][key] = true;
+          
+          const txtLine = `[${new Date().toLocaleString()}] VALIDADO: ${key}\n`;
+          fs.appendFileSync(txtPath, txtLine);
+        }
+      });
+    }
 
     fs.writeFileSync(logPath, JSON.stringify(history, null, 2));
-    
-    // Also save as plain text for easy reading as requested
-    const txtPath = path.join(process.cwd(), "validacoes.txt");
-    const txtLine = `[${new Date().toLocaleString()}] Versão ${version}: ${feature} -> ${validated ? 'VALIDADO' : 'PENDENTE'}\n`;
-    fs.appendFileSync(txtPath, txtLine);
-
     res.json({ status: "ok" });
   });
 

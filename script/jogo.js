@@ -178,7 +178,7 @@ function updateUI() {
 
     const isCreator = roomState.createdBy === currentUser.uid;
     const isPapai = currentUser.email === 'papai@sabermidia.com.br';
-    const isAdmin = isCreator || isPapai;
+    const isAdmin = isCreator || isPapai || ['miguel', 'sophia'].includes(lowerName);
 
     // Toggle Lobby vs Game Area
     if (roomState.status === 'waiting') {
@@ -187,7 +187,7 @@ function updateUI() {
         
         if (isAdmin) {
             adminControlsLobby.classList.remove('hidden');
-            startButtonArea.classList.remove('hidden');
+            startButtonArea.classList.toggle('hidden', roomState.joinedPlayers.length < 2); // Show only if someone else is here
             diffSelect.value = roomState.difficulty || 'easy';
             catSelect.value = roomState.category || 'all';
         } else {
@@ -223,7 +223,11 @@ function renderLobbyPlayers() {
         allPlayers.forEach(p => {
             const identifier = (p.slug || p.name || p.id || 'anon').toLowerCase();
             const isRecentlySeen = (now - (p.lastSeen || 0)) < ACTIVE_THRESHOLD;
-            if (p.online && isRecentlySeen) {
+            // Only show family members and yourself
+            const isFamily = ['papai', 'miguel', 'sophia'].includes(identifier);
+            const isMe = p.id === currentUser.uid;
+            
+            if (p.online && isRecentlySeen && (isFamily || isMe)) {
                 if (!uniqueOnline[identifier] || (p.lastSeen > uniqueOnline[identifier].lastSeen)) {
                     uniqueOnline[identifier] = p;
                 }
