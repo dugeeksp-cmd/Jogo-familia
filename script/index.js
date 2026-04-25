@@ -256,6 +256,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (versionBtn && versionModal && closeVersionBtn) {
         versionBtn.addEventListener('click', () => versionModal.classList.remove('hidden'));
         closeVersionBtn.addEventListener('click', () => versionModal.classList.add('hidden'));
+
+        // Handle Checkboxes
+        const checkboxes = document.querySelectorAll('.v-check');
+        checkboxes.forEach(cb => {
+            const version = cb.closest('.version-list').dataset.version;
+            const feat = cb.dataset.feat;
+
+            // Optional: Initial state could be loaded from API if needed
+            
+            cb.addEventListener('change', async () => {
+                try {
+                    await fetch('/api/validate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            version: version,
+                            feature: feat,
+                            validated: cb.checked
+                        })
+                    });
+                    console.log(`[Version] ${feat} validado: ${cb.checked}`);
+                } catch (e) {
+                    console.error("[Version] Erro ao salvar validação:", e);
+                }
+            });
+        });
     }
 });
 

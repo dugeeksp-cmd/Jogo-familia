@@ -5,7 +5,8 @@ import {
     listenToActiveGameRooms, 
     listenToMeet,
     updatePlayerStatus,
-    initRoom
+    initRoom,
+    listenToPlayers
 } from './firebase-service.js';
 import { setupChat } from './chat.js';
 import { playSound } from './audio.js';
@@ -55,11 +56,22 @@ async function init() {
 function setupLobby() {
     const role = (PLAYER_ID === 'miguel' || PLAYER_ID === 'sophia' || PLAYER_ID === 'papai') ? 'family' : 'guest';
     
+    // 0. Initial Status Sync
+    const syncStatus = (isOnline) => {
+        if (currentUser) {
+            updatePlayerStatus(currentUser.uid, { 
+                online: isOnline, 
+                name: PLAYER_NAME, 
+                role: role, 
+                slug: PLAYER_ID 
+            });
+        }
+    };
+
     // 1. Heartbeat
-    updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME, role: role });
-    setInterval(() => {
-        updatePlayerStatus(PLAYER_ID, { lastSeen: Date.now(), online: true });
-    }, 30000);
+    syncStatus(true);
+    const heartbeatInterval = setInterval(() => syncStatus(true), 30000);
+    window.addEventListener('beforeunload', () => syncStatus(false));
 
     // 2. Active Rooms Listener
     listenToActiveGameRooms((rooms) => {

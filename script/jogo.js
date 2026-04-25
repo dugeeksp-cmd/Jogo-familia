@@ -94,6 +94,7 @@ function setupListeners() {
     listenToGameRoom(GAME_ROOM_ID, (room) => {
         roomState = room;
         updateUI();
+        renderLobbyPlayers();
     });
 
     // 2. Listen to All Players (to show online status/name)
@@ -188,12 +189,20 @@ function renderLobbyPlayers() {
 
     // 1. Render Registered Players in the Room
     playersInRoomList.innerHTML = roomState.joinedPlayers.map(uid => {
-        const player = allPlayers.find(p => p.id === uid) || { name: uid, online: false };
+        // Find by dynamic UID or legacy slug for Papai
+        const player = allPlayers.find(p => p.id === uid || (uid === 'papai' && p.id === 'papai')) 
+                    || allPlayers.find(p => p.slug === uid)
+                    || { name: "Jogador", online: false };
+        
+        let displayName = player.name || "Jogador";
+        if (uid === roomState.createdBy && !player.name) displayName = roomState.createdByName || "Criador";
+        if (uid === 'papai' || player.slug === 'papai' || player.id === 'papai') displayName = "Papai";
+
         return `
             <div class="flex items-center justify-between bg-gray-800/80 p-3 rounded-lg border border-gray-700">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full ${player.online ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-gray-600'}"></div>
-                    <span class="font-bold text-sm text-gray-200">${player.name}</span>
+                    <span class="font-bold text-sm text-gray-200">${displayName}</span>
                 </div>
                 ${uid === roomState.createdBy ? '<span class="text-[10px] bg-yellow-600/30 text-yellow-500 px-2 py-0.5 rounded border border-yellow-600/30 font-black uppercase">Criador</span>' : ''}
             </div>

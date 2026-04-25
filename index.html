@@ -69,7 +69,7 @@
         <div class="footer-content">
             <p class="footer-rights">Quem sou Eu? © Todos os direitos reservados</p>
             <p class="footer-dedication">Jogo Desenvolvido por <strong>Eduardo Lima</strong> em homenagem a <strong>Sophia</strong> e <strong>Miguel</strong> ❤️ Papai ama muito vocês!</p>
-            <button id="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.1.0</button>
+            <button id="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.1.1</button>
         </div>
     </footer>
 
@@ -81,29 +81,45 @@
             </h2>
             
             <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Versão 1.1.1 -->
                 <div class="version-item">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <strong style="color: #4ade80;">v1.1.0</strong>
+                        <strong style="color: #4ade80;">v1.1.1</strong>
                         <span style="font-size: 0.7rem; opacity: 0.5;">Atuais</span>
                     </div>
-                    <ul style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: disc; padding-left: 20px; line-height: 1.5;">
-                        <li>Correção Crítica: Erro 404 ao entrar na sala (Vite Build).</li>
-                        <li>Padronização de páginas e scripts (jogo.html).</li>
-                        <li>Correção: Alternância de abas de chat para Sophia e Miguel.</li>
-                        <li>Melhoria: Persistência de login e nomes no Firestore.</li>
-                        <li>Novo: Histórico de Versões (este modal).</li>
+                    <ul class="version-list" data-version="1.1.1" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Online Players Visibility">
+                            Fix: Visibilidade de jogadores online na sala para todos.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Kids Room Creation">
+                            Fix: Botão de criar sala para Kids agora funcional.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Kids Chat Tabs">
+                            Fix: Alternância de abas de chat (Papai/Família) para Kids.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Kids Messaging">
+                            Fix: Envio de mensagens no chat dos Kids.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Validation Tracking">
+                            Novo: Sistema de Checkbox e Log de Validação (.txt).
+                        </li>
                     </ul>
                 </div>
 
-                <div class="version-item">
+                <!-- Versão 1.1.0 -->
+                <div class="version-item" style="opacity: 0.6;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <strong style="color: #94a3b8;">v1.0.1</strong>
-                        <span style="font-size: 0.7rem; opacity: 0.5;">Anterior</span>
+                        <strong style="color: #94a3b8;">v1.1.0</strong>
+                        <span style="font-size: 0.7rem; opacity: 0.5;">Validado</span>
                     </div>
-                    <ul style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: disc; padding-left: 20px; line-height: 1.5;">
-                        <li>Implementação de Salas de Jogo dinâmicas.</li>
-                        <li>Sistema de Login Anônimo para crianças.</li>
-                        <li>Chat Privado entre Papai e filhos.</li>
+                    <ul style="font-size: 0.8rem; color: rgba(255,255,255,0.5); list-style: disc; padding-left: 20px;">
+                        <li>Correção Crítica: Erro 404 ao entrar na sala (Vite Build).</li>
+                        <li>Padronização de jogo.html.</li>
                     </ul>
                 </div>
             </div>
