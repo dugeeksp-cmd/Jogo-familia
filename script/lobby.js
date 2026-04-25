@@ -47,6 +47,8 @@ async function init() {
             playerNameDisplay.textContent = user.displayName || PLAYER_NAME;
         }
 
+        localStorage.setItem('last_profile', `${PLAYER_ID}.html`);
+
         // Finalize initialization
         initRoom();
         setupLobby();
@@ -70,8 +72,9 @@ function setupLobby() {
 
     // 1. Heartbeat
     syncStatus(true);
-    const heartbeatInterval = setInterval(() => syncStatus(true), 30000);
+    const heartbeatInterval = setInterval(() => syncStatus(true), 15000); // More frequent heartbeat
     window.addEventListener('beforeunload', () => syncStatus(false));
+    window.addEventListener('unload', () => syncStatus(false));
 
     // 2. Active Rooms Listener
     listenToActiveGameRooms((rooms) => {

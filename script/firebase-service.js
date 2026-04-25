@@ -412,9 +412,13 @@ export const listenToAllHands = (callback) => {
 // Players
 export const updatePlayerStatus = async (playerId, data) => {
     try {
-        const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
+        // Use a consistent ID for the status record
+        // If it's a known slug (papai, miguel, sophia), use it, otherwise use UID
+        const statusId = (['papai', 'miguel', 'sophia'].includes(playerId)) ? playerId : playerId;
+        
+        const playerRef = doc(db, "rooms", ROOM_ID, "players", statusId);
         await setDoc(playerRef, {
-            id: playerId,
+            id: statusId,
             ...data,
             lastSeen: Date.now(),
             joinedAtMs: Date.now()
@@ -422,6 +426,13 @@ export const updatePlayerStatus = async (playerId, data) => {
     } catch (e) {
         handleFirestoreError(e, 'write', `rooms/${ROOM_ID}/players/${playerId}`);
     }
+};
+
+export const markOffline = async (playerId) => {
+    try {
+        const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
+        await updateDoc(playerRef, { online: false });
+    } catch (e) {}
 };
 
 export const updatePlayer = async (playerId, data) => {

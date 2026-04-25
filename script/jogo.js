@@ -11,7 +11,9 @@ import {
     sendGuess,
     listenToGuesses,
     respondToGuess,
-    listenToMeet
+    listenToMeet,
+    updatePlayerStatus,
+    markOffline
 } from './firebase-service.js';
 import { playSound } from './audio.js';
 import { CARD_BANK } from './cards.js';
@@ -86,6 +88,32 @@ async function init() {
         userBadge.textContent = user.displayName || user.email.split('@')[0];
         
         setupListeners();
+        startStatusSync();
+    });
+}
+
+function startStatusSync() {
+    if (!currentUser) return;
+    
+    // Deduce slug from displayName or previous storage
+    const name = currentUser.displayName || '';
+    const slug = name.toLowerCase();
+    const role = ['papai', 'miguel', 'sophia'].includes(slug) ? 'family' : 'guest';
+
+    const sync = (online) => {
+        updatePlayerStatus(currentUser.uid, {
+            online,
+            name: name,
+            role: role,
+            slug: slug
+        });
+    };
+
+    sync(true);
+    const interval = setInterval(() => sync(true), 15000);
+    window.addEventListener('beforeunload', () => {
+        sync(false);
+        markOffline(currentUser.uid);
     });
 }
 
@@ -188,15 +216,17 @@ function renderLobbyPlayers() {
     if (!roomState) return;
 
     // 1. Render Registered Players in the Room
-    playersInRoomList.innerHTML = roomState.joinedPlayers.map(uid => {
-        // Find by dynamic UID or legacy slug for Papai
-        const player = allPlayers.find(p => p.id === uid || (uid === 'papai' && p.id === 'papai')) 
+    playersInRoomList.innerHTML = (roomState.joinedPlayers || []).map(uid => {
+        // Find by dynamic UID or legacy slug
+        const player = allPlayers.find(p => p.id === uid) 
                     || allPlayers.find(p => p.slug === uid)
                     || { name: "Jogador", online: false };
         
         let displayName = player.name || "Jogador";
-        if (uid === roomState.createdBy && !player.name) displayName = roomState.createdByName || "Criador";
-        if (uid === 'papai' || player.slug === 'papai' || player.id === 'papai') displayName = "Papai";
+        // Override for specific family members if possible
+        if (uid === 'papai' || player.slug === 'papai') displayName = "Papai";
+        if (uid === 'miguel' || player.slug === 'miguel') displayName = "Miguel";
+        if (uid === 'sophia' || player.slug === 'sophia') displayName = "Sophia";
 
         return `
             <div class="flex items-center justify-between bg-gray-800/80 p-3 rounded-lg border border-gray-700">
@@ -209,12 +239,27 @@ function renderLobbyPlayers() {
         `;
     }).join('');
 
-    // 2. Render Online Players to Invite
-    const availableToInvite = allPlayers.filter(p => !roomState.joinedPlayers.includes(p.id) && p.online);
-    onlinePlayersList.innerHTML = availableToInvite.length > 0 
-        ? availableToInvite.map(p => `
+    // 2. Render Online Players to Invite (Deduplicated)
+    const now = Date.now();
+    const uniqueOnline = {};
+    allPlayers.forEach(p => {
+        const identifier = (p.slug || p.name || p.id).toLowerCase();
+        const isRecentlySeen = (now - (p.lastSeen || 0)) < 45000;
+        const isJoined = (roomState.joinedPlayers || []).includes(p.id) || (roomState.joinedPlayers || []).includes(p.slug);
+
+        if (p.online && isRecentlySeen && !isJoined) {
+            if (!uniqueOnline[identifier] || (p.lastSeen > uniqueOnline[identifier].lastSeen)) {
+                uniqueOnline[identifier] = p;
+            }
+        }
+    });
+
+    const inviteList = Object.values(uniqueOnline);
+
+    onlinePlayersList.innerHTML = inviteList.length > 0 
+        ? inviteList.map(p => `
             <div class="flex items-center justify-between bg-gray-800/50 p-2 rounded-lg text-sm border border-gray-700/50">
-                <span class="text-gray-300 font-medium">${p.name}</span>
+                <span class="text-gray-300 font-medium">${p.name || 'Jogador'}</span>
                 <button onclick="window.invite('${p.id}')" class="text-[10px] bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded font-bold uppercase transition-colors">Convidar</button>
             </div>
         `).join('')
@@ -223,8 +268,8 @@ function renderLobbyPlayers() {
 
 window.invite = async (playerId) => {
     playSound('click');
-    await invitePlayerToGame(GAME_ROOM_ID, playerId);
-    alert("Convite enviado!");
+    // Using a simple alert for now as requested
+    alert(`Convite enviado para ${playerId}!`);
 };
 
 function renderOthersCards(hands) {
@@ -312,9 +357,16 @@ btnJoinRoom.addEventListener('click', async () => {
 });
 
 btnExit.addEventListener('click', async () => {
+    const returnUrl = localStorage.getItem('last_profile') || 'index.html';
+    
     if (confirm("Deseja sair da sala? Isso o removerá do jogo.")) {
-        await leaveGameRoom(GAME_ROOM_ID, currentUser.uid);
-        window.location.href = 'index.html';
+        try {
+            await leaveGameRoom(GAME_ROOM_ID, currentUser.uid);
+            window.location.href = returnUrl;
+        } catch (e) {
+            console.error(e);
+            window.location.href = returnUrl;
+        }
     }
 });
 

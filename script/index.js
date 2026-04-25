@@ -70,12 +70,29 @@ document.addEventListener('DOMContentLoaded', () => {
     function startListeners() {
         // Listen to players for online status
         listenToPlayers((players) => {
-            onlinePlayersList.innerHTML = players.map(p => {
-                if (!p.online) return '';
+            const now = Date.now();
+            const ACTIVE_THRESHOLD = 45000; // 45 seconds (was 120s)
+            
+            // Deduplicate by name or slug and filter active
+            const uniquePlayers = {};
+            players.forEach(p => {
+                const identifier = (p.slug || p.name || p.id || 'anon').toLowerCase();
+                const isRecentlySeen = (now - (p.lastSeen || 0)) < ACTIVE_THRESHOLD;
+                
+                if (p.online && isRecentlySeen) {
+                    if (!uniquePlayers[identifier] || (p.lastSeen > uniquePlayers[identifier].lastSeen)) {
+                        uniquePlayers[identifier] = p;
+                    }
+                }
+            });
+
+            const activeList = Object.values(uniquePlayers);
+
+            onlinePlayersList.innerHTML = activeList.map(p => {
                 return `
                     <div style="display: flex; align-items: center; gap: 6px; background: rgba(74, 222, 128, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.2);">
                         <div style="width: 6px; height: 6px; background: #4ade80; border-radius: 50%;"></div>
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #4ade80;">${p.name}</span>
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #4ade80;">${p.name || 'Jogador'}</span>
                     </div>
                 `;
             }).join('') || '<p style="font-size: 0.7rem; opacity: 0.4;">Ninguém online no momento.</p>';
@@ -255,7 +272,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (versionBtn && versionModal && closeVersionBtn) {
         const saveVersionBtn = document.getElementById('save-version-btn');
-        versionBtn.addEventListener('click', () => versionModal.classList.remove('hidden'));
+        const validatedSection = document.getElementById('validated-section'); // I'll add this to HTML
+        
+        versionBtn.addEventListener('click', async () => {
+            versionModal.classList.remove('hidden');
+            // Load history
+            try {
+                const res = await fetch('/api/validated');
+                const history = await res.json();
+                
+                const checkboxes = document.querySelectorAll('.v-check');
+                const validatedList = document.getElementById('validated-list');
+                validatedList.innerHTML = '';
+                
+                checkboxes.forEach(cb => {
+                    const version = cb.closest('.version-list').dataset.version;
+                    const feat = cb.dataset.feat;
+                    const isCheck = history[version] && history[version][feat];
+                    cb.checked = isCheck;
+                    
+                    if (isCheck) {
+                        const li = document.createElement('div');
+                        li.style.marginBottom = '4px';
+                        li.textContent = `✓ ${cb.parentElement.textContent.replace('Fix:', '').replace('Novo:', '').trim()}`;
+                        validatedList.appendChild(li);
+                        cb.parentElement.style.opacity = '0.3'; // Dim the pending one
+                    } else {
+                        cb.parentElement.style.opacity = '1';
+                    }
+                });
+            } catch (e) { console.error(e); }
+        });
+        
         closeVersionBtn.addEventListener('click', () => versionModal.classList.add('hidden'));
 
         // Handle Checkboxes and Save Button
@@ -266,7 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const results = Array.from(checkboxes).map(cb => ({
                     version: cb.closest('.version-list').dataset.version,
                     feat: cb.dataset.feat,
-                    checked: cb.checked
+                    checked: cb.checked,
+                    label: cb.parentElement.textContent.trim()
                 }));
 
                 try {
@@ -287,12 +336,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     saveVersionBtn.textContent = "✅ Validação Salva!";
+                    
+                    // After brief delay, could "refresh" the list?
                     setTimeout(() => {
                         saveVersionBtn.textContent = "Salvar Validação";
                         saveVersionBtn.disabled = false;
+                        // Optional: trigger a subtle UI change or close
                     }, 2000);
 
                 } catch (e) {
+                     // ... error handling
                     console.error("[Version] Erro ao salvar validações:", e);
                     saveVersionBtn.textContent = "❌ Erro ao Salvar";
                     setTimeout(() => {

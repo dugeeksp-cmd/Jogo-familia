@@ -52,6 +52,7 @@ async function init() {
                 await updateProfile(user, { displayName: PLAYER_NAME });
                 await user.getIdToken(true);
             }
+            localStorage.setItem('last_profile', 'papai.html');
             if (loginOverlay) loginOverlay.style.display = 'none';
             initRoom();
             setupAdmin();

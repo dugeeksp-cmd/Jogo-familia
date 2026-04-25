@@ -36,6 +36,21 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // API to get validated tests
+  app.get("/api/validated", (req, res) => {
+    const logPath = path.join(process.cwd(), "validated_tests.json");
+    if (fs.existsSync(logPath)) {
+      try {
+        const data = fs.readFileSync(logPath, "utf-8");
+        res.json(JSON.parse(data));
+      } catch (e) {
+        res.json({});
+      }
+    } else {
+      res.json({});
+    }
+  });
+
   // Serve static dist in production
   if (process.env.NODE_ENV === "production") {
     const distPath = path.join(process.cwd(), "dist");

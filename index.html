@@ -89,30 +89,42 @@
                     </div>
                     <ul class="version-list" data-version="1.1.1" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Online Players Visibility">
-                            Fix: Visibilidade de jogadores online na sala para todos.
+                            <input type="checkbox" class="v-check" data-feat="Online Players deduplication">
+                            Fix: Limpeza de jogadores duplicados na index.
                         </li>
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Kids Room Creation">
-                            Fix: Botão de criar sala para Kids agora funcional.
+                            <input type="checkbox" class="v-check" data-feat="Room players visibility">
+                            Fix: Jogadores na sala agora aparecem corretamente.
                         </li>
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Kids Chat Tabs">
-                            Fix: Alternância de abas de chat (Papai/Família) para Kids.
+                            <input type="checkbox" class="v-check" data-feat="Online list filtering">
+                            Fix: Lista de convite mostra apenas jogadores Online.
                         </li>
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Kids Messaging">
-                            Fix: Envio de mensagens no chat dos Kids.
+                            <input type="checkbox" class="v-check" data-feat="Back button fix">
+                            Fix: Botão voltar agora retorna ao perfil, não a index.
                         </li>
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Validation Tracking">
-                            Novo: Sistema de Checkbox e Log de Validação (.txt).
+                            <input type="checkbox" class="v-check" data-feat="Auto-offline">
+                            Fix: Status offline automático ao sair da página.
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="v-check" data-feat="Version history Persistence">
+                            Fix: Histórico de versões agora salva validações.
                         </li>
                     </ul>
                 </div>
 
-                <!-- Versão 1.1.0 -->
-                <div class="version-item" style="opacity: 0.6;">
+                <!-- Seção de Validados -->
+                <div id="validated-section" style="border-top: 1px solid rgba(255,255,255,0.1); pt-4;">
+                    <strong style="font-size: 0.7rem; opacity: 0.4; text-transform: uppercase;">Já Validados</strong>
+                    <div id="validated-list" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 8px;">
+                        <!-- Itens validados virão para cá via JS? -->
+                    </div>
+                </div>
+
+                <!-- Versão 1.1.0 (Legacy) -->
+                <div class="version-item" style="opacity: 0.4;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <strong style="color: #94a3b8;">v1.1.0</strong>
                         <span style="font-size: 0.7rem; opacity: 0.5;">Validado</span>
