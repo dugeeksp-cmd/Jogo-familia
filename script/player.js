@@ -109,10 +109,8 @@ async function finishInit() {
 
     // Initialize Chat
     chatTabs.forEach(tab => {
-        const type = tab.dataset.chat;
-        if (type === 'private-papai') tab.dataset.chatMapping = PRIVATE_CHAT_ID;
-        else if (type === 'family') tab.dataset.chatMapping = 'family';
-        else tab.dataset.chatMapping = 'group';
+        const chatId = tab.dataset.chat;
+        tab.dataset.chatMapping = chatId;
     });
 
     setupChat({

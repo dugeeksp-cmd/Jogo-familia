@@ -15,9 +15,13 @@ export function setupChat(config) {
     } = config;
 
     console.log(`[CHAT] Inicializando chat para ${playerId} (${playerName})`, { initialChatId });
+    console.log("[CHAT] tabs encontrados:", tabs?.length);
+    console.log("[CHAT] messagesList:", messagesList);
+    console.log("[CHAT] chat-input:", input);
+    console.log("[CHAT] sendBtn:", sendBtn);
 
     if (!messagesList || !input || !sendBtn) {
-        console.error('[CHAT] Elementos obrigatórios não encontrados:', { messagesList, input, sendBtn });
+        console.error('[CHAT] Elementos obrigatórios ausentes. Chat não será iniciado.');
         return;
     }
 
@@ -91,6 +95,14 @@ export function setupChat(config) {
         unsubscribe = listenToMessages(chatId, (msgs) => {
             console.log(`[CHAT] Mensagens recebidas para ${chatId}: ${msgs.length}`);
             renderMessages(msgs);
+        }, (err) => {
+            console.error(`[CHAT] Erro no listener de ${chatId}:`, err);
+            messagesList.innerHTML = `
+                <div class="empty-chat">
+                    <span>⚠️</span>
+                    <p>Erro ao carregar mensagens. Verifique os índices do Firestore no console.</p>
+                </div>
+            `;
         });
     };
 
@@ -118,7 +130,7 @@ export function setupChat(config) {
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const newChatId = tab.dataset.chatMapping || tab.dataset.chat;
-                console.log(`[CHAT] Clique na aba: ${tab.textContent} -> ${newChatId}`);
+                console.log(`[CHAT] Clique na aba: ${tab.textContent.trim()} -> ${newChatId}`);
                 
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.remove('pulse-new');

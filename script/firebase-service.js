@@ -152,61 +152,63 @@ export const respondToGuess = async (guessId, isCorrect) => {
 export const sendMessage = async (chatId, senderId, senderName, text) => {
     try {
         console.log(`[Firebase] Enviando mensagem para ${chatId}: "${text}"`);
+
+        if (!chatId || !senderId || !senderName || !text.trim()) {
+            throw new Error("Dados inválidos para envio de mensagem");
+        }
+
         const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
+
         await addDoc(messagesRef, {
             chatId,
             senderId,
             senderName,
-            text,
-            createdAt: serverTimestamp()
+            text: text.trim(),
+            createdAt: serverTimestamp(),
+            createdAtMs: Date.now()
         });
+
     } catch (e) {
-        console.error('[Firebase] Erro ao enviar mensagem:', e);
-        handleFirestoreError(e, 'create', `rooms/${ROOM_ID}/messages`);
+        console.error("[Firebase] Erro ao enviar mensagem:", e);
+        handleFirestoreError(e, "create", `rooms/${ROOM_ID}/messages`);
     }
 };
 
-export const listenToMessages = (chatId, callback) => {
+export const listenToMessages = (chatId, callback, errorCallback) => {
     console.log(`[Firebase] Iniciando listener para chat: ${chatId}`);
-    const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
-    
-    // Simplest possible query to avoid index issues
-    const q = query(
-        messagesRef, 
-        where("chatId", "==", chatId)
-    );
-    
-    return onSnapshot(q, (snapshot) => {
-        console.log(`[Firebase] Snapshot recebido para ${chatId}. Total docs: ${snapshot.docs.length}. From cache: ${snapshot.metadata.fromCache}`);
-        
-        const msgs = snapshot.docs.map(doc => {
-            const data = doc.data();
-            // Handle server timestamp and missing createdAt
-            let createdAt = data.createdAt;
-            if (!createdAt) {
-                createdAt = { toDate: () => new Date() };
-                console.warn(`[Firebase] Mensagem ${doc.id} sem createdAt. Usando data atual.`);
-            }
 
-            return { 
-                id: doc.id, 
-                ...data,
-                createdAt
-            };
-        });
-        
-        // Client-side sort by createdAt
-        msgs.sort((a, b) => {
-            const timeA = a.createdAt.toDate ? a.createdAt.toDate() : a.createdAt;
-            const timeB = b.createdAt.toDate ? b.createdAt.toDate() : b.createdAt;
-            return (timeA || 0) - (timeB || 0);
-        });
-        
+    if (!chatId) {
+        console.error("[Firebase] listenToMessages chamado sem chatId");
+        return () => {};
+    }
+
+    const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
+
+    const q = query(
+        messagesRef,
+        where("chatId", "==", chatId),
+        orderBy("createdAtMs", "asc")
+    );
+
+    return onSnapshot(q, (snapshot) => {
+        console.log(`[Firebase] Snapshot recebido para ${chatId}. Total docs: ${snapshot.docs.length}`);
+
+        const msgs = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
         callback(msgs);
+
     }, (error) => {
         console.error(`[Firebase] Erro CRÍTICO no listener de mensagens para ${chatId}:`, error);
-        // If we get permission denied here, it's definitely a rules issue
-        handleFirestoreError(error, 'list', `rooms/${ROOM_ID}/messages (chatId=${chatId})`);
+
+        if (error.code === "failed-precondition") {
+            console.error("[Firebase] Provável índice ausente no Firestore. O chat pode não funcionar até que o índice seja criado.");
+        }
+
+        if (errorCallback) errorCallback(error);
+        else handleFirestoreError(error, "list", `rooms/${ROOM_ID}/messages (chatId=${chatId})`);
     });
 };
 
