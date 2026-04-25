@@ -28,6 +28,33 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // --- Game Rooms ---
+    match /gameRooms/{gameRoomId} {
+      function isFamily() {
+        return request.auth.token.email in ['miguel@sabermidia.com.br', 'sophia@sabermidia.com.br', 'papai@sabermidia.com.br'];
+      }
+      function canCreateRoom() {
+        return isFamily() || isAdmin();
+      }
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && canCreateRoom();
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.createdBy || isAdmin() ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['joinedPlayers', 'invitedPlayers'])) // Allow joining or inviting
+      );
+      allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.createdBy);
+    }
+
+    match /gameRooms/{gameRoomId}/players/{playerId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    match /gameRooms/{gameRoomId}/hands/{playerId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || (isSignedIn() && request.auth.uid == get(/databases/$(database)/documents/gameRooms/$(gameRoomId)).data.createdBy);
+    }
+
     // --- Rooms & Sub-collections ---
     match /rooms/{roomCode} {
       allow read: if isSignedIn();

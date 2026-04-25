@@ -3,345 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#64748b">
-    <title>Convidado - Quem Sou Eu?</title>
+    <title>Convidado - Lobby</title>
     <link rel="stylesheet" href="style/main.css">
     <link rel="stylesheet" href="style/player.css">
     <link rel="stylesheet" href="style/chat.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body data-player="visitante">
-    <div class="app-container fade-in">
-        <main class="player-main">
-            <header class="player-header">
-                <div>
-                    <h2 id="guest-name-display">Visitante</h2>
-                    <div class="status-indicator">
-                        <span class="status-dot"></span>
-                        <span id="player-score-header">0 pts</span>
-                    </div>
+<body data-player="visitante" class="bg-gray-950 text-white">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col p-4 gap-6">
+        
+        <!-- Top Bar -->
+        <header class="flex justify-between items-center bg-gray-900/40 p-4 rounded-2xl border border-white/5">
+            <div>
+                <h1 id="guest-name-display" class="text-xl font-black text-gray-200">Visitante</h1>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span class="text-xs text-gray-500 font-bold uppercase tracking-widest">Online</span>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button id="invite-btn" class="status-badge" style="cursor: pointer;">🔗 Convidar</button>
-                    <a href="index.html" class="status-badge">Sair</a>
-                </div>
-            </header>
-
-            <div id="login-guest" class="card hidden" style="margin-top: 20px;">
-                <h3 style="margin-bottom: 12px;">Carregando Perfil...</h3>
-                <p style="opacity: 0.7;">Aguarde enquanto entramos na sala.</p>
             </div>
+            <a href="index.html" class="text-xs bg-gray-800 px-3 py-2 rounded-full hover:bg-gray-700 transition-colors">Sair</a>
+        </header>
 
-            <div id="guest-content" class="hidden" style="display: flex; flex-direction: column; gap: 32px;">
-                <!-- Área do Meet -->
-                <div id="meet-container" class="meet-button-container hidden">
-                    <a href="#" id="meet-link" target="_blank" class="btn btn-meet">
-                        <span>📹</span>
-                        <span>Entrar na Reunião</span>
-                    </a>
+        <!-- Active Rooms Section (Primary for Visitors) -->
+        <section class="space-y-4">
+            <div class="bg-gray-900/60 rounded-3xl border border-white/5 p-6 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Salas Disponíveis</h2>
+                    <span class="text-[10px] bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded border border-blue-600/20 font-black">AO VIVO</span>
                 </div>
-
-                <!-- Objetivo / Sonho de Jogo -->
-                <div id="objective-container" class="hidden" style="margin-bottom: 0px;">
-                    <div style="background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1)); border: 1px dashed #10b981; padding: 12px; border-radius: 12px; font-size: 0.8rem; text-align: center;">
-                        <div style="font-weight: 800; color: #10b981; margin-bottom: 4px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;">✨ Sonho de Jogo (Objetivo)</div>
-                        <div id="objective-text" style="color: white; line-height: 1.4;"></div>
+                <div id="activeRoomsList" class="space-y-3">
+                    <!-- List of active rooms -->
+                    <div class="animate-pulse space-y-2">
+                        <div class="h-16 bg-gray-800 rounded-2xl"></div>
+                        <div class="h-16 bg-gray-800 rounded-2xl"></div>
                     </div>
                 </div>
-
-                <!-- Cronômetro -->
-                <section class="timer-area">
-                    <div class="timer-display">
-                        <span id="timer-number">60</span>
-                    </div>
-                    <div class="turn-status-container">
-                        <span class="turn-label">Vez do Jogador</span>
-                        <div class="turn-status" id="turn-status">Aguardando início...</div>
-                    </div>
-                </section>
-
-                <!-- Cartas na Mesa -->
-                <section class="table-section" style="margin-top: 10px;">
-                    <div class="turn-label" style="margin-bottom: 12px; display: block;">Na Testa dos Jogadores:</div>
-                    <div id="all-cards-display" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
-                        <!-- Dinamizado -->
-                    </div>
-                    <button id="btn-open-guess" class="btn" style="width: 100%; background: linear-gradient(to right, #f59e0b, #d97706); color: white;">
-                        🎯 Dar Palpite
-                    </button>
-                </section>
-
-                <!-- Chats -->
-                <section class="chats-section">
-                    <div class="chat-tabs">
-                        <button class="chat-tab active" data-chat="group">Chat Público</button>
-                    </div>
-
-                    <div class="chat-window">
-                        <div id="messages-list" class="messages-list"></div>
-                        <div class="chat-input-area">
-                            <input type="text" id="chat-input" class="chat-input" placeholder="Escreva aqui...">
-                            <button id="send-msg" class="btn-send">➤</button>
-                        </div>
-                    </div>
-                </section>
             </div>
-        </main>
-    </div>
+            <p class="text-[10px] text-gray-600 text-center uppercase tracking-widest font-bold">Visitantes podem entrar em salas criadas pela família</p>
+        </section>
 
-    <!-- Modal de Palpite -->
-    <div id="guess-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px;">
-        <div class="card" style="width: 100%; max-width: 350px; text-align: center;">
-            <h3 style="margin-bottom: 20px;">Qual é o seu palpite?</h3>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">O Papai dirá se você acertou seu personagem!</p>
-            <input type="text" id="guess-input" class="chat-input" placeholder="Ex: Gato, Batman..." style="width: 100%; margin-bottom: 20px; padding: 15px;">
-            <div style="display: flex; gap: 10px;">
-                <button id="btn-cancel-guess" class="btn" style="flex: 1; opacity: 0.6; background: transparent;">Cancelar</button>
-                <button id="btn-confirm-guess" class="btn" style="flex: 2; background: #f59e0b;">Enviar Palpite</button>
+        <!-- Public Chat -->
+        <section class="flex-1 flex flex-col min-h-[400px]">
+            <div class="flex bg-gray-900/40 rounded-t-2xl border-t border-x border-white/5">
+                <button class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 border-blue-500 text-blue-400 bg-blue-500/5">Chat Público</button>
             </div>
-        </div>
+            <div class="flex-1 bg-gray-900/20 border-x border-b border-white/5 rounded-b-2xl overflow-hidden flex flex-col">
+                <div id="messages-list" class="flex-1 p-4 overflow-y-auto space-y-3">
+                    <!-- Messages -->
+                </div>
+                <div class="p-4 bg-gray-900/60 border-t border-white/5 flex gap-2">
+                    <input type="text" id="chat-input" class="flex-1 bg-gray-950 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-blue-500" placeholder="Participe do chat...">
+                    <button id="send-msg" class="bg-blue-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">➤</button>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <!-- Scripts -->
-    <script type="module">
-        import { setupChat } from './script/chat.js';
-        import { 
-            initRoom, 
-            listenToRoom, 
-            updatePlayerStatus, 
-            listenToPlayers, 
-            listenToAllHands, 
-            sendGuess,
-            onAuth,
-            getGuestProfile
-        } from './script/firebase-service.js';
-        import { playSound } from './script/audio.js';
-
-        let PLAYER_ID = '';
-        let PLAYER_NAME = '';
-        let PLAYER_ROLE = 'guest';
-        let SENDER_COLOR = '#f59e0b';
-        let roomState = null;
-
-        const loginGuest = document.getElementById('login-guest');
-        const guestContent = document.getElementById('guest-content');
-        const guestNameDisplay = document.getElementById('guest-name-display');
-        const timerNumber = document.getElementById('timer-number');
-        const turnStatus = document.getElementById('turn-status');
-        const allCardsDisplay = document.getElementById('all-cards-display');
-        const objectiveContainer = document.getElementById('objective-container');
-        const objectiveText = document.getElementById('objective-text');
-        const meetContainer = document.getElementById('meet-container');
-        const meetLink = document.getElementById('meet-link');
-        const playerScoreHeader = document.getElementById('player-score-header');
-        const roomFullMsg = document.getElementById('room-full-msg');
-        const inviteBtn = document.getElementById('invite-btn');
-
-        // Guess Modal Elements
-        const btnOpenGuess = document.getElementById('btn-open-guess');
-        const guessModal = document.getElementById('guess-modal');
-        const btnCancelGuess = document.getElementById('btn-cancel-guess');
-        const btnConfirmGuess = document.getElementById('btn-confirm-guess');
-        const guessInput = document.getElementById('guess-input');
-
-        onAuth(async (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
-            }
-            await finishGuestJoin(user);
-        });
-
-        async function finishGuestJoin(user) {
-            if (PLAYER_ID) return; // Already joined
-            
-            await initRoom();
-            
-            // Fetch Profile
-            const profile = await getGuestProfile(user.uid);
-            if (!profile) {
-                // If no profile, maybe it's Miguel/Sophia accidentally accessing this?
-                // For now, redirect or create a temp one.
-                window.location.href = 'index.html';
-                return;
-            }
-
-            PLAYER_NAME = profile.displayName;
-            PLAYER_ROLE = profile.role;
-            SENDER_COLOR = profile.chatColor || '#f59e0b';
-
-            // Check room limit
-            const players = await new Promise(resolve => {
-                const unsub = listenToPlayers(p => { unsub(); resolve(p); });
-            });
-
-            if (players.length >= (roomState?.maxPlayers || 8)) {
-                if (loginGuest) {
-                    loginGuest.innerHTML = '<h3 style="color: #ef4444;">Sala Cheia!</h3><p>Não há espaço para novos jogadores.</p>';
-                    loginGuest.classList.remove('hidden');
-                }
-                return;
-            }
-
-            PLAYER_ID = 'guest_' + user.uid.slice(0, 8);
-            if (loginGuest) loginGuest.classList.add('hidden');
-            guestContent.classList.remove('hidden');
-            guestNameDisplay.textContent = PLAYER_NAME;
-
-            await updatePlayerStatus(PLAYER_ID, { 
-                online: true, 
-                name: PLAYER_NAME, 
-                role: PLAYER_ROLE, 
-                chatColor: SENDER_COLOR, 
-                score: 0 
-            });
-
-            // Setup Chat
-            setupChat({
-                playerId: PLAYER_ID,
-                playerName: PLAYER_NAME,
-                playerRole: PLAYER_ROLE,
-                senderColor: SENDER_COLOR,
-                initialChatId: 'group',
-                tabs: document.querySelectorAll('.chat-tab'),
-                messagesList: document.getElementById('messages-list'),
-                input: document.getElementById('chat-input'),
-                sendBtn: document.getElementById('send-msg')
-            });
-        }
-
-        listenToRoom(room => {
-            roomState = room;
-            updateUI();
-        });
-
-        let lastPlayers = [];
-
-        listenToPlayers(players => {
-            lastPlayers = players;
-            const me = players.find(p => p.id === PLAYER_ID);
-            if (me) {
-                playerScoreHeader.textContent = `${me.score || 0} pts`;
-                const emojiStr = me.emoji ? `<span style="margin-right: 8px;">${me.emoji}</span>` : '';
-                guestNameDisplay.innerHTML = `${emojiStr}${PLAYER_NAME}`;
-            }
-        });
-
-        listenToAllHands(hands => {
-            if (!allCardsDisplay) return;
-            allCardsDisplay.innerHTML = hands.map(h => {
-                const isMe = h.playerId === PLAYER_ID;
-                const playerInfo = lastPlayers.find(p => p.id === h.playerId);
-                const emoji = playerInfo?.emoji || '';
-                const emojiStr = emoji ? `<span style="margin-right: 4px;">${emoji}</span>` : '';
-                return `
-                    <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; border-radius: 12px; font-size: 0.7rem; min-width: 80px; text-align: center;">
-                        <div style="font-weight: 800; color: ${isMe ? '#f59e0b' : '#10b981'}; margin-bottom: 2px;">
-                            ${emojiStr}${isMe ? 'VOCÊ' : h.playerId.toUpperCase()}
-                        </div>
-                        <div style="color: white; font-weight: 600; filter: ${isMe ? 'blur(4px)' : 'none'};">
-                            ${isMe ? '???' : (h.card?.text || 'Sem carta')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        });
-
-        function updateUI() {
-            if (!roomState) return;
-
-            if (roomState.status === 'finished') {
-                window.location.href = 'win.html';
-                return;
-            }
-
-            if (roomState.meeting?.enabled && roomState.meeting?.link) {
-                meetLink.href = roomState.meeting.link;
-                meetContainer.classList.remove('hidden');
-            } else {
-                meetContainer.classList.add('hidden');
-            }
-
-            // Objective
-            if (roomState.gameObjective) {
-                objectiveText.textContent = roomState.gameObjective;
-                objectiveContainer.classList.remove('hidden');
-            } else {
-                objectiveContainer.classList.add('hidden');
-            }
-
-            // Timer logic
-            if (roomState.timer?.isRunning && roomState.timer?.endsAtMs) {
-                const remaining = Math.max(0, Math.ceil((roomState.timer.endsAtMs - Date.now()) / 1000));
-                timerNumber.textContent = remaining;
-                
-                // Visual feedback for low time
-                const timerDisplay = document.querySelector('.timer-display');
-                if (timerDisplay) {
-                    timerDisplay.style.borderColor = remaining <= 10 ? '#ef4444' : '#f97316';
-                    timerDisplay.style.color = remaining <= 10 ? '#ef4444' : '#f97316';
-                }
-
-                if (remaining === 0) playSound('timerEnd');
-            } else {
-                timerNumber.textContent = roomState.timer?.durationSeconds || 60;
-                const timerDisplay = document.querySelector('.timer-display');
-                if (timerDisplay) {
-                    timerDisplay.style.borderColor = '#f97316';
-                    timerDisplay.style.color = '#f97316';
-                }
-            }
-
-            const turnName = roomState.currentTurnPlayerId ? roomState.currentTurnPlayerId.charAt(0).toUpperCase() + roomState.currentTurnPlayerId.slice(1) : 'Aguardando';
-            
-            if (roomState.currentTurnPlayerId === PLAYER_ID) {
-                turnStatus.innerHTML = '<span class="turn-active">Sua vez de perguntar!</span>';
-            } else {
-                turnStatus.textContent = `Vez de: ${turnName}`;
-            }
-        }
-
-        inviteBtn.addEventListener('click', () => {
-            const url = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}/index.html?room=${roomState?.code || "PRINCIPAL"}`;
-            navigator.clipboard.writeText(url).then(() => {
-                alert('Link de convite com código da sala copiado!');
-            });
-        });
-
-        // Guess Modal Events
-        if (btnOpenGuess) {
-            btnOpenGuess.addEventListener('click', () => {
-                guessModal.classList.remove('hidden');
-                guessInput.focus();
-            });
-        }
-
-        if (btnCancelGuess) {
-            btnCancelGuess.addEventListener('click', () => {
-                guessModal.classList.add('hidden');
-                guessInput.value = '';
-            });
-        }
-
-        if (btnConfirmGuess) {
-            btnConfirmGuess.addEventListener('click', async () => {
-                const text = guessInput.value.trim();
-                if (!text) return;
-
-                if (!PLAYER_ID) {
-                    alert('Você precisa entrar na sala primeiro!');
-                    return;
-                }
-
-                await sendGuess(PLAYER_ID, PLAYER_NAME, text);
-                alert('Palpite enviado! O Papai verificará se você acertou.');
-                guessModal.classList.add('hidden');
-                guessInput.value = '';
-            });
-        }
-
-        setInterval(() => { if (roomState?.timer?.isRunning) updateUI(); }, 1000);
-    </script>
+    <script type="module" src="script/visitante.js"></script>
 </body>
 </html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Jogo - Quem Sou Eu?</title>
+    <link rel="stylesheet" href="style/player.css">
+    <link rel="stylesheet" href="style/jogo.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .blinking-meet {
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen pb-10">
+
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <button onclick="window.history.back()" class="p-2 hover:bg-gray-700 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            </button>
+            <h1 class="text-xl font-bold flex flex-col">
+                <span class="text-xs text-gray-400 uppercase tracking-widest">Sala de Jogo</span>
+                <span id="roomTitle">Carregando...</span>
+            </h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="userBadge" class="bg-gray-700 px-3 py-1 rounded-full text-sm font-medium border border-gray-600">Usuário</span>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-6">
+
+        <!-- LOBBY STATE -->
+        <section id="lobbyArea" class="space-y-6">
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl space-y-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-2xl font-bold">Aguardando Jogadores</h2>
+                        <p class="text-gray-400 text-sm">A sala está aberta. Aguarde os convidados entrarem.</p>
+                    </div>
+                    <div id="adminControlsLobby" class="hidden flex gap-2">
+                        <select id="diffSelect" class="bg-gray-700 border-none rounded-lg text-sm p-2 outline-none focus:ring-2 focus:ring-yellow-500 transition-all">
+                            <option value="easy">Fácil</option>
+                            <option value="medium">Médio</option>
+                            <option value="hard">Difícil</option>
+                            <option value="all">Todas</option>
+                        </select>
+                        <select id="catSelect" class="bg-gray-700 border-none rounded-lg text-sm p-2 outline-none focus:ring-2 focus:ring-yellow-500 transition-all">
+                            <option value="all">Todas as Categorias</option>
+                            <option value="animals">Animais</option>
+                            <option value="objects">Objetos</option>
+                            <option value="professions">Profissões</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Players in room -->
+                    <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Na sala</h3>
+                        <div id="playersInRoomList" class="space-y-2">
+                            <!-- List of joined players -->
+                        </div>
+                        <div id="joinButtonArea" class="mt-4 pt-4 border-t border-gray-700/50 hidden">
+                            <button id="btnJoinRoom" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-xl font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg">Entrar na Sala</button>
+                        </div>
+                    </div>
+
+                    <!-- Online players available -->
+                    <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Online agora</h3>
+                        <div id="onlinePlayersList" class="space-y-2">
+                            <!-- List of online players to invite -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="startButtonArea" class="hidden pt-4">
+                    <button id="btnStartGame" class="w-full bg-yellow-600 hover:bg-yellow-700 p-4 rounded-xl text-xl font-black uppercase tracking-widest transition-all transform hover:scale-105 active:scale-95 shadow-[0_4px_0_rgb(133,96,0)] active:shadow-none active:translate-y-1">Iniciar Jogo 🚀</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GAME STATE -->
+        <section id="gameArea" class="hidden space-y-6">
+            <!-- Game UI similar to what was in player.html but adapted for room context -->
+            <div class="bg-gray-800 p-4 rounded-2xl border border-gray-700 shadow-xl overflow-hidden relative">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="bg-gray-900 px-4 py-2 rounded-xl flex items-center gap-3 border border-gray-700">
+                        <span class="text-gray-500 font-mono text-sm uppercase">Rodada</span>
+                        <span id="gameRound" class="text-2xl font-black text-yellow-500">1</span>
+                    </div>
+                    <div id="gameTimer" class="bg-gray-900 px-6 py-2 rounded-xl flex items-center gap-3 border border-gray-700 min-w-[120px] justify-center">
+                        <span class="text-4xl font-black text-white" id="timerValue">00</span>
+                    </div>
+                </div>
+
+                <!-- Minha Carta -->
+                <div class="relative group">
+                    <p class="text-xs font-semibold text-center mb-2 text-gray-400 uppercase tracking-widest">Minha Carta (Na sua testa)</p>
+                    <div class="card-container mx-auto aspect-[3/4] w-64 bg-gray-700 rounded-3xl p-6 flex flex-col items-center justify-center text-center shadow-2xl border-4 border-gray-600 relative overflow-hidden group">
+                        <div id="myCardContent" class="blur-xl transition-all duration-500 pointer-events-none opacity-0 flex flex-col items-center gap-4">
+                             <!-- Card Info -->
+                        </div>
+                        <div id="myCardRevealOverlay" class="absolute inset-0 bg-gray-800 flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-gray-750">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500 mb-4 animate-bounce"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                            <p class="text-sm font-bold text-gray-300">Não esqueceu?</p>
+                            <p class="text-xs text-gray-500 mt-2">Clique para ver (por 3s)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Na testa dos outros -->
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Na testa dos outros
+                </h3>
+                <div id="othersCards" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <!-- Outros jogadores aparecerão aqui -->
+                </div>
+            </div>
+
+            <!-- Palpites -->
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Fazer um Palpite
+                </h3>
+                <div class="flex gap-2">
+                    <input type="text" id="guessInput" placeholder="Eu sou um(a)..." class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-yellow-500 transition-all font-medium">
+                    <button id="btnGuess" class="bg-yellow-600 hover:bg-yellow-700 px-6 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg hover:translate-y-[-2px] active:translate-y-[0]">
+                        <span>Enviar</span>
+                    </button>
+                </div>
+                <div id="activeGuesses" class="mt-4 space-y-2">
+                    <!-- Palpites pendentes -->
+                </div>
+            </div>
+
+            <!-- Admin Controls (Inside Game) -->
+            <div id="adminControlsArea" class="hidden bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl bg-gradient-to-br from-gray-800 to-gray-900">
+                <h3 class="text-lg font-black mb-4 flex items-center gap-2 text-yellow-500 uppercase tracking-tighter">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                    Painel de Controle
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="btnTimerToggle" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-xl font-bold text-sm transition-all border border-gray-600">INICIAR CRONÔMETRO</button>
+                    <button id="btnTimerReset" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-xl font-bold text-sm transition-all border border-gray-600">RESETAR TEMPO</button>
+                    <button id="btnNextRound" class="bg-blue-600/20 hover:bg-blue-600/30 p-3 rounded-xl font-bold text-blue-400 text-sm transition-all border border-blue-600/30 col-span-2">PRÓXIMA RODADA (NOVAS CARTAS)</button>
+                    <button id="btnEndGame" class="bg-red-600/20 hover:bg-red-600/30 p-3 rounded-xl font-bold text-red-400 text-sm transition-all border border-red-600/30 col-span-2">FINALIZAR JOGO</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAT AREA -->
+        <section class="bg-gray-800 rounded-2xl border border-gray-700 shadow-xl overflow-hidden flex flex-col min-h-[400px]">
+            <div class="flex bg-gray-900/50 border-b border-gray-700">
+                <button class="chat-tab flex-1 py-3 text-[10px] font-black uppercase tracking-widest border-b-2 border-yellow-500 text-yellow-500 bg-yellow-500/5" data-chat="group">Global</button>
+                <button class="chat-tab flex-1 py-3 text-[10px] font-black uppercase tracking-widest border-b-2 border-transparent text-gray-500" data-chat="family">Família</button>
+            </div>
+            <div id="messages-list" class="flex-1 p-4 overflow-y-auto space-y-3 min-h-[300px]">
+                <!-- Mensagens -->
+            </div>
+            <div class="p-3 bg-gray-900 border-t border-gray-700 flex gap-2">
+                <input type="text" id="chat-input" class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-yellow-500" placeholder="Escreva uma mensagem...">
+                <button id="send-msg" class="bg-yellow-600 w-10 h-10 rounded-xl flex items-center justify-center text-gray-950 font-bold">➤</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Meet Notification (Floating) -->
+    <div id="meetNotification" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[100] hidden">
+        <a id="meetLinkBtn" href="#" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-full font-bold shadow-2xl flex items-center gap-3 blinking-meet border-4 border-green-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+            ENTRAR NA REUNIÃO DO MEET
+        </a>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="script/jogo.js"></script>
+</body>
+</html>

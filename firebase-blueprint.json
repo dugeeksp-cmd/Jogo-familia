@@ -153,9 +153,50 @@
         "respondedAt": { "type": "number", "format": "timestamp" }
       },
       "required": ["playerId", "playerName", "text", "status", "createdAt"]
+    },
+    "GameRoom": {
+      "title": "Sala de Jogo Real",
+      "description": "Sala onde o jogo acontece efetivamente.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "status": { "type": "string", "enum": ["waiting", "playing", "finished", "cancelled"] },
+        "createdBy": { "type": "string" },
+        "createdByName": { "type": "string" },
+        "createdAt": { "type": "number", "format": "timestamp" },
+        "createdAtMs": { "type": "number" },
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard", "all"] },
+        "category": { "type": "string", "enum": ["all", "animals", "objects", "professions"] },
+        "invitedPlayers": { "type": "array", "items": { "type": "string" } },
+        "joinedPlayers": { "type": "array", "items": { "type": "string" } },
+        "currentTurnPlayerId": { "type": "string" },
+        "gameStarted": { "type": "boolean" },
+        "roundNumber": { "type": "number" },
+        "timer": {
+          "type": "object",
+          "properties": {
+            "durationSeconds": { "type": "number" },
+            "startedAtMs": { "type": "number" },
+            "endsAtMs": { "type": "number" },
+            "isRunning": { "type": "boolean" }
+          }
+        }
+      }
     }
   },
   "firestore": {
+    "/gameRooms/{gameRoomId}": {
+      "schema": "GameRoom",
+      "description": "Coleção de salas de jogo ativas."
+    },
+    "/gameRooms/{gameRoomId}/players/{playerId}": {
+      "schema": "Player",
+      "description": "Jogadores dentro de uma sala específica."
+    },
+    "/gameRooms/{gameRoomId}/hands/{playerId}": {
+      "schema": "PrivateHand",
+      "description": "Mão (carta) de cada jogador na sala."
+    },
     "/rooms/{roomCode}": {
       "schema": "Room",
       "description": "Documento da sala principal."

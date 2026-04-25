@@ -3,134 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#ec4899">
-    <title>Sophia - Quem Sou Eu?</title>
+    <title>Sophia - Lobby</title>
     <link rel="stylesheet" href="style/main.css">
     <link rel="stylesheet" href="style/player.css">
     <link rel="stylesheet" href="style/chat.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .blinking-meet {
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+    </style>
 </head>
-<body data-player="sophia">
-    <div class="app-container fade-in">
-        <main class="player-main">
-            <header class="player-header">
-                <div>
-                    <h2 id="player-name-display">Sophia</h2>
-                    <div class="status-indicator">
-                        <span class="status-dot"></span>
-                        <span id="player-score-header">0 pts</span>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <button id="invite-btn" class="status-badge" style="cursor: pointer;">🔗 Convidar</button>
-                    <a href="index.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem;">🏠 Início</a>
-                </div>
-            </header>
-
-            <!-- Ações Rápidas -->
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button id="btn-new-game" class="btn" style="flex: 1; background: #ec4899; font-size: 0.75rem; padding: 12px; font-weight: 800; border-radius: 12px;">🎮 Criar Novo Jogo</button>
-                <button id="btn-change-pass" class="btn" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; padding: 12px; font-weight: 800; border-radius: 12px;">🔑 Trocar Minha Senha</button>
-            </div>
-
-            <!-- Objetivo / Sonho de Jogo -->
-            <div id="objective-container" class="hidden" style="margin-bottom: 15px;">
-                <div style="background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1)); border: 1px dashed #10b981; padding: 12px; border-radius: 12px; font-size: 0.8rem; text-align: center;">
-                    <div style="font-weight: 800; color: #10b981; margin-bottom: 4px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;">✨ Sonho de Jogo (Objetivo)</div>
-                    <div id="objective-text" style="color: white; line-height: 1.4;"></div>
+<body data-player="sophia" class="bg-indigo-950 text-white">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col p-4 gap-6">
+        
+        <!-- Top Bar -->
+        <header class="flex justify-between items-center bg-indigo-900/40 p-4 rounded-2xl border border-white/5">
+            <div>
+                <h1 id="player-name-display" class="text-xl font-black text-pink-400">Sophia</h1>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span id="player-status-text" class="text-xs text-gray-400 font-bold uppercase tracking-widest">Online</span>
                 </div>
             </div>
+            <a href="index.html" class="text-xs bg-indigo-800/50 px-3 py-2 rounded-full hover:bg-slate-700 transition-colors">Voltar ao Início</a>
+        </header>
 
-            <!-- Área do Meet (Sincronizada) -->
-            <div id="meet-container" class="meet-button-container hidden">
-                <a href="#" id="meet-link" target="_blank" class="btn btn-meet">
-                    <span>📹</span>
-                    <span>Entrar na Reunião</span>
-                </a>
+        <!-- Main Actions -->
+        <section class="space-y-4">
+            <button id="btnCreateRoom" class="w-full bg-pink-600 hover:bg-pink-700 p-6 rounded-3xl font-black text-xl shadow-xl shadow-pink-900/20 transition-all flex flex-col items-center gap-2 transform active:scale-95">
+                <span class="text-3xl">🎮</span>
+                CRIAR NOVA SALA DE JOGO
+            </button>
+            <div id="activeRoomsSection" class="bg-indigo-900/60 rounded-3xl border border-white/5 p-5 space-y-4">
+                <h2 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Salas Ativas</h2>
+                <div id="activeRoomsList" class="space-y-2">
+                    <!-- List of active rooms -->
+                    <p class="text-xs text-gray-500 italic py-4 text-center">Nenhuma sala ativa no momento.</p>
+                </div>
             </div>
+        </section>
 
-            <!-- Área da Carta -->
-            <section class="card-area">
-                <div class="card-container">
-                    <div id="game-card" class="game-card card-blur">
-                        <div class="card-bg-overlay" id="card-bg-overlay"></div>
-                        <div class="card-content">
-                            <span class="card-category" id="card-cat">ANIMAIS</span>
-                            <h3 class="card-title" id="card-text">???</h3>
-                            <span class="card-difficulty" id="card-diff">FÁCIL</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button id="toggle-card" class="btn" style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-                        Ver Carta
-                    </button>
-                    <button id="btn-open-guess" class="btn" style="flex: 1; background: linear-gradient(to right, #f59e0b, #d97706); color: white;">
-                        🎯 Dar Palpite
-                    </button>
-                </div>
-            </section>
-
-            <!-- Cronômetro -->
-            <section class="timer-area">
-                <div class="timer-display">
-                    <span id="timer-number">60</span>
-                </div>
-                <div class="turn-status-container">
-                    <span class="turn-label">Vez do Jogador</span>
-                    <div class="turn-status" id="turn-status">Aguardando início...</div>
-                </div>
-            </section>
-
-            <!-- Cartas dos Outros -->
-            <section class="table-section" style="margin-top: 10px;">
-                <div class="turn-label" style="margin-bottom: 12px; display: block;">Na Testa dos Outros:</div>
-                <div id="all-cards-display" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                    <!-- Dinamizado -->
-                </div>
-            </section>
-
-            <!-- Chats -->
-            <section class="chats-section">
-                <div class="chat-tabs">
-                    <button class="chat-tab active" data-chat="group">Chat Grupo</button>
-                    <button class="chat-tab" data-chat="family">Chat Família</button>
-                    <button class="chat-tab" data-chat="private-papai-sophia">Chat com Papai</button>
-                </div>
-
-                <div class="chat-window">
-                    <div id="messages-list" class="messages-list">
-                        <!-- Mensagens aqui -->
-                        <div class="empty-chat">
-                            <span>💬</span>
-                            <p>Sem mensagens ainda. Dê um oi!</p>
-                        </div>
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" class="chat-input" placeholder="Escreva aqui...">
-                        <button id="send-msg" class="btn-send">➤</button>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Modal de Palpite -->
-    <div id="guess-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px;">
-        <div class="card" style="width: 100%; max-width: 350px; text-align: center;">
-            <h3 style="margin-bottom: 20px;">Qual é o seu palpite?</h3>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">O Papai receberá seu palpite e dirá se você acertou!</p>
-            <input type="text" id="guess-input" class="chat-input" placeholder="Ex: Gato, Batman..." style="width: 100%; margin-bottom: 20px; padding: 15px;">
-            <div style="display: flex; gap: 10px;">
-                <button id="btn-cancel-guess" class="btn" style="flex: 1; opacity: 0.6; background: transparent;">Cancelar</button>
-                <button id="btn-confirm-guess" class="btn" style="flex: 2; background: #f59e0b;">Enviar Palpite</button>
-            </div>
+        <!-- Meet Component (Active by Papai) -->
+        <div id="meet-container" class="hidden">
+            <a href="#" id="meet-link" target="_blank" class="w-full bg-green-600 hover:bg-green-700 p-5 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl blinking-meet border-2 border-green-400/50 transition-all">
+                <span class="text-2xl">📹</span>
+                ENTRAR NO GOOGLE MEET
+            </a>
         </div>
+
+        <!-- Chats -->
+        <section class="flex-1 flex flex-col min-h-[400px]">
+            <div class="flex bg-indigo-900/40 rounded-t-2xl border-t border-x border-white/5">
+                <button class="chat-tab flex-1 py-3 text-[10px] font-black uppercase tracking-widest border-b-2 border-pink-500 text-pink-400 bg-pink-500/5" data-chat="group">Global</button>
+                <button class="chat-tab flex-1 py-3 text-[10px] font-black uppercase tracking-widest border-b-2 border-transparent text-gray-500" data-chat="family">Família</button>
+                <button class="chat-tab flex-1 py-3 text-[10px] font-black uppercase tracking-widest border-b-2 border-transparent text-gray-500" data-chat="private-papai-sophia">Papai</button>
+            </div>
+            <div class="flex-1 bg-indigo-950/40 border-x border-b border-white/5 rounded-b-2xl overflow-hidden flex flex-col">
+                <div id="messages-list" class="flex-1 p-4 overflow-y-auto space-y-3">
+                    <!-- Messages -->
+                </div>
+                <div class="p-3 bg-indigo-900/60 border-t border-white/5 flex gap-2">
+                    <input type="text" id="chat-input" class="flex-1 bg-indigo-900 border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-pink-500" placeholder="Escreva...">
+                    <button id="send-msg" class="bg-pink-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-pink-900/20">➤</button>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <!-- Scripts -->
-    <!-- Login: sophia@sabermidia.com.br / qwerty (v2.0.1) -->
-    <script type="module" src="script/player.js"></script>
+    <script type="module" src="script/lobby.js"></script>
 </body>
 </html>

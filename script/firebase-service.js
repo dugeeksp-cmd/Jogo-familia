@@ -483,6 +483,128 @@ export const listenToScoreHistory = (callback) => {
     });
 };
 
+// --- GAME ROOMS (REAL GAME SALAS) ---
+const GAME_ROOMS_COL = "gameRooms";
+
+export const createGameRoom = async (playerId, playerName) => {
+    try {
+        const roomRef = collection(db, GAME_ROOMS_COL);
+        const newRoom = await addDoc(roomRef, {
+            status: "waiting",
+            createdBy: playerId,
+            createdByName: playerName,
+            createdAt: serverTimestamp(),
+            createdAtMs: Date.now(),
+            difficulty: "easy",
+            category: "all",
+            invitedPlayers: [playerId],
+            joinedPlayers: [playerId],
+            currentTurnPlayerId: null,
+            gameStarted: false,
+            roundNumber: 1,
+            timer: {
+                durationSeconds: 60,
+                startedAtMs: null,
+                endsAtMs: null,
+                isRunning: false
+            }
+        });
+        return newRoom.id;
+    } catch (e) {
+        console.error("[Firebase] erro ao criar sala de jogo:", e);
+        handleFirestoreError(e, 'create', GAME_ROOMS_COL);
+    }
+};
+
+export const listenToActiveGameRooms = (callback) => {
+    const q = query(
+        collection(db, GAME_ROOMS_COL),
+        where("status", "in", ["waiting", "playing"]),
+        orderBy("createdAt", "desc")
+    );
+    return onSnapshot(q, (snapshot) => {
+        const rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        callback(rooms);
+    });
+};
+
+export const listenToGameRoom = (gameRoomId, callback) => {
+    if (!gameRoomId) return () => {};
+    return onSnapshot(doc(db, GAME_ROOMS_COL, gameRoomId), (snapshot) => {
+        if (snapshot.exists()) callback({ id: snapshot.id, ...snapshot.data() });
+    });
+};
+
+export const updateGameRoom = async (gameRoomId, data) => {
+    try {
+        const roomRef = doc(db, GAME_ROOMS_COL, gameRoomId);
+        await updateDoc(roomRef, data);
+    } catch (e) {
+        handleFirestoreError(e, 'update', `${GAME_ROOMS_COL}/${gameRoomId}`);
+    }
+};
+
+export const joinGameRoom = async (gameRoomId, playerId) => {
+    try {
+        const roomRef = doc(db, GAME_ROOMS_COL, gameRoomId);
+        const roomSnap = await getDoc(roomRef);
+        if (roomSnap.exists()) {
+            const data = roomSnap.data();
+            const joined = data.joinedPlayers || [];
+            if (!joined.includes(playerId)) {
+                await updateDoc(roomRef, {
+                    joinedPlayers: [...joined, playerId]
+                });
+            }
+        }
+    } catch (e) {
+        handleFirestoreError(e, 'update', `${GAME_ROOMS_COL}/${gameRoomId}`);
+    }
+};
+
+export const invitePlayerToGame = async (gameRoomId, playerId) => {
+    try {
+        const roomRef = doc(db, GAME_ROOMS_COL, gameRoomId);
+        const roomSnap = await getDoc(roomRef);
+        if (roomSnap.exists()) {
+            const data = roomSnap.data();
+            const invited = data.invitedPlayers || [];
+            if (!invited.includes(playerId)) {
+                await updateDoc(roomRef, {
+                    invitedPlayers: [...invited, playerId]
+                });
+            }
+        }
+    } catch (e) {
+        handleFirestoreError(e, 'update', `${GAME_ROOMS_COL}/${gameRoomId}`);
+    }
+};
+
+// Meet Controls (Using global PRINCIPAL room)
+export const updateMeetRoom = async (link, enabled) => {
+    try {
+        const roomRef = doc(db, "rooms", ROOM_ID);
+        await updateDoc(roomRef, {
+            meeting: {
+                link,
+                enabled,
+                updated_at: Date.now()
+            }
+        });
+    } catch (e) {
+        handleFirestoreError(e, 'update', `rooms/${ROOM_ID}/meeting`);
+    }
+};
+
+export const listenToMeet = (callback) => {
+    return onSnapshot(doc(db, "rooms", ROOM_ID), (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            callback(data.meeting || { enabled: false, link: "" });
+        }
+    });
+};
+
 export function handleFirestoreError(error, operationType, path = null) {
     if (error.code === 'permission-denied') {
         const user = auth.currentUser;
