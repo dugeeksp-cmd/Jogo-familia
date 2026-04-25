@@ -113,14 +113,24 @@ export const signUpGuest = async (username, email, password) => {
         };
 
         // 2. Save profile in Firestore
-        await setDoc(doc(db, GUEST_USERS_COL, user.uid), profile);
+        try {
+            await setDoc(doc(db, GUEST_USERS_COL, user.uid), profile);
+        } catch (e) {
+            console.error("[Firestore] Erro ao criar perfil:", e);
+            handleFirestoreError(e, 'create', `${GUEST_USERS_COL}/${user.uid}`);
+        }
 
         // 3. Save username index
-        await setDoc(usernameRef, {
-            uid: user.uid,
-            email: email,
-            username: cleanUsername
-        });
+        try {
+            await setDoc(usernameRef, {
+                uid: user.uid,
+                email: email,
+                username: cleanUsername
+            });
+        } catch (e) {
+            console.error("[Firestore] Erro ao criar index de username:", e);
+            handleFirestoreError(e, 'create', `${USERNAMES_COL}/${cleanUsername}`);
+        }
 
         return user;
     } catch (error) {
@@ -144,7 +154,7 @@ export const loginWithUsernameOrEmail = async (login, password) => {
 
         // If it's not an email, assume it's a username and look it up
         if (!login.includes('@')) {
-            const usernameDoc = await getDoc(doc(db, USERNAMES_COL, login.toLowerCase()));
+            const usernameDoc = await getDoc(doc(db, USERNAMES_COL, login.toLowerCase().trim()));
             if (usernameDoc.exists()) {
                 email = usernameDoc.data().email;
             } else {
@@ -154,6 +164,7 @@ export const loginWithUsernameOrEmail = async (login, password) => {
 
         return await loginWithEmail(email, password);
     } catch (error) {
+        console.error("[Firebase] erro no login:", error);
         throw error;
     }
 };
