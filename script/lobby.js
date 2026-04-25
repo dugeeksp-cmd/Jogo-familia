@@ -10,10 +10,12 @@ import {
 } from './firebase-service.js';
 import { setupChat } from './chat.js';
 import { playSound } from './audio.js';
+import { initVersionControl } from './version-control.js';
 
 const PLAYER_ID = document.body.dataset.player;
 const PLAYER_NAME = PLAYER_ID.charAt(0).toUpperCase() + PLAYER_ID.slice(1);
 
+initVersionControl();
 let currentUser = null;
 
 // DOM Elements
@@ -72,7 +74,7 @@ function setupLobby() {
 
     // 1. Heartbeat
     syncStatus(true);
-    const heartbeatInterval = setInterval(() => syncStatus(true), 15000); // More frequent heartbeat
+    setInterval(() => syncStatus(true), 15000); // More frequent heartbeat
     window.addEventListener('beforeunload', () => syncStatus(false));
     window.addEventListener('unload', () => syncStatus(false));
 

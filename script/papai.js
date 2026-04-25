@@ -10,14 +10,16 @@ import {
     listenToActiveGameRooms,
     updateMeetRoom,
     updatePlayerStatus,
-    initRoom,
-    auth
+    initRoom
 } from './firebase-service.js';
 import { setupChat } from './chat.js';
 import { playSound } from './audio.js';
+import { initVersionControl } from './version-control.js';
 
 const PLAYER_ID = 'papai';
 const PLAYER_NAME = 'Papai';
+
+initVersionControl();
 
 let currentUser = null;
 let roomState = null;

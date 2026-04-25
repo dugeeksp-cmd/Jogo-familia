@@ -18,8 +18,6 @@ import {
     collection, 
     addDoc, 
     query, 
-    orderBy, 
-    where,
     limit, 
     serverTimestamp,
     getDoc,
@@ -432,7 +430,9 @@ export const markOffline = async (playerId) => {
     try {
         const playerRef = doc(db, "rooms", ROOM_ID, "players", playerId);
         await updateDoc(playerRef, { online: false });
-    } catch (e) {}
+    } catch {
+        // Ignorar erros ao marcar offline
+    }
 };
 
 export const updatePlayer = async (playerId, data) => {

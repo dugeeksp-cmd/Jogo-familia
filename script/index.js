@@ -10,8 +10,10 @@ import {
     syncGoogleGuestProfile,
     auth
 } from './firebase-service.js';
+import { initVersionControl } from './version-control.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    initVersionControl();
     const miguelBtn = document.getElementById('miguel-btn');
     const sophiaBtn = document.getElementById('sophia-btn');
     const papaiBtn = document.getElementById('papai-btn');
@@ -263,156 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (infoBtn && infoModal && closeInfoBtn) {
         infoBtn.addEventListener('click', () => infoModal.classList.remove('hidden'));
         closeInfoBtn.addEventListener('click', () => infoModal.classList.add('hidden'));
-    }
-
-    // Version Modal Logic
-    const versionBtn = document.getElementById('version-btn');
-    const versionModal = document.getElementById('version-modal');
-    const closeVersionBtn = document.getElementById('close-version');
-
-    if (versionBtn && versionModal && closeVersionBtn) {
-        const saveVersionBtn = document.getElementById('save-version-btn');
-        const validatedSection = document.getElementById('validated-section'); // I'll add this to HTML
-        
-        async function loadValidationHistory() {
-            try {
-                const res = await fetch('/api/validated');
-                const history = await res.json();
-                
-                const checkboxes = document.querySelectorAll('.v-check');
-                const validatedList = document.getElementById('validated-list');
-                validatedList.innerHTML = '';
-                
-                checkboxes.forEach(cb => {
-                    const version = cb.closest('.version-list').dataset.version;
-                    const feat = cb.dataset.feat;
-                    // Check specific version OR the new 'current' flat map for persistence
-                    const isCheck = (history[version] && history[version][feat]) || (history["current"] && history["current"][feat]);
-                    cb.checked = isCheck;
-                    
-                    if (isCheck) {
-                        const li = document.createElement('div');
-                        li.style.cssText = "font-size: 0.75rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 6px;";
-                        li.innerHTML = `
-                            <svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span style="text-decoration: line-through;">${cb.parentElement.textContent.replace('Fix:', '').replace('Novo:', '').trim()}</span>
-                        `;
-                        validatedList.appendChild(li);
-                        cb.parentElement.style.display = 'none'; // Hide it from pending list if already validated
-                    } else {
-                        cb.parentElement.style.display = 'flex';
-                        cb.parentElement.style.opacity = '1';
-                    }
-                });
-            } catch (e) { 
-                console.error("[Version] Erro ao carregar histórico:", e); 
-            }
-        }
-
-        versionBtn.addEventListener('click', async () => {
-            versionModal.classList.remove('hidden');
-            await loadValidationHistory();
-        });
-        
-        closeVersionBtn.addEventListener('click', () => versionModal.classList.add('hidden'));
-
-        // Handle Checkboxes and Save Button
-        const checkboxes = document.querySelectorAll('.v-check');
-        
-        if (saveVersionBtn) {
-            saveVersionBtn.addEventListener('click', async () => {
-                const checkboxes = document.querySelectorAll('.v-check');
-                const results = Array.from(checkboxes).map(cb => ({
-                    version: cb.closest('.version-list').dataset.version,
-                    feat: cb.dataset.feat,
-                    checked: cb.checked
-                }));
-
-                try {
-                    saveVersionBtn.textContent = "Salvando...";
-                    saveVersionBtn.disabled = true;
-
-                    // Send all checked states to server
-                    // We need to send them as a block or handle carefully
-                    const validatedData = {};
-                    for (const item of results) {
-                        if (item.checked) {
-                            validatedData[item.feat] = true;
-                        }
-                    }
-
-                    const resp = await fetch('/api/validate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(validatedData)
-                    });
-
-                    if (resp.ok) {
-                        saveVersionBtn.textContent = "✅ Validação Salva!";
-                        playSound('success');
-                        
-                        // Refresh history UI immediately
-                        await loadValidationHistory();
-                    } else {
-                        throw new Error("Falha no servidor");
-                    }
-
-                    setTimeout(() => {
-                        saveVersionBtn.textContent = "Salvar Validação";
-                        saveVersionBtn.disabled = false;
-                    }, 2000);
-
-                } catch (e) {
-                    console.error("[Version] Erro ao salvar validações:", e);
-                    saveVersionBtn.textContent = "❌ Erro ao Salvar";
-                    setTimeout(() => {
-                        saveVersionBtn.textContent = "Salvar Validação";
-                        saveVersionBtn.disabled = false;
-                    }, 2000);
-                }
-            });
-        }
-
-        // Add Correction report functionality
-        const addCorrectionBtn = document.getElementById('add-correction-btn');
-        const correctionArea = document.getElementById('correction-area');
-        const sendCorrectionBtn = document.getElementById('send-correction-btn');
-        const correctionText = document.getElementById('correction-text');
-
-        addCorrectionBtn?.addEventListener('click', () => {
-            correctionArea.classList.toggle('hidden');
-        });
-
-        sendCorrectionBtn?.addEventListener('click', async () => {
-            const text = correctionText.value.trim();
-            if (!text) return;
-
-            sendCorrectionBtn.disabled = true;
-            sendCorrectionBtn.textContent = 'Enviando...';
-
-            try {
-                console.log("[CORRECTION] Novo relato:", text);
-                const resp = await fetch('/api/validate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ [`RELATO_${Date.now()}`]: text })
-                });
-
-                if (resp.ok) {
-                    playSound('success');
-                    correctionText.value = '';
-                    correctionArea.classList.add('hidden');
-                    alert("Obrigado! Sua correção foi enviada para o desenvolvedor.");
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                sendCorrectionBtn.disabled = false;
-                sendCorrectionBtn.textContent = 'Enviar Relato';
-            }
-        });
     }
 });
 

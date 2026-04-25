@@ -5,7 +5,9 @@ import {
     listenToActiveGameRooms,
     updatePlayerStatus
 } from './firebase-service.js';
-import { setupChat } from './chat.js';
+import { initVersionControl } from './version-control.js';
+
+initVersionControl();
 
 let currentUser = null;
 let profile = null;

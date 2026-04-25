@@ -170,7 +170,6 @@ export function setupChat(config) {
                 // Re-add theme-specific classes if applicable
                 const isSophiaTab = newChatId?.includes('sophia');
                 const isMiguelTab = newChatId?.includes('miguel');
-                const isPapaiTab = newChatId === 'family' && playerId === 'papai';
 
                 if (playerId === 'sophia' || isSophiaTab) {
                     tab.classList.add('border-pink-500', 'text-pink-400', 'bg-pink-500/5');

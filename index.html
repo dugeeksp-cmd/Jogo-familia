@@ -69,125 +69,12 @@
         <div class="footer-content">
             <p class="footer-rights">Quem sou Eu? © Todos os direitos reservados</p>
             <p class="footer-dedication">Jogo Desenvolvido por <strong>Eduardo Lima</strong> em homenagem a <strong>Sophia</strong> e <strong>Miguel</strong> ❤️ Papai ama muito vocês!</p>
-            <button id="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.2.1</button>
+            <button class="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.2.2</button>
         </div>
     </footer>
 
-    <!-- Modal de Histórico de Versões -->
-    <div id="version-modal" class="modal-overlay hidden">
-        <div class="card" style="width: 100%; max-width: 450px; text-align: left; max-height: 80vh; overflow-y: auto;">
-            <h2 style="color: #6366f1; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                <span>📜</span> Histórico de Versões
-            </h2>
-            
-            <div style="display: flex; flex-direction: column; gap: 24px;">
-                <!-- Versão 1.2.1 -->
-                <div class="version-item">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <strong style="color: #4ade80;">v1.2.1</strong>
-                        <span style="font-size: 0.7rem; opacity: 0.5;">Atuais</span>
-                    </div>
-                    <ul class="version-list" data-version="1.2.1" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Start Button for Kids">
-                            Novo: Botão para iniciar jogo disponível para Miguel e Sophia.
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Auto Room Deletion">
-                            Novo: Salar são excluídas automaticamente quando ficam vazias.
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Version Sync Fix">
-                            Fix: Persistência e movimentação das validações no histórico.
-                        </li>
-                    </ul>
-                </div>
+    <!-- Modals are injected via script/version-control.js -->
 
-                <!-- Versão 1.2.0 (Move pending here) -->
-                <div class="version-item">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <strong style="color: #60a5fa;">v1.2.0</strong>
-                        <span style="font-size: 0.7rem; opacity: 0.5;">Aguardando</span>
-                    </div>
-                    <ul class="version-list" data-version="1.2.0" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Online Indicator in Room">
-                            Indicador de jogadores online no topo da sala.
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Stay in Room after Finish">
-                            Finalizar partida agora mantém os jogadores na sala.
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Victory Return Fix">
-                            Tela de vitória agora volta para a sala de jogo.
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Versão 1.1.1 (Pending items move here) -->
-                <div class="version-item">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <strong style="color: #60a5fa;">v1.1.1</strong>
-                        <span style="font-size: 0.7rem; opacity: 0.5;">Pendente</span>
-                    </div>
-                    <ul class="version-list" data-version="1.1.1" style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: none; padding-left: 0; line-height: 1.8;">
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Online Players deduplication">
-                            Fix: Limpeza de jogadores duplicados na index.
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Room players visibility">
-                            Fix: Jogadores na sala agora aparecem corretamente.
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Online list filtering">
-                            Fix: Lista de convite mostra apenas jogadores Online.
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Back button fix">
-                            Fix: Botão voltar agora retorna ao perfil, não a index.
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" class="v-check" data-feat="Auto-offline">
-                            Fix: Status offline automático ao sair da página.
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Seção de Validados -->
-                <div id="validated-section" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 10px;">
-                    <strong style="font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; color: #4ade80;">✓ Já Validados pela Família</strong>
-                    <div id="validated-list" style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
-                        <!-- Itens validados virão para cá via JS -->
-                    </div>
-                </div>
-
-                <!-- Versão 1.1.0 (Legacy) -->
-                <div class="version-item" style="opacity: 0.4;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <strong style="color: #94a3b8;">v1.1.0</strong>
-                        <span style="font-size: 0.7rem; opacity: 0.5;">Validado</span>
-                    </div>
-                    <ul style="font-size: 0.8rem; color: rgba(255,255,255,0.5); list-style: disc; padding-left: 20px;">
-                        <li>Correção Crítica: Erro 404 ao entrar na sala (Vite Build).</li>
-                        <li>Padronização de jogo.html.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <div id="correction-area" class="hidden" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 15px; rounded: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                    <label style="font-size: 0.7rem; font-weight: 800; color: #f87171; text-transform: uppercase;">Relatar Nova Correção</label>
-                    <textarea id="correction-text" class="input" placeholder="O que não está funcionando?" style="width: 100%; font-size: 0.75rem; min-height: 60px; margin-top: 8px;"></textarea>
-                    <button id="send-correction-btn" class="btn" style="width: 100%; margin-top: 8px; background: #f87171; font-size: 0.75rem;">Enviar Relato</button>
-                </div>
-                <button id="add-correction-btn" class="btn" style="width: 100%; margin-top: 10px; background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid #f87171; font-size: 0.75rem;">+ Adicionar Correção Necessária</button>
-                <button id="save-version-btn" class="btn btn-primary" style="width: 100%; margin-top: 10px; background: #6366f1;">Salvar Validação</button>
-                <button id="close-version" class="btn" style="width: 100%; background: rgba(255,255,255,0.05); margin-top: 5px;">Fechar</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal de Senha Admin/Papai -->
     <div id="password-modal" class="modal-overlay hidden">

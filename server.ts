@@ -11,47 +11,52 @@ async function startServer() {
 
   // API to save validated tests
   app.post("/api/validate", (req, res) => {
-    const data = req.body;
-    const logPath = path.join(process.cwd(), "validated_tests.json");
-    const txtPath = path.join(process.cwd(), "validacoes.txt");
-    
-    let history = {};
-    if (fs.existsSync(logPath)) {
-      try {
-        history = JSON.parse(fs.readFileSync(logPath, "utf-8"));
-      } catch (e) {
-        history = {};
-      }
-    }
-
-    if (data.feature && data.version) {
-      // Legacy single validation
-      if (!history[data.version]) history[data.version] = {};
-      history[data.version][data.feature] = data.validated;
+    try {
+      const data = req.body;
+      const logPath = path.join(process.cwd(), "validated_tests.json");
+      const txtPath = path.join(process.cwd(), "validacoes.txt");
       
-      const txtLine = `[${new Date().toLocaleString()}] Versão ${data.version}: ${data.feature} -> ${data.validated ? 'VALIDADO' : 'PENDENTE'}\n`;
-      fs.appendFileSync(txtPath, txtLine);
-    } else {
-      // Bulk update or Correction report
-      Object.keys(data).forEach(key => {
-        if (key.startsWith('RELATO_')) {
-          const report = data[key];
-          const txtLine = `[${new Date().toLocaleString()}] NOVO RELATO DE CORREÇÃO: ${report}\n`;
-          fs.appendFileSync(txtPath, txtLine);
-        } else {
-          // Assume feature key (feat) and we find which version it belongs to
-          // Or we just store it in a flat validations map for easier UI retrieval
-          if (!history["current"]) history["current"] = {};
-          history["current"][key] = true;
-          
-          const txtLine = `[${new Date().toLocaleString()}] VALIDADO: ${key}\n`;
-          fs.appendFileSync(txtPath, txtLine);
-        }
-      });
-    }
+      console.log("[SERVER] Recebendo validação/relato:", JSON.stringify(data));
 
-    fs.writeFileSync(logPath, JSON.stringify(history, null, 2));
-    res.json({ status: "ok" });
+      let history = {};
+      if (fs.existsSync(logPath)) {
+        try {
+          history = JSON.parse(fs.readFileSync(logPath, "utf-8"));
+        } catch {
+          history = {};
+        }
+      }
+
+      if (data.feature && data.version) {
+        // Legacy single validation
+        if (!history[data.version]) history[data.version] = {};
+        history[data.version][data.feature] = data.validated;
+        
+        const txtLine = `[${new Date().toLocaleString()}] Versão ${data.version}: ${data.feature} -> ${data.validated ? 'VALIDADO' : 'PENDENTE'}\n`;
+        fs.appendFileSync(txtPath, txtLine);
+      } else {
+        // Bulk update or Correction report
+        Object.keys(data).forEach(key => {
+          if (key.startsWith('RELATO_')) {
+            const report = data[key];
+            const txtLine = `[${new Date().toLocaleString()}] NOVO RELATO DE CORREÇÃO: ${report}\n`;
+            fs.appendFileSync(txtPath, txtLine);
+          } else {
+            if (!history["current"]) history["current"] = {};
+            history["current"][key] = true;
+            
+            const txtLine = `[${new Date().toLocaleString()}] VALIDADO: ${key}\n`;
+            fs.appendFileSync(txtPath, txtLine);
+          }
+        });
+      }
+
+      fs.writeFileSync(logPath, JSON.stringify(history, null, 2));
+      res.json({ status: "ok" });
+    } catch (err) {
+      console.error("[SERVER] Erro ao processar /api/validate:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   });
 
   // API to get validated tests
@@ -61,7 +66,7 @@ async function startServer() {
       try {
         const data = fs.readFileSync(logPath, "utf-8");
         res.json(JSON.parse(data));
-      } catch (e) {
+      } catch {
         res.json({});
       }
     } else {

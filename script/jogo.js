@@ -19,6 +19,7 @@ import { playSound } from './audio.js';
 import { CARD_BANK } from './cards.js';
 import { shuffleArray } from './utils.js';
 import { setupChat } from './chat.js';
+import { initVersionControl } from './version-control.js';
 
 // Get Room ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -79,14 +80,23 @@ const meetNotification = document.getElementById('meetNotification');
 const meetLinkBtn = document.getElementById('meetLinkBtn');
 
 async function init() {
-    onAuth(user => {
+    initVersionControl();
+    onAuth(async user => {
         if (!user) {
             window.location.href = 'index.html';
             return;
         }
         currentUser = user;
-        userBadge.textContent = user.displayName || user.email.split('@')[0];
+        userBadge.textContent = user.displayName || user.email?.split('@')[0] || "Jogador";
         
+        // AUTO-JOIN ROOM
+        try {
+            await joinGameRoom(GAME_ROOM_ID, user);
+            console.log("[JOGO] Joined room automatically");
+        } catch (e) {
+            console.error("[JOGO] Auto-join failed:", e);
+        }
+
         setupListeners();
         startStatusSync();
     });
@@ -110,7 +120,7 @@ function startStatusSync() {
     };
 
     sync(true);
-    const interval = setInterval(() => sync(true), 15000);
+    setInterval(() => sync(true), 15000);
     window.addEventListener('beforeunload', () => {
         sync(false);
         markOffline(currentUser.uid);
