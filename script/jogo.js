@@ -5,6 +5,7 @@ import {
     updateGameRoom, 
     joinGameRoom,
     invitePlayerToGame,
+    leaveGameRoom,
     listenToPlayers,
     listenToAllHands,
     updatePrivateHand,
@@ -44,6 +45,7 @@ const playersInRoomList = document.getElementById('playersInRoomList');
 const onlinePlayersList = document.getElementById('onlinePlayersList');
 const joinButtonArea = document.getElementById('joinButtonArea');
 const btnJoinRoom = document.getElementById('btnJoinRoom');
+const btnExit = document.getElementById('btnExit');
 const startButtonArea = document.getElementById('startButtonArea');
 const btnStartGame = document.getElementById('btnStartGame');
 
@@ -138,13 +140,6 @@ function setupListeners() {
         messagesList: messagesList,
         input: chatInput,
         sendBtn: sendMsgBtn
-    });
-
-    // Cleanup when leaving
-    window.addEventListener('beforeunload', () => {
-        import('./firebase-service.js').then(({ leaveGameRoom }) => {
-            leaveGameRoom(GAME_ROOM_ID, currentUser.uid);
-        });
     });
 }
 
@@ -306,6 +301,13 @@ window.ansGuess = async (id, correct) => {
 btnJoinRoom.addEventListener('click', async () => {
     playSound('click');
     await joinGameRoom(GAME_ROOM_ID, currentUser.uid);
+});
+
+btnExit.addEventListener('click', async () => {
+    if (confirm("Deseja sair da sala? Isso o removerá do jogo.")) {
+        await leaveGameRoom(GAME_ROOM_ID, currentUser.uid);
+        window.location.href = 'index.html';
+    }
 });
 
 btnStartGame.addEventListener('click', async () => {

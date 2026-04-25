@@ -8,7 +8,9 @@ import {
     listenToPlayers,
     createGameRoom,
     listenToActiveGameRooms,
-    updateMeetRoom
+    updateMeetRoom,
+    updatePlayerStatus,
+    auth
 } from './firebase-service.js';
 import { setupChat } from './chat.js';
 import { playSound } from './audio.js';
@@ -44,6 +46,11 @@ async function init() {
     onAuth(async (user) => {
         if (user) {
             currentUser = user;
+            if (user.displayName !== PLAYER_NAME) {
+                const { updateProfile } = await import('firebase/auth');
+                await updateProfile(user, { displayName: PLAYER_NAME });
+                await user.getIdToken(true);
+            }
             if (loginOverlay) loginOverlay.style.display = 'none';
             setupAdmin();
         } else {
@@ -54,7 +61,13 @@ async function init() {
     if (btnGoogleLogin) {
         btnGoogleLogin.addEventListener('click', async () => {
             try {
-                await loginWithGoogle();
+                const user = await loginWithGoogle();
+                if (user) {
+                    const { updateProfile } = await import('firebase/auth');
+                    await updateProfile(user, { displayName: PLAYER_NAME });
+                    await user.getIdToken(true); // Force token refresh
+                    // Success, onAuth will handle the rest
+                }
             } catch (err) {
                 console.error(err);
                 alert("Erro ao fazer login com Google.");

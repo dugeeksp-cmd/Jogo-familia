@@ -7,7 +7,8 @@ import {
     loginAnonymously,
     signUpGuest,
     loginWithUsernameOrEmail,
-    syncGoogleGuestProfile
+    syncGoogleGuestProfile,
+    auth
 } from './firebase-service.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -97,7 +98,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (papaiLoginBtn) {
         papaiLoginBtn.addEventListener('click', async () => {
             try {
-                await loginWithGoogle();
+                const user = await loginWithGoogle();
+                if (user) {
+                    const { updateProfile } = await import('firebase/auth');
+                    await updateProfile(user, { displayName: 'Papai' });
+                    await user.getIdToken(true);
+                }
                 window.location.href = 'papai.html';
             } catch (e) {
                 console.error(e);
@@ -217,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await updateProfile(user, { 
                     displayName: selectedPlayerId.charAt(0).toUpperCase() + selectedPlayerId.slice(1) 
                 });
+                await user.getIdToken(true); // Force token refresh
             }
             window.location.href = `${selectedPlayerId}.html`;
         } else {

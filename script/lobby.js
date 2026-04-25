@@ -33,6 +33,12 @@ async function init() {
             return;
         }
         currentUser = user;
+
+        if (user.displayName !== PLAYER_NAME && (PLAYER_ID === 'miguel' || PLAYER_ID === 'sophia')) {
+            const { updateProfile } = await import('firebase/auth');
+            await updateProfile(user, { displayName: PLAYER_NAME });
+            await user.getIdToken(true);
+        }
         
         // Update name display
         if (playerNameDisplay) {

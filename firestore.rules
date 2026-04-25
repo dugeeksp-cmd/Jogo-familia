@@ -17,8 +17,9 @@ service cloud.firestore {
 
     function isFamily() {
       return isSignedIn() && (
-        request.auth.token.email in ['miguel@sabermidia.com.br', 'sophia@sabermidia.com.br', 'papai@sabermidia.com.br'] ||
-        (request.auth.token.name in ['Miguel', 'Sophia', 'Papai'])
+        request.auth.token.email in ['miguel@sabermidia.com.br', 'sophia@sabermidia.com.br', 'papai@sabermidia.com.br', 'dugeeksp@gmail.com'] ||
+        (request.auth.token.name in ['Miguel', 'Sophia', 'Papai', 'Miguel Sabermidia', 'Sophia Sabermidia', 'Papai Sabermidia']) ||
+        request.auth.token.display_name in ['Miguel', 'Sophia', 'Papai']
       );
     }
 
