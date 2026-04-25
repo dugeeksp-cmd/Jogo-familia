@@ -121,12 +121,7 @@ function setupLobby() {
             }
         } catch (error) {
             console.error("[LOBBY] Erro ao criar sala:", error);
-            let detail = error.message;
-            try {
-                const json = JSON.parse(error.message);
-                detail = `${json.operationType} @ ${json.path} - ${json.error}`;
-            } catch(e) {}
-            alert("Erro ao criar sala: " + detail);
+            alert("Erro ao criar sala. Verifique sua conexão.");
         }
     });
 }

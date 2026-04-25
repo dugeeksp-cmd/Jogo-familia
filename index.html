@@ -69,8 +69,48 @@
         <div class="footer-content">
             <p class="footer-rights">Quem sou Eu? © Todos os direitos reservados</p>
             <p class="footer-dedication">Jogo Desenvolvido por <strong>Eduardo Lima</strong> em homenagem a <strong>Sophia</strong> e <strong>Miguel</strong> ❤️ Papai ama muito vocês!</p>
+            <button id="version-btn" style="margin-top: 10px; font-size: 0.6rem; opacity: 0.4; background: transparent; color: white; cursor: pointer; border: none;">Versão 1.1.0</button>
         </div>
     </footer>
+
+    <!-- Modal de Histórico de Versões -->
+    <div id="version-modal" class="modal-overlay hidden">
+        <div class="card" style="width: 100%; max-width: 450px; text-align: left; max-height: 80vh; overflow-y: auto;">
+            <h2 style="color: #6366f1; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <span>📜</span> Histórico de Versões
+            </h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <div class="version-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong style="color: #4ade80;">v1.1.0</strong>
+                        <span style="font-size: 0.7rem; opacity: 0.5;">Atuais</span>
+                    </div>
+                    <ul style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: disc; padding-left: 20px; line-height: 1.5;">
+                        <li>Correção Crítica: Erro 404 ao entrar na sala (Vite Build).</li>
+                        <li>Padronização de páginas e scripts (jogo.html).</li>
+                        <li>Correção: Alternância de abas de chat para Sophia e Miguel.</li>
+                        <li>Melhoria: Persistência de login e nomes no Firestore.</li>
+                        <li>Novo: Histórico de Versões (este modal).</li>
+                    </ul>
+                </div>
+
+                <div class="version-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong style="color: #94a3b8;">v1.0.1</strong>
+                        <span style="font-size: 0.7rem; opacity: 0.5;">Anterior</span>
+                    </div>
+                    <ul style="font-size: 0.8rem; color: rgba(255,255,255,0.7); list-style: disc; padding-left: 20px; line-height: 1.5;">
+                        <li>Implementação de Salas de Jogo dinâmicas.</li>
+                        <li>Sistema de Login Anônimo para crianças.</li>
+                        <li>Chat Privado entre Papai e filhos.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button id="close-version" class="btn" style="width: 100%; margin-top: 30px; background: rgba(255,255,255,0.05);">Fechar</button>
+        </div>
+    </div>
 
     <!-- Modal de Senha Admin/Papai -->
     <div id="password-modal" class="modal-overlay hidden">

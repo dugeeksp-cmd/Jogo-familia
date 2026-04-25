@@ -247,6 +247,16 @@ document.addEventListener('DOMContentLoaded', () => {
         infoBtn.addEventListener('click', () => infoModal.classList.remove('hidden'));
         closeInfoBtn.addEventListener('click', () => infoModal.classList.add('hidden'));
     }
+
+    // Version Modal Logic
+    const versionBtn = document.getElementById('version-btn');
+    const versionModal = document.getElementById('version-modal');
+    const closeVersionBtn = document.getElementById('close-version');
+
+    if (versionBtn && versionModal && closeVersionBtn) {
+        versionBtn.addEventListener('click', () => versionModal.classList.remove('hidden'));
+        closeVersionBtn.addEventListener('click', () => versionModal.classList.add('hidden'));
+    }
 });
 
 // Shake animation style

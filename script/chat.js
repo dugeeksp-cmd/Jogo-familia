@@ -109,17 +109,10 @@ export function setupChat(config) {
             renderMessages(msgs);
         }, (err) => {
             console.error(`[CHAT] Erro no listener de ${chatId}:`, err);
-            let detail = err.message;
-            try {
-                const json = JSON.parse(err.message);
-                detail = `${json.operationType} @ ${json.path} - ${json.error}`;
-            } catch(e) {}
-            
             messagesList.innerHTML = `
                 <div class="empty-chat">
                     <span>⚠️</span>
-                    <p>Erro ao carregar mensagens.</p>
-                    <small class="text-[8px] opacity-50 block mt-1">${detail}</small>
+                    <p>Erro ao carregar mensagens. Verifique sua conexão.</p>
                 </div>
             `;
         });
@@ -163,9 +156,29 @@ export function setupChat(config) {
 
                 console.log(`[CHAT] Clique na aba: ${tab.textContent.trim()} -> ${newChatId}`);
                 
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.remove('pulse-new');
+                // Visual reset for all tabs
+                tabs.forEach(t => {
+                    t.classList.remove('active', 'border-pink-500', 'border-blue-500', 'border-yellow-500', 'text-pink-400', 'text-blue-400', 'text-yellow-500', 'bg-pink-500/5', 'bg-blue-500/5', 'bg-yellow-500/5');
+                    t.classList.add('border-transparent', 'text-gray-500');
+                    t.classList.remove('pulse-new');
+                });
+                
+                // Add active state to clicked tab
+                tab.classList.remove('border-transparent', 'text-gray-500');
                 tab.classList.add('active');
+                
+                // Re-add theme-specific classes if applicable
+                const isSophiaTab = newChatId?.includes('sophia');
+                const isMiguelTab = newChatId?.includes('miguel');
+                const isPapaiTab = newChatId === 'family' && playerId === 'papai';
+
+                if (playerId === 'sophia' || isSophiaTab) {
+                    tab.classList.add('border-pink-500', 'text-pink-400', 'bg-pink-500/5');
+                } else if (playerId === 'miguel' || isMiguelTab) {
+                    tab.classList.add('border-blue-500', 'text-blue-400', 'bg-blue-500/5');
+                } else {
+                    tab.classList.add('border-yellow-500', 'text-yellow-500', 'bg-yellow-500/5');
+                }
                 
                 loadChat(newChatId);
             });

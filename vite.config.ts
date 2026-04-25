@@ -16,6 +16,7 @@ export default defineConfig(({mode}) => {
           visitante: path.resolve(__dirname, 'visitante.html'),
           papai: path.resolve(__dirname, 'papai.html'),
           win: path.resolve(__dirname, 'win.html'),
+          jogo: path.resolve(__dirname, 'jogo.html'),
         }
       }
     },
