@@ -180,6 +180,7 @@ async function finishInit() {
     });
 
 btnSaveMiguelAll.addEventListener('click', async () => {
+    playSound('pop');
     const emoji = emojiMiguel.value.trim();
     const password = passMiguelInput.value.trim();
     const updates = {};
@@ -192,6 +193,7 @@ btnSaveMiguelAll.addEventListener('click', async () => {
 });
 
 btnSaveSophiaAll.addEventListener('click', async () => {
+    playSound('pop');
     const emoji = emojiSophia.value.trim();
     const password = passSophiaInput.value.trim();
     const updates = {};
@@ -468,17 +470,20 @@ btnEndGame.addEventListener('click', async () => {
 
 // Meeting Controls
 btnSaveMeet.addEventListener('click', async () => {
+    playSound('click');
     const link = meetLinkInput.value.trim();
     await updateRoom({ 'meeting.link': link, 'meeting.updated_at': Date.now() });
     alert('Link salvo!');
 });
 
 btnToggleMeet.addEventListener('click', async () => {
+    playSound('pop');
     const newState = !roomState.meeting?.enabled;
     await updateRoom({ 'meeting.enabled': newState });
 });
 
 btnSaveLimit.addEventListener('click', async () => {
+    playSound('click');
     const limit = parseInt(maxPlayersInput.value);
     if (isNaN(limit)) return;
     await updateRoom({ maxPlayers: limit });

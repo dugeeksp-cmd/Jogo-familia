@@ -15,7 +15,6 @@ import { setupChat } from './chat.js';
 
 const PLAYER_ID = document.body.dataset.player;
 const PLAYER_NAME = PLAYER_ID.charAt(0).toUpperCase() + PLAYER_ID.slice(1);
-const PRIVATE_CHAT_ID = `private-papai-${PLAYER_ID}`;
 
 let roomState = null;
 
@@ -145,7 +144,14 @@ async function finishInit() {
         updatePlayerStatus(PLAYER_ID, { lastSeen: Date.now(), online: true });
     }, 30000);
 
+    let lastTurnPlayer = null;
     listenToRoom((room) => {
+        if (room.currentTurnPlayerId && room.currentTurnPlayerId !== lastTurnPlayer) {
+            if (room.currentTurnPlayerId === PLAYER_ID) {
+                playSound('roundStart');
+            }
+            lastTurnPlayer = room.currentTurnPlayerId;
+        }
         roomState = room;
         updateUI();
     });
@@ -204,6 +210,7 @@ async function finishInit() {
     // Invite Button
     if (inviteBtn) {
         inviteBtn.addEventListener('click', () => {
+            playSound('click');
             const url = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}/index.html?room=${roomState?.code || "PRINCIPAL"}`;
             navigator.clipboard.writeText(url).then(() => alert('Link de convite com código da sala copiado!'));
         });
@@ -212,6 +219,7 @@ async function finishInit() {
     // Guess Modal Events
     if (btnOpenGuess) {
         btnOpenGuess.addEventListener('click', () => {
+            playSound('pop');
             guessModal.classList.remove('hidden');
             guessInput.focus();
         });
@@ -219,6 +227,7 @@ async function finishInit() {
 
     if (btnCancelGuess) {
         btnCancelGuess.addEventListener('click', () => {
+            playSound('click');
             guessModal.classList.add('hidden');
             guessInput.value = '';
         });

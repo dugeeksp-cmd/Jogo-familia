@@ -7,7 +7,9 @@ const sounds = {
     correct: 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3',
     wrong: 'https://assets.mixkit.co/active_storage/sfx/2205/2205-preview.mp3',
     timerWarning: 'https://assets.mixkit.co/active_storage/sfx/2190/2190-preview.mp3',
-    click: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'
+    click: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
+    pop: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3',
+    success: 'https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3'
 };
 
 export const playSound = (soundName) => {

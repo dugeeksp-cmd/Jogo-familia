@@ -20,7 +20,6 @@ import {
     orderBy, 
     where,
     limit, 
-    limitToLast,
     serverTimestamp,
     getDoc,
     getDocFromServer
