@@ -44,81 +44,44 @@ service cloud.firestore {
 
     // --- Game Rooms ---
     match /gameRooms/{gameRoomId} {
-      function canCreateRoom() {
-        return isFamily() || isAdmin();
-      }
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && canCreateRoom();
-      allow update: if isSignedIn() && (
-        request.auth.uid == resource.data.createdBy || isAdmin() ||
-        (incoming().diff(existing()).affectedKeys().hasOnly(['joinedPlayers', 'invitedPlayers', 'status', 'gameStarted', 'currentTurnPlayerId', 'roundNumber', 'timer']))
-      );
-      allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.createdBy);
+      allow create: if isSignedIn(); 
+      allow update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == existing().createdBy);
     }
 
     match /gameRooms/{gameRoomId}/players/{playerId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, write: if isSignedIn();
     }
 
     match /gameRooms/{gameRoomId}/hands/{playerId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || (isSignedIn() && request.auth.uid == get(/databases/$(database)/documents/gameRooms/$(gameRoomId)).data.createdBy);
+      allow read, write: if isSignedIn();
     }
 
     // --- Rooms & Sub-collections ---
     match /rooms/{roomCode} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin(); // Only Papai manages room status/passwords
+      allow read, write: if isSignedIn();
     }
 
     match /rooms/{roomCode}/players/{playerId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn(); // Players update their own online status/score history
+      allow read, write: if isSignedIn();
     }
 
     match /rooms/{roomCode}/messages/{messageId} {
-      function isValidMessage(data) {
-        return data.keys().hasAll(['chatId', 'senderId', 'senderName', 'senderRole', 'senderColor', 'text', 'createdAt', 'createdAtMs'])
-          && data.text is string && data.text.size() <= 1000
-          && data.senderId is string
-          && data.chatId is string;
-      }
-
-      allow read: if isSignedIn() && (
-        existing().chatId == 'group' || 
-        (existing().chatId == 'family' && isFamily()) ||
-        (existing().chatId.startsWith('private-') && (
-          existing().senderId == request.auth.uid || 
-          existing().chatId.matches('.*' + request.auth.uid + '.*') ||
-          isFamily() // Family members (esp Papai) can read their relevant private chats
-        ))
-      );
-
-      // We allow reading 'group' for everyone. 
-      // 'family' should be restricted further if needed, but since children use anonymous auth, 
-      // we check custom logic in app.
-      
-      allow create: if isSignedIn() && isValidMessage(incoming()) && (
-        incoming().chatId == 'group' || 
-        (incoming().chatId == 'family' && isFamily()) ||
-        incoming().chatId.startsWith('private-')
-      );
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
     }
 
     match /rooms/{roomCode}/guesses/{guessId} {
-      allow read, create: if isSignedIn();
-      allow update: if isAdmin();
+      allow read, write: if isSignedIn();
     }
 
     match /rooms/{roomCode}/privateHands/{playerId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow read, write: if isSignedIn();
     }
 
     match /rooms/{roomCode}/scoreHistory/{historyId} {
-      allow read: if isSignedIn();
-      allow create: if isAdmin();
+      allow read, create: if isSignedIn();
     }
   }
 }

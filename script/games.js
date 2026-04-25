@@ -1,10 +1,9 @@
-/* script/jogo.js */
+/* script/games.js */
 import { 
     onAuth, 
     listenToGameRoom, 
     updateGameRoom, 
     joinGameRoom,
-    invitePlayerToGame,
     leaveGameRoom,
     listenToPlayers,
     listenToAllHands,

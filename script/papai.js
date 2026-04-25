@@ -123,7 +123,7 @@ function setupAdmin() {
             console.log("[ADMIN] Criando sala p/ ID:", currentUser.uid);
             const roomId = await createGameRoom(currentUser.uid, PLAYER_NAME);
             if (roomId) {
-                window.location.href = `jogo.html?room=${roomId}`;
+                window.location.href = `games.html?room=${roomId}`;
             }
         } catch (error) {
             console.error("[ADMIN] Erro ao criar sala:", error);
@@ -225,7 +225,7 @@ function renderActiveRooms(rooms) {
                     <span class="text-xs text-gray-500">${room.joinedPlayers?.length || 0} Jogadores</span>
                 </div>
             </div>
-            <a href="jogo.html?room=${room.id}" class="bg-yellow-600 hover:bg-yellow-500 p-3 rounded-xl transform group-hover:scale-105 transition-all font-black text-xs">GERENCIAR / ENTRAR</a>
+            <a href="games.html?room=${room.id}" class="bg-yellow-600 hover:bg-yellow-500 p-3 rounded-xl transform group-hover:scale-105 transition-all font-black text-xs">GERENCIAR / ENTRAR</a>
         </div>
     `).join('');
 }

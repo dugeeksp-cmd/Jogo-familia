@@ -365,7 +365,7 @@ export const listenToMessages = (chatId, callback, errorCallback) => {
 
     const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
 
-    // Client-side filtering only to avoid all index issues
+    // Strictly unfiltered to avoid ALL index errors
     const q = query(messagesRef);
 
     return onSnapshot(q, (snapshot) => {
@@ -518,6 +518,9 @@ export const listenToActiveGameRooms = (callback) => {
         
         rooms.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
         callback(rooms);
+    }, (error) => {
+        console.error("[Firebase] Erro no listener de salas ativas:", error);
+        handleFirestoreError(error, "list", GAME_ROOMS_COL);
     });
 };
 
