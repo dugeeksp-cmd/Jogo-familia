@@ -363,10 +363,10 @@ export const listenToMessages = (chatId, callback, errorCallback) => {
 
     const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
 
+    // Remove orderBy to avoid missing index error
     const q = query(
         messagesRef,
-        where("chatId", "==", chatId),
-        orderBy("createdAtMs", "asc")
+        where("chatId", "==", chatId)
     );
 
     return onSnapshot(q, (snapshot) => {
@@ -376,6 +376,9 @@ export const listenToMessages = (chatId, callback, errorCallback) => {
             id: doc.id,
             ...doc.data()
         }));
+
+        // Sort client-side
+        msgs.sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
 
         callback(msgs);
 
@@ -425,6 +428,7 @@ export const updatePlayerStatus = async (playerId, data) => {
         await setDoc(playerRef, {
             id: playerId,
             ...data,
+            lastSeen: Date.now(),
             joinedAtMs: Date.now()
         }, { merge: true });
     } catch (e) {
@@ -517,13 +521,15 @@ export const createGameRoom = async (playerId, playerName) => {
 };
 
 export const listenToActiveGameRooms = (callback) => {
+    // Remove orderBy to avoid missing index error
     const q = query(
         collection(db, GAME_ROOMS_COL),
-        where("status", "in", ["waiting", "playing"]),
-        orderBy("createdAt", "desc")
+        where("status", "in", ["waiting", "playing"])
     );
     return onSnapshot(q, (snapshot) => {
         const rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort client-side
+        rooms.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
         callback(rooms);
     });
 };
@@ -562,16 +568,21 @@ export const joinGameRoom = async (gameRoomId, playerId) => {
     }
 };
 
-export const invitePlayerToGame = async (gameRoomId, playerId) => {
+export const leaveGameRoom = async (gameRoomId, playerId) => {
     try {
         const roomRef = doc(db, GAME_ROOMS_COL, gameRoomId);
         const roomSnap = await getDoc(roomRef);
         if (roomSnap.exists()) {
             const data = roomSnap.data();
-            const invited = data.invitedPlayers || [];
-            if (!invited.includes(playerId)) {
+            const joined = data.joinedPlayers || [];
+            const newJoined = joined.filter(id => id !== playerId);
+            
+            if (newJoined.length === 0) {
+                // Delete if empty OR keep it? User said: "remover automaticamente"
+                await setDoc(roomRef, { status: 'deleted', deletedAt: serverTimestamp() }, { merge: true });
+            } else {
                 await updateDoc(roomRef, {
-                    invitedPlayers: [...invited, playerId]
+                    joinedPlayers: newJoined
                 });
             }
         }

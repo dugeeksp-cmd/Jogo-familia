@@ -15,6 +15,13 @@ service cloud.firestore {
     function existing() { return resource.data; }
     function isValidId(id) { return id is string && id.size() <= 128; }
 
+    function isFamily() {
+      return isSignedIn() && (
+        request.auth.token.email in ['miguel@sabermidia.com.br', 'sophia@sabermidia.com.br', 'papai@sabermidia.com.br'] ||
+        (request.auth.token.name in ['Miguel', 'Sophia', 'Papai'])
+      );
+    }
+
     // --- Guest Users ---
     match /guestUsers/{uid} {
       allow read: if isSignedIn();
@@ -30,9 +37,6 @@ service cloud.firestore {
 
     // --- Game Rooms ---
     match /gameRooms/{gameRoomId} {
-      function isFamily() {
-        return request.auth.token.email in ['miguel@sabermidia.com.br', 'sophia@sabermidia.com.br', 'papai@sabermidia.com.br'];
-      }
       function canCreateRoom() {
         return isFamily() || isAdmin();
       }
@@ -40,7 +44,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && canCreateRoom();
       allow update: if isSignedIn() && (
         request.auth.uid == resource.data.createdBy || isAdmin() ||
-        (incoming().diff(existing()).affectedKeys().hasOnly(['joinedPlayers', 'invitedPlayers'])) // Allow joining or inviting
+        (incoming().diff(existing()).affectedKeys().hasOnly(['joinedPlayers', 'invitedPlayers', 'status', 'gameStarted', 'currentTurnPlayerId', 'roundNumber', 'timer']))
       );
       allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.createdBy);
     }
@@ -76,8 +80,12 @@ service cloud.firestore {
 
       allow read: if isSignedIn() && (
         existing().chatId == 'group' || 
-        (existing().chatId == 'family' && isAdmin()) || // Simplified check, family role not in auth token
-        (existing().senderId == request.auth.uid) // Simplified
+        (existing().chatId == 'family' && isFamily()) ||
+        (existing().chatId.startsWith('private-') && (
+          existing().senderId == request.auth.uid || 
+          existing().chatId.matches('.*' + request.auth.uid + '.*') ||
+          isFamily() // Family members (esp Papai) can read their relevant private chats
+        ))
       );
 
       // We allow reading 'group' for everyone. 
@@ -86,7 +94,8 @@ service cloud.firestore {
       
       allow create: if isSignedIn() && isValidMessage(incoming()) && (
         incoming().chatId == 'group' || 
-        (incoming().chatId != 'family' || incoming().senderRole != 'guest')
+        (incoming().chatId == 'family' && isFamily()) ||
+        incoming().chatId.startsWith('private-')
       );
     }
 

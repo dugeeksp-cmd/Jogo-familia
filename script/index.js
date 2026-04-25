@@ -205,11 +205,19 @@ document.addEventListener('DOMContentLoaded', () => {
         playerModal.classList.add('hidden');
     });
 
-    const verifyPass = () => {
+    const verifyPass = async () => {
         const input = playerPasswordInput.value.trim();
         const correct = currentRoom?.passwords?.[selectedPlayerId] || 'qwerty'; // Default: qwerty
         
         if (input === correct) {
+            // Set displayName so firestore rules identify them
+            const user = auth.currentUser;
+            if (user) {
+                const { updateProfile } = await import('firebase/auth');
+                await updateProfile(user, { 
+                    displayName: selectedPlayerId.charAt(0).toUpperCase() + selectedPlayerId.slice(1) 
+                });
+            }
             window.location.href = `${selectedPlayerId}.html`;
         } else {
             playerPasswordError.classList.remove('hidden');

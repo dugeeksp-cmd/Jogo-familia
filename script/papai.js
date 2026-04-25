@@ -38,6 +38,7 @@ const chatTabs = document.querySelectorAll('.chat-tab');
 const messagesList = document.getElementById('messages-list');
 const chatInput = document.getElementById('chat-input');
 const sendMsgBtn = document.getElementById('send-msg');
+const onlineIndicators = document.getElementById('online-indicators');
 
 async function init() {
     onAuth(async (user) => {
@@ -63,6 +64,12 @@ async function init() {
 }
 
 function setupAdmin() {
+    // 0. Heartbeat
+    updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME, role: 'family' });
+    setInterval(() => {
+        updatePlayerStatus(PLAYER_ID, { lastSeen: Date.now(), online: true });
+    }, 30000);
+
     // 1. Listen to Global Room (PRINCIPAL) for Meet and Passwords
     listenToRoom((room) => {
         roomState = room;
@@ -74,6 +81,7 @@ function setupAdmin() {
     listenToPlayers((players) => {
         allPlayers = players;
         updatePlayersUI();
+        updateOnlineUI(players);
     });
 
     // 3. Listen to Active Game Rooms
@@ -87,7 +95,7 @@ function setupAdmin() {
         playerName: PLAYER_NAME,
         playerRole: 'family',
         senderColor: '#10b981',
-        initialChatId: 'group',
+        initialChatId: 'family',
         tabs: chatTabs,
         messagesList: messagesList,
         input: chatInput,
@@ -138,6 +146,24 @@ function setupAdmin() {
         }
         alert("Dados da Sophia atualizados!");
     });
+}
+
+function updateOnlineUI(players) {
+    if (onlineIndicators) {
+        const others = players.filter(p => p.online && p.id !== PLAYER_ID && (Date.now() - (p.lastSeen || 0) < 60000));
+        onlineIndicators.innerHTML = `
+            <div class="flex items-center gap-1.5 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                <span class="text-[10px] text-green-500 font-bold uppercase tracking-wider">Você</span>
+            </div>
+            ${others.map(p => `
+                <div class="flex items-center gap-1.5 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                    <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                    <span class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">${p.name}</span>
+                </div>
+            `).join('')}
+        `;
+    }
 }
 
 function updateMeetUI() {

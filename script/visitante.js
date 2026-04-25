@@ -13,9 +13,7 @@ let profile = null;
 // DOM Elements
 const guestNameDisplay = document.getElementById('guest-name-display');
 const activeRoomsList = document.getElementById('activeRoomsList');
-const messagesList = document.getElementById('messages-list');
-const chatInput = document.getElementById('chat-input');
-const sendMsgBtn = document.getElementById('send-msg');
+const onlineIndicators = document.getElementById('online-indicators');
 
 async function init() {
     onAuth(async (user) => {
@@ -45,17 +43,25 @@ function setupVisitante() {
         updatePlayerStatus(playerId, { lastSeen: Date.now(), online: true });
     }, 30000);
 
-    // 2. Chat (Only Group)
-    setupChat({
-        playerId: playerId,
-        playerName: playerName,
-        playerRole: 'guest',
-        senderColor: profile?.chatColor || '#f59e0b',
-        initialChatId: 'group',
-        tabs: [], // No tabs for guests
-        messagesList: messagesList,
-        input: chatInput,
-        sendBtn: sendMsgBtn
+    // 2. Online Indicators
+    import('./firebase-service.js').then(({ listenToPlayers }) => {
+        listenToPlayers((players) => {
+            if (onlineIndicators) {
+                const others = players.filter(p => p.online && p.id !== playerId && (Date.now() - (p.lastSeen || 0) < 60000));
+                onlineIndicators.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                        <span class="text-[10px] text-green-500 font-bold uppercase tracking-wider">Você</span>
+                    </div>
+                    ${others.map(p => `
+                        <div class="flex items-center gap-1.5 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                            <span class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">${p.name}</span>
+                        </div>
+                    `).join('')}
+                `;
+            }
+        });
     });
 
     // 3. Active Rooms

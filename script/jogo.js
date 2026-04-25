@@ -123,12 +123,14 @@ function setupListeners() {
     });
 
     // 6. Setup Chat
-    const playerRole = (currentUser.email === 'papai@sabermidia.com.br' || ['miguel', 'sophia'].includes(currentUser.displayName?.toLowerCase())) ? 'family' : 'guest';
-    const senderColor = currentUser.uid === 'miguel' ? '#3b82f6' : (currentUser.uid === 'sophia' ? '#ec4899' : '#f59e0b');
+    const name = currentUser.displayName || currentUser.email?.split('@')[0] || "Jogador";
+    const lowerName = name.toLowerCase();
+    const playerRole = (currentUser.email === 'papai@sabermidia.com.br' || ['miguel', 'sophia', 'papai'].includes(lowerName)) ? 'family' : 'guest';
+    const senderColor = lowerName === 'miguel' ? '#3b82f6' : (lowerName === 'sophia' ? '#ec4899' : '#f59e0b');
 
     setupChat({
         playerId: currentUser.uid,
-        playerName: currentUser.displayName || currentUser.email.split('@')[0],
+        playerName: name,
         playerRole: playerRole,
         senderColor: senderColor,
         initialChatId: 'group',
@@ -136,6 +138,13 @@ function setupListeners() {
         messagesList: messagesList,
         input: chatInput,
         sendBtn: sendMsgBtn
+    });
+
+    // Cleanup when leaving
+    window.addEventListener('beforeunload', () => {
+        import('./firebase-service.js').then(({ leaveGameRoom }) => {
+            leaveGameRoom(GAME_ROOM_ID, currentUser.uid);
+        });
     });
 }
 

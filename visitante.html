@@ -14,11 +14,13 @@
         
         <!-- Top Bar -->
         <header class="flex justify-between items-center bg-gray-900/40 p-4 rounded-2xl border border-white/5">
-            <div>
+            <div class="flex flex-col">
                 <h1 id="guest-name-display" class="text-xl font-black text-gray-200">Visitante</h1>
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span class="text-xs text-gray-500 font-bold uppercase tracking-widest">Online</span>
+                <div id="online-indicators" class="flex gap-2 flex-wrap mt-1">
+                    <div class="flex items-center gap-1.5 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                        <span class="text-[10px] text-green-500 font-bold uppercase tracking-wider">Online</span>
+                    </div>
                 </div>
             </div>
             <a href="index.html" class="text-xs bg-gray-800 px-3 py-2 rounded-full hover:bg-gray-700 transition-colors">Sair</a>
@@ -42,21 +44,7 @@
             <p class="text-[10px] text-gray-600 text-center uppercase tracking-widest font-bold">Visitantes podem entrar em salas criadas pela família</p>
         </section>
 
-        <!-- Public Chat -->
-        <section class="flex-1 flex flex-col min-h-[400px]">
-            <div class="flex bg-gray-900/40 rounded-t-2xl border-t border-x border-white/5">
-                <button class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 border-blue-500 text-blue-400 bg-blue-500/5">Chat Público</button>
-            </div>
-            <div class="flex-1 bg-gray-900/20 border-x border-b border-white/5 rounded-b-2xl overflow-hidden flex flex-col">
-                <div id="messages-list" class="flex-1 p-4 overflow-y-auto space-y-3">
-                    <!-- Messages -->
-                </div>
-                <div class="p-4 bg-gray-900/60 border-t border-white/5 flex gap-2">
-                    <input type="text" id="chat-input" class="flex-1 bg-gray-950 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-blue-500" placeholder="Participe do chat...">
-                    <button id="send-msg" class="bg-blue-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">➤</button>
-                </div>
-            </div>
-        </section>
+        <!-- No chat in visitor lobby anymore -->
 
     </div>
 

@@ -24,6 +24,7 @@ const messagesList = document.getElementById('messages-list');
 const chatInput = document.getElementById('chat-input');
 const sendMsgBtn = document.getElementById('send-msg');
 const playerNameDisplay = document.getElementById('player-name-display');
+const onlineIndicators = document.getElementById('online-indicators');
 
 async function init() {
     onAuth(async (user) => {
@@ -44,8 +45,10 @@ async function init() {
 }
 
 function setupLobby() {
+    const role = (PLAYER_ID === 'miguel' || PLAYER_ID === 'sophia' || PLAYER_ID === 'papai') ? 'family' : 'guest';
+    
     // 1. Heartbeat
-    updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME });
+    updatePlayerStatus(PLAYER_ID, { online: true, name: PLAYER_NAME, role: role });
     setInterval(() => {
         updatePlayerStatus(PLAYER_ID, { lastSeen: Date.now(), online: true });
     }, 30000);
@@ -65,26 +68,47 @@ function setupLobby() {
         }
     });
 
-    // 4. Chat Setup
+    // 4. Players Listener (Online Indicators)
+    listenToPlayers((players) => {
+        if (onlineIndicators) {
+            const others = players.filter(p => p.online && p.id !== PLAYER_ID && (Date.now() - (p.lastSeen || 0) < 60000));
+            onlineIndicators.innerHTML = `
+                <div class="flex items-center gap-1.5 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span class="text-[10px] text-green-500 font-bold uppercase tracking-wider">Você</span>
+                </div>
+                ${others.map(p => `
+                    <div class="flex items-center gap-1.5 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                        <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                        <span class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">${p.name}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+    });
+
+    // 5. Chat Setup
     const senderColor = PLAYER_ID === 'miguel' ? '#3b82f6' : '#ec4899';
     setupChat({
         playerId: PLAYER_ID,
         playerName: PLAYER_NAME,
         playerRole: 'family',
         senderColor: senderColor,
-        initialChatId: 'group',
+        initialChatId: 'family', // Default to family in lobby
         tabs: chatTabs,
         messagesList: messagesList,
         input: chatInput,
         sendBtn: sendMsgBtn
     });
 
-    // 5. Create Room Action
+    // 6. Create Room Action
     btnCreateRoom.addEventListener('click', async () => {
         playSound('click');
         try {
+            console.log("[LOBBY] Criando sala...");
             const roomId = await createGameRoom(currentUser.uid, currentUser.displayName || PLAYER_NAME);
             if (roomId) {
+                console.log("[LOBBY] Sala criada:", roomId);
                 window.location.href = `jogo.html?room=${roomId}`;
             }
         } catch (error) {
