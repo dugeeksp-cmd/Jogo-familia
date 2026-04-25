@@ -296,11 +296,13 @@ export const sendGuess = async (playerId, playerName, guessText) => {
 
 export const listenToGuesses = (callback) => {
     const guessRef = collection(db, "rooms", ROOM_ID, "guesses");
-    const q = query(guessRef, orderBy("createdAt", "asc"));
+    const q = query(guessRef);
     return onSnapshot(q, (snapshot) => {
         const guesses = snapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() }))
-            .filter(g => g.status === "pending"); // Filtro no cliente
+            .filter(g => g.status === "pending"); 
+        
+        guesses.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
         callback(guesses);
     });
 };
@@ -363,34 +365,20 @@ export const listenToMessages = (chatId, callback, errorCallback) => {
 
     const messagesRef = collection(db, "rooms", ROOM_ID, "messages");
 
-    // Remove orderBy to avoid missing index error
-    const q = query(
-        messagesRef,
-        where("chatId", "==", chatId)
-    );
+    // Client-side filtering only to avoid all index issues
+    const q = query(messagesRef);
 
     return onSnapshot(q, (snapshot) => {
-        console.log(`[Firebase] Snapshot recebido para ${chatId}. Total docs: ${snapshot.docs.length}`);
+        const msgs = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(msg => msg.chatId === chatId);
 
-        const msgs = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-
-        // Sort client-side
         msgs.sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
-
         callback(msgs);
-
     }, (error) => {
-        console.error(`[Firebase] Erro CRÍTICO no listener de mensagens para ${chatId}:`, error);
-
-        if (error.code === "failed-precondition") {
-            console.error("[Firebase] Provável índice ausente no Firestore. O chat pode não funcionar até que o índice seja criado.");
-        }
-
+        console.error(`[Firebase] Erro no listener de mensagens:`, error);
         if (errorCallback) errorCallback(error);
-        else handleFirestoreError(error, "list", `rooms/${ROOM_ID}/messages (chatId=${chatId})`);
+        else handleFirestoreError(error, "list", `rooms/${ROOM_ID}/messages`);
     });
 };
 
@@ -480,9 +468,10 @@ export const addScore = async (playerId, playerName, round, points) => {
 
 export const listenToScoreHistory = (callback) => {
     const historyRef = collection(db, "rooms", ROOM_ID, "scoreHistory");
-    const q = query(historyRef, orderBy("timestamp", "desc"), limit(30));
+    const q = query(historyRef, limit(30));
     return onSnapshot(q, (snapshot) => {
         const history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        history.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
         callback(history);
     });
 };
@@ -521,14 +510,12 @@ export const createGameRoom = async (playerId, playerName) => {
 };
 
 export const listenToActiveGameRooms = (callback) => {
-    // Remove orderBy to avoid missing index error
-    const q = query(
-        collection(db, GAME_ROOMS_COL),
-        where("status", "in", ["waiting", "playing"])
-    );
+    const q = query(collection(db, GAME_ROOMS_COL));
     return onSnapshot(q, (snapshot) => {
-        const rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Sort client-side
+        const rooms = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(r => r.status === "waiting" || r.status === "playing");
+        
         rooms.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
         callback(rooms);
     });

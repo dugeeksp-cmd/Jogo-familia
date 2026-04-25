@@ -111,15 +111,15 @@ function setupLobby() {
     btnCreateRoom.addEventListener('click', async () => {
         playSound('click');
         try {
-            console.log("[LOBBY] Criando sala...");
+            console.log("[LOBBY] Criando sala p/ ID:", currentUser.uid);
             const roomId = await createGameRoom(currentUser.uid, currentUser.displayName || PLAYER_NAME);
             if (roomId) {
                 console.log("[LOBBY] Sala criada:", roomId);
                 window.location.href = `jogo.html?room=${roomId}`;
             }
         } catch (error) {
-            alert("Erro ao criar sala. Verifique suas permissões.");
-            console.error(error);
+            console.error("[LOBBY] Erro ao criar sala:", error);
+            alert("Erro ao criar sala. Verifique suas permissões: " + error.message);
         }
     });
 }

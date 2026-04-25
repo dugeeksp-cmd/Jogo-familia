@@ -9,7 +9,12 @@ service cloud.firestore {
 
     // Global Helpers
     function isSignedIn() { return request.auth != null; }
-    function isAdmin() { return isSignedIn() && request.auth.token.email == 'papai@sabermidia.com.br'; }
+    function isAdmin() { 
+      return isSignedIn() && (
+        request.auth.token.email == 'papai@sabermidia.com.br' || 
+        request.auth.token.email == 'dugeeksp@gmail.com'
+      ); 
+    }
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
@@ -17,6 +22,7 @@ service cloud.firestore {
 
     function isFamily() {
       return isSignedIn() && (
+        isAdmin() ||
         request.auth.token.email in ['miguel@sabermidia.com.br', 'sophia@sabermidia.com.br', 'papai@sabermidia.com.br', 'dugeeksp@gmail.com'] ||
         (request.auth.token.name in ['Miguel', 'Sophia', 'Papai', 'Miguel Sabermidia', 'Sophia Sabermidia', 'Papai Sabermidia']) ||
         request.auth.token.display_name in ['Miguel', 'Sophia', 'Papai']

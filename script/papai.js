@@ -119,8 +119,16 @@ function setupAdmin() {
 
     btnCreateRoom.addEventListener('click', async () => {
         playSound('click');
-        const roomId = await createGameRoom(currentUser.uid, PLAYER_NAME);
-        if (roomId) window.location.href = `jogo.html?room=${roomId}`;
+        try {
+            console.log("[ADMIN] Criando sala p/ ID:", currentUser.uid);
+            const roomId = await createGameRoom(currentUser.uid, PLAYER_NAME);
+            if (roomId) {
+                window.location.href = `jogo.html?room=${roomId}`;
+            }
+        } catch (error) {
+            console.error("[ADMIN] Erro ao criar sala:", error);
+            alert("Erro ao criar sala: " + error.message);
+        }
     });
 
     btnSaveMeet.addEventListener('click', async () => {
