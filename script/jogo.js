@@ -1,4 +1,4 @@
-/* script/games.js */
+/* script/jogo.js */
 import { 
     onAuth, 
     listenToGameRoom, 

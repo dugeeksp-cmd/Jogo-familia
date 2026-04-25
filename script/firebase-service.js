@@ -481,8 +481,9 @@ const GAME_ROOMS_COL = "gameRooms";
 
 export const createGameRoom = async (playerId, playerName) => {
     try {
+        console.log(`[Firebase] Tentando criar sala de jogo para ${playerId} (${playerName})`);
         const roomRef = collection(db, GAME_ROOMS_COL);
-        const newRoom = await addDoc(roomRef, {
+        const data = {
             status: "waiting",
             createdBy: playerId,
             createdByName: playerName,
@@ -501,10 +502,13 @@ export const createGameRoom = async (playerId, playerName) => {
                 endsAtMs: null,
                 isRunning: false
             }
-        });
+        };
+
+        const newRoom = await addDoc(roomRef, data);
+        console.log(`[Firebase] Sala de jogo criada com sucesso: ${newRoom.id}`);
         return newRoom.id;
     } catch (e) {
-        console.error("[Firebase] erro ao criar sala de jogo:", e);
+        console.error("[Firebase] Erro Crítico ao criar sala de jogo:", e);
         handleFirestoreError(e, 'create', GAME_ROOMS_COL);
     }
 };

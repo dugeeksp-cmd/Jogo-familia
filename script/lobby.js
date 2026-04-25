@@ -4,7 +4,8 @@ import {
     createGameRoom, 
     listenToActiveGameRooms, 
     listenToMeet,
-    updatePlayerStatus
+    updatePlayerStatus,
+    initRoom
 } from './firebase-service.js';
 import { setupChat } from './chat.js';
 import { playSound } from './audio.js';
@@ -46,6 +47,7 @@ async function init() {
         }
 
         // Finalize initialization
+        initRoom();
         setupLobby();
     });
 }
@@ -115,11 +117,16 @@ function setupLobby() {
             const roomId = await createGameRoom(currentUser.uid, currentUser.displayName || PLAYER_NAME);
             if (roomId) {
                 console.log("[LOBBY] Sala criada:", roomId);
-                window.location.href = `games.html?room=${roomId}`;
+                window.location.href = `jogo.html?room=${roomId}`;
             }
         } catch (error) {
             console.error("[LOBBY] Erro ao criar sala:", error);
-            alert("Erro ao criar sala. Verifique suas permissões: " + error.message);
+            let detail = error.message;
+            try {
+                const json = JSON.parse(error.message);
+                detail = `${json.operationType} @ ${json.path} - ${json.error}`;
+            } catch(e) {}
+            alert("Erro ao criar sala: " + detail);
         }
     });
 }
@@ -139,7 +146,7 @@ function renderActiveRooms(rooms) {
                     <span class="text-[10px] text-gray-500 uppercase font-black">${room.status === 'playing' ? '🎮 Jogando' : '⏳ Aguardando'}</span>
                 </div>
             </div>
-            <a href="games.html?room=${room.id}" class="bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl transform group-hover:scale-110 transition-all font-black text-xs">ENTRAR</a>
+            <a href="jogo.html?room=${room.id}" class="bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl transform group-hover:scale-110 transition-all font-black text-xs">ENTRAR</a>
         </div>
     `).join('');
 }

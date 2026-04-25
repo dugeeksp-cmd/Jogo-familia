@@ -44,44 +44,40 @@ service cloud.firestore {
 
     // --- Game Rooms ---
     match /gameRooms/{gameRoomId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn(); 
-      allow update: if isSignedIn();
+      allow read, create, update: if isSignedIn();
       allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == existing().createdBy);
+
+      match /players/{playerId} {
+        allow read, write: if isSignedIn();
+      }
+      match /hands/{playerId} {
+        allow read, write: if isSignedIn();
+      }
     }
 
-    match /gameRooms/{gameRoomId}/players/{playerId} {
-      allow read, write: if isSignedIn();
-    }
-
-    match /gameRooms/{gameRoomId}/hands/{playerId} {
-      allow read, write: if isSignedIn();
-    }
-
-    // --- Rooms & Sub-collections ---
+    // --- Rooms & Sub-collections (Legacy/Lobby Chat) ---
     match /rooms/{roomCode} {
       allow read, write: if isSignedIn();
-    }
 
-    match /rooms/{roomCode}/players/{playerId} {
-      allow read, write: if isSignedIn();
-    }
+      match /players/{playerId} {
+        allow read, write: if isSignedIn();
+      }
 
-    match /rooms/{roomCode}/messages/{messageId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-    }
+      match /messages/{messageId} {
+        allow read, write: if true;
+      }
 
-    match /rooms/{roomCode}/guesses/{guessId} {
-      allow read, write: if isSignedIn();
-    }
+      match /guesses/{guessId} {
+        allow read, write: if isSignedIn();
+      }
 
-    match /rooms/{roomCode}/privateHands/{playerId} {
-      allow read, write: if isSignedIn();
-    }
+      match /privateHands/{playerId} {
+        allow read, write: if isSignedIn();
+      }
 
-    match /rooms/{roomCode}/scoreHistory/{historyId} {
-      allow read, create: if isSignedIn();
+      match /scoreHistory/{historyId} {
+        allow read, create: if isSignedIn();
+      }
     }
   }
 }

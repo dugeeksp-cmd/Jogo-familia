@@ -109,10 +109,17 @@ export function setupChat(config) {
             renderMessages(msgs);
         }, (err) => {
             console.error(`[CHAT] Erro no listener de ${chatId}:`, err);
+            let detail = err.message;
+            try {
+                const json = JSON.parse(err.message);
+                detail = `${json.operationType} @ ${json.path} - ${json.error}`;
+            } catch(e) {}
+            
             messagesList.innerHTML = `
                 <div class="empty-chat">
                     <span>⚠️</span>
-                    <p>Erro ao carregar mensagens. Verifique os índices do Firestore no console.</p>
+                    <p>Erro ao carregar mensagens.</p>
+                    <small class="text-[8px] opacity-50 block mt-1">${detail}</small>
                 </div>
             `;
         });
