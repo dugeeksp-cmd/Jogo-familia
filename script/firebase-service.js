@@ -89,6 +89,8 @@ export const signUpGuest = async (username, email, password) => {
     try {
         const cleanUsername = username.toLowerCase().trim();
         
+        console.log(`[Firebase] Iniciando cadastro: ${cleanUsername} (${email})`);
+
         // 0. Check if username is already taken
         const usernameRef = doc(db, USERNAMES_COL, cleanUsername);
         const usernameSnap = await getDoc(usernameRef);
@@ -99,6 +101,7 @@ export const signUpGuest = async (username, email, password) => {
         // 1. Create user in Auth
         const result = await createUserWithEmailAndPassword(auth, email, password);
         const user = result.user;
+        console.log(`[Firebase] Auth criado: ${user.uid}`);
 
         const chatColor = generateRandomColor();
         const profile = {
@@ -113,14 +116,16 @@ export const signUpGuest = async (username, email, password) => {
         };
 
         // 2. Save profile in Firestore
+        console.log(`[Firebase] Salvando perfil em ${GUEST_USERS_COL}/${user.uid}`);
         try {
             await setDoc(doc(db, GUEST_USERS_COL, user.uid), profile);
         } catch (e) {
-            console.error("[Firestore] Erro ao criar perfil:", e);
-            handleFirestoreError(e, 'create', `${GUEST_USERS_COL}/${user.uid}`);
+            console.error("[Firestore] Erro Crítico ao criar perfil:", e);
+            throw new Error("Erro ao salvar perfil. Verifique as regras do banco.");
         }
 
         // 3. Save username index
+        console.log(`[Firebase] Salvando index em ${USERNAMES_COL}/${cleanUsername}`);
         try {
             await setDoc(usernameRef, {
                 uid: user.uid,
@@ -129,7 +134,8 @@ export const signUpGuest = async (username, email, password) => {
             });
         } catch (e) {
             console.error("[Firestore] Erro ao criar index de username:", e);
-            handleFirestoreError(e, 'create', `${USERNAMES_COL}/${cleanUsername}`);
+            // Non-critical if profile was saved, but let's throw to be safe
+            throw new Error("Erro ao registrar nome de usuário.");
         }
 
         return user;
